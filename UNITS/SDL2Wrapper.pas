@@ -13,10 +13,18 @@ const
   SDL_PIXELFORMAT_BGRA32 = $16762004;
   SDL_TEXTUREACCESS_STREAMING = 1;
 
+  SDL_QUIT = $100;
+
 type
   PSDL_Window = pointer;
   PSDL_Renderer = pointer;
   PSDL_Texture = pointer;
+
+  PSDL_Event = ^TSDL_Event;
+  TSDL_Event = packed record
+    eventType: longword;
+    padding: array[0..51] of byte;
+  end;
 
 function SDL_Init(flags: longword): longint; cdecl; external 'SDL2.dll';
 function SDL_CreateWindow(title: PChar; x, y, w, h: longint; flags: longword): PSDL_Window; cdecl; external 'SDL2.dll';
@@ -37,6 +45,8 @@ function SDL_CreateTexture(renderer: PSDL_Renderer; format: longword; access, w,
 function SDL_UpdateTexture(texture: PSDL_Texture; rect, pixels: pointer; pitch: longint): longint; cdecl; external 'SDL2.dll';
 function SDL_RenderCopy(renderer: PSDL_Renderer; texture: PSDL_Texture; srcrect, dstrect: pointer): longint; cdecl; external 'SDL2.dll';
 procedure SDL_DestroyTexture(texture: PSDL_Texture); cdecl; external 'SDL2.dll';
+
+function SDL_PollEvent(event: PSDL_Event): longint; cdecl; external 'SDL2.dll';
 
 
 implementation

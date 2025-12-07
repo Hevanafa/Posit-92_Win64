@@ -12,6 +12,7 @@ type
     procedure init;
     procedure setTitle(const value: string);
     procedure cleanup;
+    procedure update;
     procedure flush;
   private
     window: PSDL_Window;
@@ -48,6 +49,15 @@ end;
 procedure TPosit92.setTitle(const value: string);
 begin
   SDL_SetWindowTitle(window, @value[1])
+end;
+
+procedure TPosit92.update;
+var
+  event: TSDL_Event;
+begin
+  while SDL_PollEvent(@event) <> 0 do begin
+    if event.eventType = SDL_QUIT then done := true;
+  end;
 end;
 
 procedure TPosit92.cleanup;
