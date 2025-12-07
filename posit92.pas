@@ -8,10 +8,12 @@ type
   TPosit92 = object
   public
     procedure init;
+    {
     procedure afterInit;
     procedure cleanup;
     procedure update;
     procedure draw;
+    }
   private
   end;
 

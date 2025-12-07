@@ -1,9 +1,9 @@
 { Entry point }
 
+{$Mode TP}
+
 uses
   Posit92;
-
-{$Mode TP}
 
 type
   TGame = object(TPosit92)
@@ -13,6 +13,7 @@ var
   game: TGame;
 
 begin
-  game.init
+  game.init;
+  readln
 end.
 
