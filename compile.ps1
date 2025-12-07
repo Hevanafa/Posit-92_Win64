@@ -11,7 +11,7 @@ $outputFile = "game.exe"
 
 $pinfo = new-object System.Diagnostics.ProcessStartInfo
 $pinfo.FileName = $compilerPath
-$pinfo.Arguments = "-Twin64", "-FuUNITS", "-O2", "-o$outputFile", $primaryUnit
+$pinfo.Arguments = "-Twin64", "-FuUNITS", "-Fushared", "-O2", "-dWIN64", "-o$outputFile", $primaryUnit
 $pinfo.WorkingDirectory = $PSScriptRoot
 $pinfo.RedirectStandardError = $true
 $pinfo.RedirectStandardOutput = $true
