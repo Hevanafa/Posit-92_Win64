@@ -6,17 +6,13 @@ uses
   SDL2Wrapper, Posit92,
   BMFont, Keyboard, Logger,
   ImgRef, ImgRefFast,
-  VGA;
+  VGA,
+  Assets;
 
 const
   TargetFPS = 60;
   FrameTime = 16;
 
-var
-  imgGasolineMaid: longint;
-
-  defaultFont: TBMFont;
-  defaultFontGlyphs: array [32..126] of TBMFontGlyph;
 
 type
   TGame = object(TPosit92)
@@ -35,7 +31,9 @@ begin
   { Load more assets here }
   imgGasolineMaid := loadImage('assets\images\gasoline_maid_100px.png');
 
-  loadBMFont('assets\fonts\nokia_cellphone_fc_8.txt', defaultFont, defaultFontGlyphs)
+  loadBMFont(
+    'assets\fonts\nokia_cellphone_fc_8.txt',
+    defaultFont, defaultFontGlyphs)
 end;
 
 procedure TGame.init;
@@ -52,8 +50,8 @@ end;
 procedure TGame.afterInit;
 begin
   loadAssets;
+  { hideCursor }
 
-  { imgEmpty := newImage(32, 32); }
   { Init your game state here }
 end;
 
@@ -62,6 +60,7 @@ begin
   inherited cleanup;
 
   closeLogger;
+  { showCursor }
   { Your cleanup code here (after setting `done` to true) }
 end;
 
@@ -81,7 +80,7 @@ begin
   { Your render logic here }
   spr(imgGasolineMaid, 10, 10);
 
-  printBMFont('Hello from Posit-92 with SDL2!', 10, 160, defaultFont, defaultFontGlyphs);
+  printDefault('Hello from Posit-92 with SDL2!', 10, 160);
 
   flush
 end;
@@ -112,5 +111,5 @@ begin
     SDL_Delay(1)
   end;
 
-  game.cleanup;
+  game.cleanup
 end.
