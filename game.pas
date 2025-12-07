@@ -72,5 +72,6 @@ begin
   game.draw;
   { TODO: Add the rest of the method calls }
   readln;
+
   game.cleanup;
 end.

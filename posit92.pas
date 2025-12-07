@@ -16,10 +16,13 @@ type
   private
     window: PSDL_Window;
     renderer: PSDL_Renderer;
+    vgaTexture: PSDL_Texture;
   end;
 
 
 implementation
+
+uses VGA;
 
 procedure TPosit92.init;
 begin
@@ -36,7 +39,10 @@ begin
 
   renderer := SDL_CreateRenderer(window, -1, 0);
 
-  writeln('Hello from TPosit92.init!')
+  vgaTexture := SDL_CreateTexture(
+    renderer,
+    SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING,
+    vgaWidth, vgaHeight)
 end;
 
 procedure TPosit92.setTitle(const value: string);
@@ -57,11 +63,14 @@ end;
 
 procedure TPosit92.flush;
 begin
+{
   SDL_SetRenderDrawColor(renderer, $64, $95, $ED, $FF);
-
-  { TODO: Handle copy from VGA buffer }
-
   SDL_RenderClear(renderer);
+}
+
+  SDL_UpdateTexture(vgaTexture, nil, getSurfacePtr, 320 * 4); { pitch = width * 4 bytes }
+  SDL_RenderCopy(renderer, vgaTexture, nil, nil);
+
   SDL_RenderPresent(renderer)
 end;
 
