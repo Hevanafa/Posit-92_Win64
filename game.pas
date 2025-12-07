@@ -15,6 +15,9 @@ const
 var
   imgGasolineMaid: longint;
 
+  defaultFont: TBMFont;
+  defaultFontGlyphs: array [32..126] TBMFontGlyph;
+
 type
   TGame = object(TPosit92)
   public
