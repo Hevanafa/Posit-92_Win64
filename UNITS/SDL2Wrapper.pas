@@ -47,6 +47,21 @@ type
     keysym: TSDL_Keysym;
   end;
 
+  PSDL_Surface = ^TSDL_Surface;
+  TSDL_Surface = record
+    flags: longword;
+    format: pointer; { PSDL_PixelFormat }
+    w, h: longint;
+    pitch: longint;
+    pixels: pointer;
+    userdata: pointer;
+    locked: longint;
+    list_blitmap: pointer;
+    clip_rect: pointer;
+    map: pointer;
+    refcount: longint;
+  end;
+
 function SDL_Init(flags: longword): longint; cdecl; external 'SDL2.dll';
 function SDL_CreateWindow(title: PChar; x, y, w, h: longint; flags: longword): PSDL_Window; cdecl; external 'SDL2.dll';
 function SDL_CreateRenderer(window: PSDL_Window; index: longint; flags: longword): PSDL_Renderer; cdecl; external 'SDL2.dll';
@@ -68,6 +83,9 @@ function SDL_RenderCopy(renderer: PSDL_Renderer; texture: PSDL_Texture; srcrect,
 procedure SDL_DestroyTexture(texture: PSDL_Texture); cdecl; external 'SDL2.dll';
 
 function SDL_PollEvent(event: PSDL_Event): longint; cdecl; external 'SDL2.dll';
+
+function IMG_Load(filename: PChar): PSDL_Surface; cdecl; external 'SDL2_image.dll';
+procedure SDL_FreeSurface(surface: PSDL_Surface); cdecl; external 'SDL2.dll';
 
 
 implementation
