@@ -65,7 +65,6 @@ var
   keyEvent: PSDL_KeyboardEvent;
   dosScancode: integer;
 begin
-  { TODO: Handle SDL to DOS translation }
   while SDL_PollEvent(@event) <> 0 do begin
     case event.eventType of 
       SDL_QUIT_: done := true;

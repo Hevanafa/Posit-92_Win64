@@ -53,7 +53,7 @@ procedure TGame.cleanup;
 begin
   inherited cleanup;
 
-
+  { Your cleanup code here (after setting `done` to true) }
 end;
 
 procedure TGame.update;
@@ -62,14 +62,14 @@ begin
 
   if isKeyDown(SC_ESC) then done := true;
 
+  { Your update logic here }
 end;
 
 procedure TGame.draw;
 begin
   cls($FF6495ED);
-  { cls($FFFF5555); } { test mode 13h red } { correct }
-  { cls($FF55FF55); } { test mode 13h green } { output: magenta }
-  { cls($FF5555FF); } { test mode 13h blue } { output: yellow }
+
+  { Your render logic here }
 
   flush
 end;
