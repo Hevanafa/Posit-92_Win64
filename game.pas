@@ -4,7 +4,7 @@
 
 uses
   SDL2Wrapper, Posit92,
-  VGA;
+  Keyboard, VGA;
 
 const
   TargetFPS = 60;
@@ -59,7 +59,8 @@ end;
 procedure TGame.update;
 begin
   inherited update;
-  
+
+  if isKeyDown(SC_ESC) then done := true;
 
 end;
 

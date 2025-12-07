@@ -14,6 +14,8 @@ const
   SDL_TEXTUREACCESS_STREAMING = 1;
 
   SDL_QUIT_ = $100;
+  SDL_KEYDOWN = $300;
+  SDL_KEYUP = $301;
 
 type
   PSDL_Window = pointer;
