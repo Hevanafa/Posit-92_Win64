@@ -177,7 +177,7 @@ begin
           font.face := replaceAll(v, '"', '');
       end;
 
-      writeLog('font.face:' + font.face)
+      { writeLog('font.face:' + font.face) }
 
     end else if startsWith(txtLine, 'common') then begin
       split(txtLine, ' ', pairs);

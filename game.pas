@@ -4,7 +4,7 @@
 
 uses
   SDL2Wrapper, Posit92,
-  BMFont, Keyboard, Logger,
+  Conv, Keyboard, Logger,
   ImgRef, ImgRefFast,
   Timing, VGA,
   Assets;
@@ -84,6 +84,9 @@ begin
   spr(imgGasolineMaid, 10, 10);
 
   printDefault('Hello from Posit-92 with SDL2!', 10, 160);
+
+  printDefault('getTimer: ' + f32str(getTimer), 10, 170);
+  printDefault('getFullTimer: ' + f32str(getFullTimer), 10, 180);
 
   flush
 end;
