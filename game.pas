@@ -5,13 +5,18 @@
 uses
   Posit92, VGA;
 
+const
+  TargetFPS = 60;
+  FrameTime = 16;
+
+var
+  done: boolean;
+
 type
   TGame = object(TPosit92)
   public
     procedure loadAssets;
   private
-    done: boolean;
-
     procedure init;
     procedure afterInit;
     procedure cleanup;
@@ -39,7 +44,6 @@ begin
   loadAssets;
 
   { Init your game state here }
-  done := false
 end;
 
 procedure TGame.cleanup;
@@ -67,14 +71,26 @@ end;
 
 var
   game: TGame;
+  lastFrameTime, frameTimeNow, elapsed: longword; { in ms }
 
 begin
   game.init;
   game.afterInit;
 
-  game.draw;
-  { TODO: Add the rest of the method calls }
-  readln;
+  done := false;
+
+  while not done do begin
+    frameTimeNow := SDL_GetTicks;
+    elapsed := frameTimeNow - lastFrameTime;
+
+    if elapsed >= FrameTime then begin
+      lastFrameTime := frameTimeNow - (elapsed mod FrameTime); { Carry over extra time }
+      game.update;
+      game.draw
+    end;
+
+    SDL_Delay(1)
+  end;
 
   game.cleanup;
 end.

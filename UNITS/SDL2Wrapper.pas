@@ -25,7 +25,9 @@ procedure SDL_SetWindowTitle(window: PSDL_Window; title: PChar); cdecl; external
 procedure SDL_DestroyRenderer(renderer: PSDL_Renderer); cdecl; external 'SDL2.dll';
 procedure SDL_DestroyWindow(window: PSDL_Window); cdecl; external 'SDL2.dll';
 procedure SDL_Quit; cdecl; external 'SDL2.dll';
+
 procedure SDL_Delay(ms: longword); cdecl; external 'SDL2.dll';
+function SDL_GetTicks: longword; cdecl; external 'SDL2.dll';
 
 procedure SDL_SetRenderDrawColor(renderer: PSDL_Renderer; r, g, b, a: byte); cdecl; external 'SDL2.dll';
 procedure SDL_RenderClear(renderer: PSDL_Renderer); cdecl; external 'SDL2.dll';
