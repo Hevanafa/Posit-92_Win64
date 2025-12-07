@@ -163,6 +163,7 @@ begin
     exit
   end;
 
+  glyphCount := 0;
   while not eof(f) do begin
     readln(f, txtLine);
 
@@ -229,15 +230,19 @@ begin
       end;
 
       { array of glyphs starts from 0, ends at 94 }
-
-      { TODO: Copy to the array of glyphs }
+      { Assuming glyph.id always starts from 32 }
+      if (tempGlyph.id - 32) in [low(fontGlyphs)..high(fontGlyphs)] then begin
+        fontGlyphs[tempGlyph.id - 32] := tempGlyph;
+        inc(glyphCount)
+      end;
     end;
   end;
 
   close(f);
 
+  writeLog('Loaded ' + i32str(glyphCount) + ' glyphs')
+
   { TODO: Load the imgHandle }
-  { writeLog('Loaded ' + i32str(count) + ' glyphs') }
 end;
 
 procedure TPosit92.flush;
