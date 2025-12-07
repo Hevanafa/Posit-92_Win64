@@ -4,7 +4,8 @@ unit Posit92;
 
 interface
 
-uses SDL2Wrapper, Keyboard;
+uses
+  SDL2Wrapper, Keyboard;
 
 type
   TPosit92 = object
@@ -30,7 +31,11 @@ type
 
 implementation
 
-uses Logger, ImgRef, VGA;
+uses
+  Logger, ImgRef, VGA;
+
+const
+  displayScale = 2;
 
 procedure TPosit92.init;
 begin
@@ -42,7 +47,7 @@ begin
   window := SDL_CreateWindow(
     'SDL2 Window',
     SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-    640, 400,
+    vgaWidth * displayScale, vgaHeight * displayScale,
     SDL_WINDOW_SHOWN);
 
   renderer := SDL_CreateRenderer(window, -1, 0);
@@ -143,7 +148,7 @@ begin
   SDL_RenderClear(renderer);
 }
 
-  SDL_UpdateTexture(vgaTexture, nil, getSurfacePtr, 320 * 4); { pitch = width * 4 bytes }
+  SDL_UpdateTexture(vgaTexture, nil, getSurfacePtr, vgaWidth * 4); { pitch = width * 4 bytes }
   SDL_RenderCopy(renderer, vgaTexture, nil, nil);
 
   SDL_RenderPresent(renderer)
