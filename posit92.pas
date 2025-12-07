@@ -15,6 +15,9 @@ type
     procedure setTitle(const value: string);
     procedure cleanup;
 
+    procedure hideCursor;
+    procedure showCursor;
+
     function isKeyDown(const scancode: integer): boolean;
     function loadImage(const filename: string): longint;
     procedure loadBMFont(const filename: string; var font: TBMFont; var fontGlyphs: array of TBMFontGlyph);
@@ -109,6 +112,16 @@ begin
   SDL_Quit
 end;
 
+
+procedure TPosit92.hideCursor;
+begin
+  SDL_ShowCursor(SDL_DISABLE)
+end;
+
+procedure TPosit92.showCursor;
+begin
+  SDL_ShowCursor(SDL_ENABLE)
+end;
 
 function TPosit92.isKeyDown(const scancode: integer): boolean;
 begin

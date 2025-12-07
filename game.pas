@@ -50,7 +50,7 @@ end;
 procedure TGame.afterInit;
 begin
   loadAssets;
-  { hideCursor }
+  hideCursor;
 
   { Init your game state here }
 end;
@@ -60,7 +60,8 @@ begin
   inherited cleanup;
 
   closeLogger;
-  { showCursor }
+  showCursor;
+  
   { Your cleanup code here (after setting `done` to true) }
 end;
 

@@ -17,6 +17,9 @@ const
   SDL_KEYDOWN = $300;
   SDL_KEYUP = $301;
 
+  SDL_DISABLE = 0;
+  SDL_ENABLE = 1;
+
 type
   PSDL_Window = pointer;
   PSDL_Renderer = pointer;
@@ -89,6 +92,7 @@ function SDL_PollEvent(event: PSDL_Event): longint; cdecl; external 'SDL2.dll';
 function IMG_Load(filename: PChar): PSDL_Surface; cdecl; external 'SDL2_image.dll';
 procedure SDL_FreeSurface(surface: PSDL_Surface); cdecl; external 'SDL2.dll';
 
+function SDL_ShowCursor(toggle: longint): longint; cdecl; external 'SDL2.dll';
 
 implementation
 
