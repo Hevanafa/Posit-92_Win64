@@ -51,6 +51,8 @@ uses
   WasmHeap;
 {$endif}
 {$ifdef WIN64}
+uses
+  Logger;
 {$endif}
 
 var
