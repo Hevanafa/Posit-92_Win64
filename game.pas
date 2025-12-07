@@ -4,16 +4,14 @@
 
 uses
   SDL2Wrapper, Posit92,
-  Keyboard, Logger, Panic, VGA;
+  Keyboard, Logger, ImgRef, Panic, VGA;
 
 const
   TargetFPS = 60;
   FrameTime = 16;
 
-{
 var
-  done: boolean;
-}
+  imgEmpty: longint;
 
 type
   TGame = object(TPosit92)
@@ -47,8 +45,7 @@ procedure TGame.afterInit;
 begin
   loadAssets;
 
-  { panicHalt('Test panic call'); }
-
+  imgEmpty := newImage(32, 32);
   { Init your game state here }
 end;
 
