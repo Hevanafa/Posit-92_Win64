@@ -17,19 +17,19 @@ type
   PSDL_Renderer = pointer;
   PSDL_Texture = pointer;
 
-function SDL_Init(const flags: longword): longint; cdecl; external 'SDL2.dll';
-function SDL_CreateWindow(const title: PChar; const x, y, w, h: longint; const flags: longword): PSDL_Window; cdecl; external 'SDL2.dll';
-function SDL_CreateRenderer(const window: PSDL_Window; const index: longint; const flags: longword): PSDL_Renderer; cdecl; external 'SDL2.dll';
-procedure SDL_DestroyRenderer(const renderer: PSDL_Renderer); cdecl; external 'SDL2.dll';
-procedure SDL_DestroyWindow(const window: PSDL_Window); cdecl; external 'SDL2.dll';
+function SDL_Init(flags: longword): longint; cdecl; external 'SDL2.dll';
+function SDL_CreateWindow(title: PChar; x, y, w, h: longint; flags: longword): PSDL_Window; cdecl; external 'SDL2.dll';
+function SDL_CreateRenderer(window: PSDL_Window; index: longint; flags: longword): PSDL_Renderer; cdecl; external 'SDL2.dll';
+procedure SDL_DestroyRenderer(renderer: PSDL_Renderer); cdecl; external 'SDL2.dll';
+procedure SDL_DestroyWindow(window: PSDL_Window); cdecl; external 'SDL2.dll';
 procedure SDL_Quit; cdecl; external 'SDL2.dll';
-procedure SDL_Delay(const ms: longword); cdecl; external 'SDL2.dll';
+procedure SDL_Delay(ms: longword); cdecl; external 'SDL2.dll';
 
-procedure SDL_SetRenderDrawColor(const renderer: PSDL_Renderer; const r, g, b, a: byte); cdecl; external 'SDL2.dll';
-procedure SDL_RenderClear(const renderer: PSDL_Renderer); cdecl; external 'SDL2.dll';
-procedure SDL_RenderPresent(const renderer: PSDL_Renderer); cdecl; external 'SDL2.dll';
+procedure SDL_SetRenderDrawColor(renderer: PSDL_Renderer; r, g, b, a: byte); cdecl; external 'SDL2.dll';
+procedure SDL_RenderClear(renderer: PSDL_Renderer); cdecl; external 'SDL2.dll';
+procedure SDL_RenderPresent(renderer: PSDL_Renderer); cdecl; external 'SDL2.dll';
 
-function SDL_CreateTexture(const renderer: PSDL_Renderer; const format: longword; const access, w, h: longint): PSDL_Texture; cdecl; external 'SDL2.dll';
+function SDL_CreateTexture(renderer: PSDL_Renderer; format: longword; access, w, h: longint): PSDL_Texture; cdecl; external 'SDL2.dll';
 function SDL_UpdateTexture(texture: PSDL_Texture; rect, pixels: pointer; pitch: longint): longint; cdecl; external 'SDL2.dll';
 function SDL_RenderCopy(renderer: PSDL_Renderer; texture: PSDL_Texture; srcrect, dstrect: pointer): longint; cdecl; external 'SDL2.dll';
 function SDL_DestroyTexture(texture: PSDL_Texture); cdecl; external 'SDL2.dll';
