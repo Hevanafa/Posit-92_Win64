@@ -45,6 +45,11 @@ end;
 procedure TPosit92.cleanup;
 begin
   { showCursor }
+
+  { Important: Destroy objects in reverse order }
+  SDL_DestroyRenderer(renderer);
+  SDL_DestroyWindow(window);
+  SDL_Quit
 end;
 
 
