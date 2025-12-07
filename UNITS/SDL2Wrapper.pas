@@ -26,6 +26,25 @@ type
     padding: array[0..51] of byte;
   end;
 
+  PSDL_Keysym = ^TSDL_Keysym;
+  TSDL_Keysym = record
+    scancode: longint;
+    sym: longint;
+    modifier: word;
+    unused: longword;
+  end;
+  
+  PSDL_KeyboardEvent = ^TSDL_KeyboardEvent;
+  TSDL_KeyboardEvent = record
+    eventType: longword;
+    timestamp: longword;
+    windowID: longword;
+    state: byte;
+    repeat_: byte;
+    padding: array[0..1] of byte;
+    keysym: TSDL_Keysym;
+  end;
+
 function SDL_Init(flags: longword): longint; cdecl; external 'SDL2.dll';
 function SDL_CreateWindow(title: PChar; x, y, w, h: longint; flags: longword): PSDL_Window; cdecl; external 'SDL2.dll';
 function SDL_CreateRenderer(window: PSDL_Window; index: longint; flags: longword): PSDL_Renderer; cdecl; external 'SDL2.dll';

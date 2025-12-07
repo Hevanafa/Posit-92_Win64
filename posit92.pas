@@ -12,12 +12,16 @@ type
     procedure init;
     procedure setTitle(const value: string);
     procedure cleanup;
+
+    function isKeyDown(const scancode: integer): boolean;
+
     procedure update;
     procedure flush;
   private
     window: PSDL_Window;
     renderer: PSDL_Renderer;
     vgaTexture: PSDL_Texture;
+    keyState: array[0..511] of boolean;
   end;
 
 
@@ -68,6 +72,12 @@ begin
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
   SDL_Quit
+end;
+
+
+function TPosit92.isKeyDown(const scancode: integer): boolean;
+begin
+
 end;
 
 
