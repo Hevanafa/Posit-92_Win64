@@ -6,7 +6,7 @@ uses
   SDL2Wrapper, Posit92,
   BMFont, Keyboard, Logger,
   ImgRef, ImgRefFast,
-  VGA,
+  Timing, VGA,
   Assets;
 
 const
@@ -44,7 +44,7 @@ begin
 
   initLogger;
   initBuffer;
-  { initDeltaTime }
+  initDeltaTime
 end;
 
 procedure TGame.afterInit;
@@ -67,10 +67,13 @@ end;
 procedure TGame.update;
 begin
   inherited update;
+  updateDeltaTime;
 
-  if isKeyDown(SC_ESC) then done := true;
+  { updateMouse }
 
   { Your update logic here }
+  if isKeyDown(SC_ESC) then done := true;
+
 end;
 
 procedure TGame.draw;
