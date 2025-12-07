@@ -26,7 +26,8 @@ end;
 
 procedure TGame.init;
 begin
-  inherited init;
+  inherited init; { works the same as super.init() in JS }
+  
   setTitle('Posit-92 with SDL2')
 
   { initBuffer; }
@@ -55,6 +56,7 @@ end;
 procedure TGame.draw;
 begin
 
+  flush
 end;
 
 
