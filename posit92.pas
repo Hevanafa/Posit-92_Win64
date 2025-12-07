@@ -41,7 +41,7 @@ begin
 
   vgaTexture := SDL_CreateTexture(
     renderer,
-    SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING,
+    SDL_PIXELFORMAT_BGRA32, SDL_TEXTUREACCESS_STREAMING,
     vgaWidth, vgaHeight)
 end;
 
