@@ -20,6 +20,14 @@ const
   SDL_DISABLE = 0;
   SDL_ENABLE = 1;
 
+  SDL_MOUSEMOTION = $400;
+  SDL_MOUSEBUTTONDOWN = $401;
+  SDL_MOUSEBUTTONUP = $402;
+
+  SDL_BUTTON_LEFT = 1;
+  SDL_BUTTON_MIDDLE = 2;
+  SDL_BUTTON_RIGHT = 3;
+
 type
   PSDL_Window = pointer;
   PSDL_Renderer = pointer;
@@ -63,6 +71,30 @@ type
     clip_rect: pointer;
     map: pointer;
     refcount: longint;
+  end;
+
+  PSDL_MouseMotionEvent = ^TSDL_MouseMotionEvent;
+  TSDL_MouseMotionEvent = record
+    eventType: longword;
+    timestamp: longword;
+    windowID: longword;
+    which: longword;
+    state: longword;
+    x, y: longint;
+    xrel, yrel: longint;
+  end;
+
+  PSDL_MouseButtonEvent = ^TSDL_MouseButtonEvent;
+  TSDL_MouseButtonEvent = record
+    eventType: longword;
+    timestamp: longword;
+    windowID: longword;
+    which: longword;
+    button: byte;
+    state: byte;
+    clicks: byte;
+    padding: byte;
+    x, y: longint;
   end;
 
 function SDL_Init(flags: longword): longint; cdecl; external 'SDL2.dll';
