@@ -37,6 +37,7 @@ type
 implementation
 
 uses
+  SysUtils,
   Conv, Logger, Mouse,
   ImgRef, Strings, VGA;
 
@@ -161,13 +162,16 @@ end;
 
 function TPosit92.loadImage(const filename: string): longint;
 var
+  strBuffer: array[0..255] of char;
   surface: PSDL_Surface;
   imgHandle: longint;
   image: PImageRef;
   src, dest: PByte;
   a: longint;
 begin
-  surface := IMG_Load(@filename[1]);
+  strpcopy(strBuffer, filename);
+  surface := IMG_Load(strBuffer);
+
   if surface = nil then begin
     writeLog('loadImage: Failed to load ' + filename);
     loadImage := -1;
@@ -286,7 +290,12 @@ begin
 
   writeLog('Loaded ' + i32str(glyphCount) + ' glyphs');
 
+  {
   font.imgHandle := loadImage(font.filename);
+
+  writeLog('font.imgHandle');
+  writeLogI32(font.imgHandle);
+  }
 end;
 
 procedure TPosit92.vgaFlush;

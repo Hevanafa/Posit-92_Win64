@@ -68,16 +68,25 @@ begin
   soundsInitialised := false
 end;
 
+{
 procedure loadSound(const key: longint; const filename: string);
-var
-  chunk: PMix_Chunk;
-  strBuffer: array[0..255] of char;
 begin
-  if not soundsInitialised then exit;
-
   writeLog('loadSound:');
   writeLogI32(key);
   writeLog(filename);
+end;
+}
+
+procedure loadSound(const key: longint; const filename: string);
+var
+  strBuffer: array[0..255] of char;
+  chunk: PMix_Chunk;
+begin
+  writeLog('loadSound:');
+  writeLogI32(key);
+  writeLog(filename);
+
+  if not soundsInitialised then exit;
 
   if (key < 0) or (key > high(soundList)) then begin
     writeLog('loadSound: Invalid sound key ' + i32str(key));
@@ -85,8 +94,8 @@ begin
   end;
 
   strpcopy(strBuffer, filename);
-
   chunk := Mix_LoadWAV(strBuffer);
+
   if chunk = nil then begin
     writeLog('loadSound: Failed to load ' + filename);
     exit
