@@ -7,12 +7,13 @@ interface
 uses BMFont;
 
 var
-  imgGasolineMaid: longint;
-  imgXPCursor: longint;
-
   defaultFont: TBMFont;
   defaultFontGlyphs: array [32..126] of TBMFontGlyph;
 
+  imgCursor: longint;
+  imgDosuEXE: array[0..1] of longint;
+
+{ BMFont boilerplate }
 procedure printDefault(const text: string; const x, y: integer);
 function measureDefault(const text: string): word;
 
