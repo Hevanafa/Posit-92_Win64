@@ -12,6 +12,7 @@ var
 
   imgCursor: longint;
   imgDosuEXE: array[0..1] of longint;
+  imgFullFont: longint;
 
 { BMFont boilerplate }
 procedure printDefault(const text: string; const x, y: integer);

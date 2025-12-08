@@ -37,6 +37,7 @@ type
 implementation
 
 uses
+  SysUtils,
   Conv, Logger, Mouse,
   ImgRef, Strings, VGA;
 
@@ -135,8 +136,6 @@ end;
 
 procedure TPosit92.cleanup;
 begin
-  { showCursor }
-
   { Important: Destroy objects in reverse order }
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
@@ -161,13 +160,27 @@ end;
 
 function TPosit92.loadImage(const filename: string): longint;
 var
+  strBuffer: PChar; { array[0..255] of char; }
+  bufferSize: word;
+
   surface: PSDL_Surface;
   imgHandle: longint;
   image: PImageRef;
   src, dest: PByte;
   a: longint;
 begin
-  surface := IMG_Load(@filename[1]);
+  writeLog('loadImage ' + filename);
+
+  bufferSize := length(filename) + 1;
+  getmem(strBuffer, bufferSize);
+  strpcopy(strBuffer, filename);
+
+  writeln(strBuffer);
+  surface := IMG_Load(strBuffer);
+
+  freemem(strBuffer, bufferSize);
+  strBuffer := nil;
+
   if surface = nil then begin
     writeLog('loadImage: Failed to load ' + filename);
     loadImage := -1;
@@ -179,9 +192,7 @@ begin
 
   src := PByte(surface^.pixels);
   dest := image^.dataPtr;
-
-  for a:=0 to (surface^.w * surface^.h * 4) - 1 do
-    dest[a] := src[a];
+  move(src^, dest^, surface^.w * surface^.h * 4);
 
   SDL_FreeSurface(surface);
   loadImage := imgHandle
@@ -287,6 +298,9 @@ begin
   writeLog('Loaded ' + i32str(glyphCount) + ' glyphs');
 
   font.imgHandle := loadImage(font.filename);
+
+  writeLog('font.imgHandle');
+  writeLogI32(font.imgHandle);
 end;
 
 procedure TPosit92.vgaFlush;
