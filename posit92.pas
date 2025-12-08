@@ -106,8 +106,8 @@ begin
       { Mouse }
       SDL_MOUSEMOTION: begin
         mouseEvent := PSDL_MouseMotionEvent(@event);
-        mouseX := mouseEvent^.x;
-        mouseY := mouseEvent^.y;
+        mouseX := mouseEvent^.x div displayScale;
+        mouseY := mouseEvent^.y div displayScale;
       end;
 
       SDL_MOUSEBUTTONDOWN: begin
