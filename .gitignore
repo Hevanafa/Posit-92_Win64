@@ -13,6 +13,7 @@ LOG.TXT
 boilerplate/shared/*.PAS
 boilerplate/UNITS/*.PAS
 boilerplate/posit92.pas
+boilerplate/posit-92.ico
 
 # Misc
 thumbs.db

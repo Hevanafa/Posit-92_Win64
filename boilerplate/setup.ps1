@@ -19,3 +19,5 @@ copy-item "$source\shared\*.pas" ".\shared\"
 copy-item "$source\UNITS\*.pas" ".\UNITS\"
 # copy-item "$source\scripts\*.ps1" ".\"
 copy-item "$source\posit92.pas" ".\"
+
+copy-item "$source\posit-92.ico" ".\"
