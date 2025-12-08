@@ -23,7 +23,7 @@ type
     procedure loadBMFont(const filename: string; var font: TBMFont; var fontGlyphs: array of TBMFontGlyph);
 
     procedure update;
-    procedure flush;
+    procedure vgaFlush;
   protected
     done: boolean;
   private
@@ -289,7 +289,7 @@ begin
   font.imgHandle := loadImage(font.filename);
 end;
 
-procedure TPosit92.flush;
+procedure TPosit92.vgaFlush;
 begin
 {
   SDL_SetRenderDrawColor(renderer, $64, $95, $ED, $FF);

@@ -14,8 +14,8 @@ dist/
 LOG.TXT
 
 # Boilerplate
-boilerplate/shared/*.PAS
-boilerplate/UNITS/*.PAS
+boilerplate/shared/
+boilerplate/UNITS/
 boilerplate/posit92.pas
 boilerplate/posit-92.ico
 
