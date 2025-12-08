@@ -28,6 +28,12 @@ const
   SDL_BUTTON_MIDDLE = 2;
   SDL_BUTTON_RIGHT = 3;
 
+  MIX_DEFAULT_FREQUENCY = 44100;
+  MIX_DEFAULT_FORMAT = $8010;  { AUDIO_S16LSB }
+  MIX_DEFAULT_CHANNELS = 2;
+  MIX_CHANNELS = 8;
+
+
 type
   PSDL_Window = pointer;
   PSDL_Renderer = pointer;
@@ -97,6 +103,13 @@ type
     x, y: longint;
   end;
 
+  PMix_Chunk = ^TMix_Chunk;
+  TMix_Chunk = record
+    { Intentionally left empty --
+      let SDL_Mixer manage this }
+  end;
+
+
 function SDL_Init(flags: longword): longint; cdecl; external 'SDL2.dll';
 function SDL_CreateWindow(title: PChar; x, y, w, h: longint; flags: longword): PSDL_Window; cdecl; external 'SDL2.dll';
 function SDL_CreateRenderer(window: PSDL_Window; index: longint; flags: longword): PSDL_Renderer; cdecl; external 'SDL2.dll';
@@ -125,6 +138,14 @@ function IMG_Load(filename: PChar): PSDL_Surface; cdecl; external 'SDL2_image.dl
 procedure SDL_FreeSurface(surface: PSDL_Surface); cdecl; external 'SDL2.dll';
 
 function SDL_ShowCursor(toggle: longint): longint; cdecl; external 'SDL2.dll';
+
+function Mix_OpenAudio(frequency: longint; format: word; channels: longint; chunksize: longint); cdecl; external 'SDL2_mixer.dll';
+procedure Mix_CloseAudio; cdecl; external 'SDL2_mixer.dll';
+function Mix_LoadWAV(file_: PChar): PMix_Chunk; cdecl; external 'SDL2_mixer.dll';
+procedure Mix_FreeChunk(chunk: PMix_Chunk); cdecl; external 'SDL2_mixer.dll';
+function Mix_PlayChannel(channel: longint; chunk: PMix_Chunk; loops: longint): longint; cdecl; external 'SDL2_mixer.dll';
+function Mix_VolumeChunk(chunk: PMix_Chunk; volume: longint): longint; cdecl; external 'SDL2_mixer.dll';
+
 
 implementation
 
