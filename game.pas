@@ -8,6 +8,7 @@ uses
   Keyboard, Mouse, Logger,
   ImgRef, ImgRefFast,
   Timing, VGA,
+  Graphics, Shapes,
   Assets;
 
 const
