@@ -22,7 +22,9 @@ procedure setSoundVolume(const key: longint; const volume: single);
 
 implementation
 
-uses Conv, Maths, Logger;
+uses
+  SysUtils,
+  Conv, Maths, Logger;
 
 var
   soundsInitialised: boolean;
@@ -33,7 +35,7 @@ var
   a: longint;
 begin
   soundsInitialised := false;
-  { writeLog('initSounds begin'); }
+  writeLog('initSounds begin');
 
   if Mix_OpenAudio(MIX_DEFAULT_FREQUENCY,
     MIX_DEFAULT_FORMAT,
@@ -48,7 +50,7 @@ begin
     soundList[a].volume := 1.0
   end;
 
-  { writeLog('initSounds end'); }
+  writeLog('initSounds end');
   soundsInitialised := true
 end;
 
@@ -69,21 +71,22 @@ end;
 procedure loadSound(const key: longint; const filename: string);
 var
   chunk: PMix_Chunk;
+  strBuffer: array[0..255] of char;
 begin
   if not soundsInitialised then exit;
 
-{
   writeLog('loadSound:');
   writeLogI32(key);
   writeLog(filename);
-}
 
   if (key < 0) or (key > high(soundList)) then begin
     writeLog('loadSound: Invalid sound key ' + i32str(key));
     exit
   end;
 
-  chunk := Mix_LoadWAV(@filename[1]);
+  strpcopy(strBuffer, filename);
+
+  chunk := Mix_LoadWAV(strBuffer);
   if chunk = nil then begin
     writeLog('loadSound: Failed to load ' + filename);
     exit

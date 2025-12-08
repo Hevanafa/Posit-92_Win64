@@ -58,7 +58,7 @@ begin
   loadSound(SfxBite, 'assets\sfx\bite.ogg');
   loadSound(SfxBonk, 'assets\sfx\bonk.ogg');
   loadSound(SfxStrum, 'assets\sfx\strum.ogg');
-  loadSound(SfxSlip, 'assets\sfx\slip.ogg');
+  { loadSound(SfxSlip, 'assets\sfx\slip.ogg'); }
 
   { Load more assets here }
 end;
