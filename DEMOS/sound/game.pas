@@ -3,10 +3,10 @@
 {$Mode TP}
 
 uses
-  SDL2Wrapper, Posit92,
+  SDL2Wrapper, Posit92, Sounds,
   Keyboard, Mouse,
   Logger, ImgRef, ImgRefFast,
-  Sounds, Timing, VGA,
+  Timing, VGA,
   Assets;
 
 const
