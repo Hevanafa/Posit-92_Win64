@@ -4,14 +4,19 @@
 
 $compilerPath = "E:\fpc-wasm\fpc\bin\x86_64-win64\fpc.exe"
 $primaryUnit = ".\game.pas"
+$resfile = "game.res"
 $outputFile = "game.exe"
 
-# Compile targetting wasm32-embedded
+if (!(test-path -path $resfile -pathType leaf)) {
+  & ".\make_res.ps1"
+}
+
+# Compile targeting Windows x64
 # E:\fpc-wasm\fpc\bin\x86_64-win64\fpc.exe -Twin64 -FuUNITS -O2 -ogame.exe .\game.pas
 
 $pinfo = new-object System.Diagnostics.ProcessStartInfo
 $pinfo.FileName = $compilerPath
-$pinfo.Arguments = "-Twin64", "-FuUNITS", "-Fushared", "-O2", "-dWIN64", "-o$outputFile", $primaryUnit
+$pinfo.Arguments = "-Twin64", "-FuUNITS", "-Fushared", "-O2", "-dWIN64", "-o$outputFile", $resfile, $primaryUnit
 $pinfo.WorkingDirectory = $PSScriptRoot
 $pinfo.RedirectStandardError = $true
 $pinfo.RedirectStandardOutput = $true
