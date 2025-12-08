@@ -49,10 +49,11 @@ begin
   imgCursor := loadImage('assets\images\cursor.png');
   imgDosuEXE[0] := loadImage('assets\images\dosu_1.png');
   imgDosuEXE[1] := loadImage('assets\images\dosu_2.png');
+  imgFullFont := loadImage('assets\fonts\nokia_cellphone_fc_8_0.png');
 
-  loadBMFont(
+  { loadBMFont(
     'assets\fonts\nokia_cellphone_fc_8.txt',
-    defaultFont, defaultFontGlyphs);
+    defaultFont, defaultFontGlyphs); }
 
   {
   loadSound(SfxBwonk, 'assets\sfx\bwonk.ogg');
@@ -146,7 +147,9 @@ var
 begin
   cls($FF6495ED);
 
-  spr(defaultFont.imgHandle, 10, 10);
+  spr(imgFullFont, 10, 10);
+
+  { spr(defaultFont.imgHandle, 10, 10); }
 
   if (trunc(gameTime * 4) and 1) > 0 then
     spr(imgDosuEXE[1], 148, 88)
