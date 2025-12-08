@@ -26,6 +26,7 @@ type
     procedure flush;
   protected
     done: boolean;
+    mouseX, mouseY, mouseButton: integer;
   private
     window: PSDL_Window;
     renderer: PSDL_Renderer;
@@ -71,11 +72,14 @@ begin
   SDL_SetWindowTitle(window, @value[1])
 end;
 
+
 procedure TPosit92.update;
 var
   event: TSDL_Event;
   keyEvent: PSDL_KeyboardEvent;
   dosScancode: integer;
+  mouseEvent: PSDL_MouseMotionEvent;
+  buttonEvent: PSDL_MouseButtonEvent;
 begin
   while SDL_PollEvent(@event) <> 0 do begin
     case event.eventType of 
@@ -117,8 +121,6 @@ begin
         buttonEvent := PSDL_MouseButtonEvent(@event);
         if buttonEvent^.button = SDL_BUTTON_LEFT then
           mouseButton := mouseButton xor 1;
-      end;
-
       end;
     end;
   end;
