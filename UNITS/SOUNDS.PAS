@@ -20,6 +20,8 @@ procedure setSoundVolume(const key: longint; const volume: single);
 
 implementation
 
+uses Maths, Logger;
+
 var
   soundsInitialised: boolean;
   sounds: array[0..9] of TSoundData;
@@ -100,6 +102,13 @@ begin
   { -1: any available channel
     0: no looping }
   Mix_PlayChannel(-1, sounds[key].chunk, 0)
+end;
+
+procedure setSoundVolume(const key: longint; const volume: single);
+begin
+  if not soundsInitialised then exit;
+  if (key < 0) or (key > high(sounds)) then exit;
+  sounds[key].volume := clamp(volume, 0.0, 1.0)
 end;
 
 end.

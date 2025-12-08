@@ -6,7 +6,7 @@ uses
   SDL2Wrapper, Posit92,
   Keyboard, Mouse,
   Logger, ImgRef, ImgRefFast,
-  Timing, VGA,
+  Sounds, Timing, VGA,
   Assets;
 
 const
@@ -58,6 +58,7 @@ begin
   initLogger;
   initBuffer;
   initDeltaTime;
+  initSounds;
 end;
 
 procedure TGame.afterInit;
@@ -71,12 +72,13 @@ end;
 
 procedure TGame.cleanup;
 begin
-  inherited cleanup;
-
   closeLogger;
   showCursor;
-  
+  cleanupSounds;
+
   { Your cleanup code here (after setting `done` to true) }
+
+  inherited cleanup;
 end;
 
 procedure TGame.update;
