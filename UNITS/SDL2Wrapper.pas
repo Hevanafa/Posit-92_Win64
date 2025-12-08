@@ -139,7 +139,7 @@ procedure SDL_FreeSurface(surface: PSDL_Surface); cdecl; external 'SDL2.dll';
 
 function SDL_ShowCursor(toggle: longint): longint; cdecl; external 'SDL2.dll';
 
-function Mix_OpenAudio(frequency: longint; format: word; channels: longint; chunksize: longint); cdecl; external 'SDL2_mixer.dll';
+function Mix_OpenAudio(frequency: longint; format: word; channels: longint; chunksize: longint): longint; cdecl; external 'SDL2_mixer.dll';
 procedure Mix_CloseAudio; cdecl; external 'SDL2_mixer.dll';
 function Mix_LoadWAV(file_: PChar): PMix_Chunk; cdecl; external 'SDL2_mixer.dll';
 procedure Mix_FreeChunk(chunk: PMix_Chunk); cdecl; external 'SDL2_mixer.dll';

@@ -5,6 +5,8 @@ unit Sounds;
 
 interface
 
+uses SDL2Wrapper;
+
 type
   TSoundData = record
     chunk: PMix_Chunk;
@@ -20,11 +22,11 @@ procedure setSoundVolume(const key: longint; const volume: single);
 
 implementation
 
-uses Maths, Logger;
+uses Conv, Maths, Logger;
 
 var
   soundsInitialised: boolean;
-  sounds: array[0..9] of TSoundData;
+  soundList: array[0..9] of TSoundData;
 
 procedure initSounds;
 var
@@ -40,9 +42,9 @@ begin
     exit
   end;
 
-  for a:=0 to high(sounds) do begin
-    sounds[a].chunk := nil;
-    sounds[a].volume := 1.0
+  for a:=0 to high(soundList) do begin
+    soundList[a].chunk := nil;
+    soundList[a].volume := 1.0
   end;
 
   soundsInitialised := true
@@ -54,9 +56,9 @@ var
 begin
   if not soundsInitialised then exit;
 
-  for a:=0 to high(sounds) do
-    if sounds[a].chunk <> nil then
-      Mix_FreeChunk(sounds[a].chunk);
+  for a:=0 to high(soundList) do
+    if soundList[a].chunk <> nil then
+      Mix_FreeChunk(soundList[a].chunk);
 
   Mix_CloseAudio;
   soundsInitialised := false
@@ -68,24 +70,24 @@ var
 begin
   if not soundsInitialised then exit;
 
-  if (key < 0) or (key > high(sounds)) then begin
+  if (key < 0) or (key > high(soundList)) then begin
     writeLog('loadSound: Invalid sound key ' + i32str(key));
     exit
   end;
 
-  chunk := Mix_LoadWAV(PChar(filename));
+  chunk := Mix_LoadWAV(@filename[1]);
   if chunk = nil then begin
     writeLog('loadSound: Failed to load ' + filename);
     exit
   end;
 
-  if sounds[key].chunk <> nil then begin
+  if soundList[key].chunk <> nil then begin
     writeLog('loadSound: Warning: Possible duplicate sound key ' + i32str(key));
-    Mix_FreeChunk(sounds[key].chunk);
+    Mix_FreeChunk(soundList[key].chunk);
     exit
   end;
 
-  sounds[key].chunk := chunk
+  soundList[key].chunk := chunk
 end;
 
 procedure playSound(const key: longint);
@@ -93,22 +95,22 @@ var
   sdlVolume: integer;
 begin
   if not soundsInitialised then exit;
-  if (key < 0) or (key > high(sounds)) then exit;
-  if sounds[key].chunk = nil then exit;
+  if (key < 0) or (key > high(soundList)) then exit;
+  if soundList[key].chunk = nil then exit;
 
-  sdlVolume := round(sounds[key].volume * 128);
-  Mix_VolumeChunk(sounds[key].chunk, sdlVolume);
+  sdlVolume := round(soundList[key].volume * 128);
+  Mix_VolumeChunk(soundList[key].chunk, sdlVolume);
 
   { -1: any available channel
     0: no looping }
-  Mix_PlayChannel(-1, sounds[key].chunk, 0)
+  Mix_PlayChannel(-1, soundList[key].chunk, 0)
 end;
 
 procedure setSoundVolume(const key: longint; const volume: single);
 begin
   if not soundsInitialised then exit;
-  if (key < 0) or (key > high(sounds)) then exit;
-  sounds[key].volume := clamp(volume, 0.0, 1.0)
+  if (key < 0) or (key > high(soundList)) then exit;
+  soundList[key].volume := clamp(volume, 0.0, 1.0)
 end;
 
 end.
