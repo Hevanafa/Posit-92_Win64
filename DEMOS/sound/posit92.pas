@@ -179,7 +179,7 @@ begin
 
   writeln(strBuffer);
   surface := IMG_Load(strBuffer);
-  
+
   freemem(strBuffer, bufferSize);
   strBuffer := nil;
 
@@ -194,10 +194,7 @@ begin
 
   src := PByte(surface^.pixels);
   dest := image^.dataPtr;
-
-  { This can be rewritten with copy() }
-  for a:=0 to (surface^.w * surface^.h * 4) - 1 do
-    dest[a] := src[a];
+  move(src^, dest^, surface^.w * surface^.h * 4);
 
   SDL_FreeSurface(surface);
   loadImage := imgHandle
