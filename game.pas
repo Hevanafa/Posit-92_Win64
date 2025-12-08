@@ -73,6 +73,9 @@ begin
   loadAssets;
   hideCursor;
 
+  writeLogI32(1234);
+  writeLogF32(1.234);
+
   { Init your game state here }
 end;
 
