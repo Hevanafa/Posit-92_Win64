@@ -1,3 +1,5 @@
+{$R game.res}
+
 {$Mode TP}
 
 uses

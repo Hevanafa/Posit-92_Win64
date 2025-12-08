@@ -3,11 +3,13 @@
 *.a
 *.o
 *.ppu
-# .rc to .res
+
+# Resource files
 *.res
-dist/
+*.obj
 
 # Runtime stuff
+dist/
 *.log
 LOG.TXT
 
