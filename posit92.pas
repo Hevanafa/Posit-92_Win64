@@ -113,14 +113,22 @@ begin
 
       SDL_MOUSEBUTTONDOWN: begin
         buttonEvent := PSDL_MouseButtonEvent(@event);
-        if buttonEvent^.button = SDL_BUTTON_LEFT then
-          mouseButton := mouseButton or 1;
+        case buttonEvent^.button of
+          SDL_BUTTON_LEFT:
+            mouseButton := mouseButton or 1;
+          SDL_BUTTON_RIGHT:
+            mouseButton := mouseButton or 2;
+        end;
       end;
 
       SDL_MOUSEBUTTONUP: begin
         buttonEvent := PSDL_MouseButtonEvent(@event);
-        if buttonEvent^.button = SDL_BUTTON_LEFT then
-          mouseButton := mouseButton xor 1;
+        case buttonEvent^.button of
+          SDL_BUTTON_LEFT:
+            mouseButton := mouseButton xor 1;
+          SDL_BUTTON_RIGHT:
+            mouseButton := mouseButton xor 2;
+        end;
       end;
     end;
   end;
