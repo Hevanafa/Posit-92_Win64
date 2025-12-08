@@ -33,7 +33,7 @@ var
   a: longint;
 begin
   soundsInitialised := false;
-  writeLog('initSounds begin');
+  { writeLog('initSounds begin'); }
 
   if Mix_OpenAudio(MIX_DEFAULT_FREQUENCY,
     MIX_DEFAULT_FORMAT,
@@ -48,7 +48,7 @@ begin
     soundList[a].volume := 1.0
   end;
 
-  writeLog('initSounds end');
+  { writeLog('initSounds end'); }
   soundsInitialised := true
 end;
 
@@ -72,9 +72,11 @@ var
 begin
   if not soundsInitialised then exit;
 
+{
   writeLog('loadSound:');
   writeLogI32(key);
   writeLog(filename);
+}
 
   if (key < 0) or (key > high(soundList)) then begin
     writeLog('loadSound: Invalid sound key ' + i32str(key));
@@ -102,7 +104,10 @@ var
 begin
   if not soundsInitialised then exit;
   if (key < 0) or (key > high(soundList)) then exit;
-  if soundList[key].chunk = nil then exit;
+  if soundList[key].chunk = nil then begin
+    writeWarn('Warning: Attempting to play a nil sound');
+    exit
+  end;
 
   sdlVolume := round(soundList[key].volume * 128);
   Mix_VolumeChunk(soundList[key].chunk, sdlVolume);
