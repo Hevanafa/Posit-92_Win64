@@ -26,7 +26,6 @@ type
     procedure flush;
   protected
     done: boolean;
-    mouseX, mouseY, mouseButton: integer;
   private
     window: PSDL_Window;
     renderer: PSDL_Renderer;
@@ -38,7 +37,7 @@ type
 implementation
 
 uses
-  Conv, Logger,
+  Conv, Logger, Mouse,
   ImgRef, Strings, VGA;
 
 const
@@ -115,9 +114,9 @@ begin
         buttonEvent := PSDL_MouseButtonEvent(@event);
         case buttonEvent^.button of
           SDL_BUTTON_LEFT:
-            mouseButton := mouseButton or 1;
+            mouseButton := mouseButton or MouseButtonLeft;
           SDL_BUTTON_RIGHT:
-            mouseButton := mouseButton or 2;
+            mouseButton := mouseButton or MouseButtonRight;
         end;
       end;
 
@@ -125,9 +124,9 @@ begin
         buttonEvent := PSDL_MouseButtonEvent(@event);
         case buttonEvent^.button of
           SDL_BUTTON_LEFT:
-            mouseButton := mouseButton xor 1;
+            mouseButton := mouseButton xor MouseButtonLeft;
           SDL_BUTTON_RIGHT:
-            mouseButton := mouseButton xor 2;
+            mouseButton := mouseButton xor MouseButtonRight;
         end;
       end;
     end;

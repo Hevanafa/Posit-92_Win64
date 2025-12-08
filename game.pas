@@ -4,7 +4,8 @@
 
 uses
   SDL2Wrapper, Posit92,
-  Conv, FPS, Keyboard, Logger,
+  Conv, FPS,
+  Keyboard, Mouse, Logger,
   ImgRef, ImgRefFast,
   Timing, VGA,
   Assets;
@@ -29,6 +30,12 @@ type
 procedure drawFPS;
 begin
   printDefault('FPS:' + i32str(getLastFPS), 240, 0);
+end;
+
+procedure debugMouse;
+begin
+  printDefault('Mouse: {x:' + i32str(mouseX) + ', y:' + i32str(mouseY) + '}', 0, 0);
+  printDefault('Button: ' + i32str(integer(mouseButton)), 0, 8);
 end;
 
 
@@ -97,6 +104,7 @@ begin
   printDefault('getTimer: ' + f32str(getTimer), 10, 170);
   printDefault('getFullTimer: ' + f32str(getFullTimer), 10, 180);
 
+  debugMouse;
   drawFPS;
 
   flush
