@@ -20,10 +20,12 @@ boilerplate/*.ps1
 !boilerplate/setup.ps1
 boilerplate/posit92.pas
 boilerplate/posit-92.ico
+boilerplate/*.dll
+boilerplate/*.rc
 
 # Demo projects
 DEMOS/sound/*.dll
-# DEMOS/sound/*.ps1
+DEMOS/sound/*.ps1
 
 
 # Misc

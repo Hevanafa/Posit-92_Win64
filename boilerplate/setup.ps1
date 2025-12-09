@@ -15,6 +15,7 @@ if (!(test-path -path "UNITS" -pathType container)) {
   mkdir "UNITS"
 }
 
+copy-item "$source\DLL\*.dll" ".\"
 copy-item "$source\shared\*.pas" ".\shared\"
 copy-item "$source\UNITS\*.pas" ".\UNITS\"
 
@@ -24,4 +25,6 @@ foreach ($script in $scripts) {
 }
 
 copy-item "$source\posit92.pas" ".\"
+
+copy-item "$source\*.rc" ".\"
 copy-item "$source\posit-92.ico" ".\"
