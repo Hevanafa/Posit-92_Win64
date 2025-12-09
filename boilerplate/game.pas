@@ -46,8 +46,6 @@ begin
     'assets\fonts\nokia_cellphone_fc_8.txt',
     defaultFont, defaultFontGlyphs);
 
-  imgFullFont := loadImage('assets\fonts\nokia_cellphone_fc_8_0.png');
-
   { Load more assets here }
 end;
 
@@ -100,9 +98,6 @@ var
   w: word;
 begin
   cls($FF6495ED);
-
-  for w:=1 to 10 do
-    spr(imgFullFont, 10, 10 * w);
 
   if (trunc(gameTime * 4) and 1) > 0 then
     spr(imgDosuEXE[1], 148, 88)
