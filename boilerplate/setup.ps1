@@ -17,7 +17,11 @@ if (!(test-path -path "UNITS" -pathType container)) {
 
 copy-item "$source\shared\*.pas" ".\shared\"
 copy-item "$source\UNITS\*.pas" ".\UNITS\"
-# copy-item "$source\scripts\*.ps1" ".\"
-copy-item "$source\posit92.pas" ".\"
 
+$scripts = @("build_run", "cleanup", "compile", "make_res", "run")
+foreach ($script in $scripts) {
+  copy-item "$source\scripts\$script.ps1" ".\"
+}
+
+copy-item "$source\posit92.pas" ".\"
 copy-item "$source\posit-92.ico" ".\"
