@@ -9,22 +9,25 @@ const
   SDL_SCANCODE_ESCAPE = 41;
   SDL_SCANCODE_SPACE = 44;
   SDL_SCANCODE_1 = 30;
-  SDL_SCANCODE_2 = 31;
-  SDL_SCANCODE_3 = 32;
-  SDL_SCANCODE_4 = 33;
-  SDL_SCANCODE_5 = 34;
+  SDL_SCANCODE_0 = 39;
   { Add more SDL scancodes here }
 
 { DOS Scancodes }
 const
-  SC_ESC = $01;
-  SC_SPACE = $39;
-
+  SC_ESCAPE = $01;
   SC_1 = $02;
   SC_2 = $03;
   SC_3 = $04;
   SC_4 = $05;
   SC_5 = $06;
+  SC_6 = $07;
+  SC_7 = $08;
+  SC_8 = $09;
+  SC_9 = $0A;
+  SC_0 = $0B;
+
+  SC_SPACE = $39;
+
   { Add more DOS scancodes here }
 
 function SDLToDOSScancode(const scancode: integer): integer;
@@ -36,14 +39,15 @@ function SDLToDOSScancode(const scancode: integer): integer;
 var
   result: integer;
 begin
+  if (scancode in [SDL_SCANCODE_1..SDL_SCANCODE_0]) then begin
+    result := scancode - (SDL_SCANCODE_1 - SC_1);
+    SDLToDOSScancode := result;
+    exit
+  end;
+
   case scancode of
     SDL_SCANCODE_ESCAPE: result := SC_ESC;
     SDL_SCANCODE_SPACE: result := SC_SPACE;
-    SDL_SCANCODE_1: result := SC_1;
-    SDL_SCANCODE_2: result := SC_2;
-    SDL_SCANCODE_3: result := SC_3;
-    SDL_SCANCODE_4: result := SC_4;
-    SDL_SCANCODE_5: result := SC_5;
     else result := 0;
   end;
 
