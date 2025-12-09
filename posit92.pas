@@ -167,7 +167,6 @@ var
   imgHandle: longint;
   image: PImageRef;
   src, dest: PByte;
-  a: longint;
 begin
   writeLog('loadImage ' + filename);
 

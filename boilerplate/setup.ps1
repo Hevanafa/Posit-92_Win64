@@ -28,3 +28,5 @@ copy-item "$source\posit92.pas" ".\"
 
 copy-item "$source\*.rc" ".\"
 copy-item "$source\posit-92.ico" ".\"
+
+write-host "Setup complete! Run .\build_run.ps1 to compile and test" -ForegroundColor green
