@@ -297,12 +297,63 @@ begin
     exit
   end;
 
-  { TODO: Numpad keys, 0, and period }
+  { TODO: Numpad keys }
 
   case scancode of
+    SDL_SCANCODE_MINUS: result := SC_MINUS;
+    SDL_SCANCODE_EQUALS: result := SC_EQUALS;
+    SDL_SCANCODE_LEFTBRACKET: result := SC_LEFT_BRACKET;
+    SDL_SCANCODE_RIGHTBRACKET: result := SC_RIGHT_BRACKET;
+    SDL_SCANCODE_BACKSLASH: result := SC_BACKSLASH;
+    SDL_SCANCODE_SEMICOLON: result := SC_SEMICOLON;
+    SDL_SCANCODE_APOSTROPHE: result := SC_APOSTROPHE;
+    SDL_SCANCODE_GRAVE: result := SC_BACKQUOTE;
+    SDL_SCANCODE_COMMA: result := SC_COMMA;
+    SDL_SCANCODE_PERIOD: result := SC_PERIOD;
+    SDL_SCANCODE_SLASH: result := SC_SLASH;
+
+    SDL_SCANCODE_TAB: result := SC_TAB;
+    SDL_SCANCODE_BACKSPACE: result := SC_BACKSPACE;
+    SDL_SCANCODE_RETURN: result := SC_ENTER;
+    SDL_SCANCODE_ESCAPE: result := SC_ESCAPE;
+    SDL_SCANCODE_SPACE: result := SC_SPACE;
+
+    SDL_SCANCODE_LSHIFT: result := SC_LEFT_SHIFT;
+    SDL_SCANCODE_RSHIFT: result := SC_RIGHT_SHIFT;
+    SDL_SCANCODE_LCTRL: result := SC_LEFT_CONTROL;
+    SDL_SCANCODE_LALT: result := SC_LEFT_ALT;
+
+    SDL_SCANCODE_F1: result := SC_F1;
+    SDL_SCANCODE_F2: result := SC_F2;
+    SDL_SCANCODE_F3: result := SC_F3;
+    SDL_SCANCODE_F4: result := SC_F4;
+    SDL_SCANCODE_F5: result := SC_F5;
+    SDL_SCANCODE_F6: result := SC_F6;
+    SDL_SCANCODE_F7: result := SC_F7;
+    SDL_SCANCODE_F8: result := SC_F8;
+    SDL_SCANCODE_F9: result := SC_F9;
+    SDL_SCANCODE_F10: result := SC_F10;
+    SDL_SCANCODE_F11: result := SC_F11;
+    SDL_SCANCODE_F12: result := SC_F12;
+
+    SDL_SCANCODE_CAPSLOCK: result := SC_CAPSLOCK;
+    SDL_SCANCODE_SCROLLLOCK: result := SC_SCROLLLOCK;
+    SDL_SCANCODE_NUMLOCKCLEAR: result := SC_NUMLOCK;
+
+    SDL_SCANCODE_INSERT: result := SC_INSERT;
+    SDL_SCANCODE_DELETE: result := SC_DELETE;
+    SDL_SCANCODE_HOME: result := SC_HOME;
+    SDL_SCANCODE_END: result := SC_END;
+    SDL_SCANCODE_PAGEUP: result := SC_PAGEUP;
+    SDL_SCANCODE_PAGEDOWN: result := SC_PAGEDOWN;
+    SDL_SCANCODE_UP: result := SC_UP;
+    SDL_SCANCODE_DOWN: result := SC_DOWN;
+    SDL_SCANCODE_LEFT: result := SC_LEFT;
+    SDL_SCANCODE_RIGHT: result := SC_RIGHT;
+
     SDL_SCANCODE_ESCAPE: result := SC_ESC;
     SDL_SCANCODE_SPACE: result := SC_SPACE;
-    { Add more scancodes here }
+    
     else result := 0;
   end;
 
