@@ -285,15 +285,24 @@ var
 begin
   result := 0;
 
+  if (scancode in [SDL_SCANCODE_A..SDL_SCANCODE_Z]) then begin
+    result := scancode - SDL_SCANCODE_A + SC_A;
+    SDLToDOSScancode := result;
+    exit
+  end;
+
   if (scancode in [SDL_SCANCODE_1..SDL_SCANCODE_0]) then begin
     result := scancode - (SDL_SCANCODE_1 - SC_1);
     SDLToDOSScancode := result;
     exit
   end;
 
+  { TODO: Numpad keys, 0, and period }
+
   case scancode of
     SDL_SCANCODE_ESCAPE: result := SC_ESC;
     SDL_SCANCODE_SPACE: result := SC_SPACE;
+    { Add more scancodes here }
     else result := 0;
   end;
 
