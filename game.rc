@@ -1,1 +1,26 @@
 1 ICON "posit-92.ico"
+1 VERSIONINFO
+FILEVERSION 1,0,0,0
+PRODUCTVERSION 1,0,0,0
+FILEOS 0x40004
+FILETYPE 0x1
+{
+  BLOCK "StringFileInfo"
+  {
+    BLOCK "040904B0"
+    {
+      VALUE "CompanyName", "Your Name/Studio"
+      VALUE "FileDescription", "Posit-92 Game Framework"
+      VALUE "FileVersion", "1.0.0.0"
+      VALUE "InternalName", "posit92"
+      VALUE "LegalCopyright", "Copyright (C) 2025"
+      VALUE "OriginalFilename", "game.exe"
+      VALUE "ProductName", "Posit-92"
+      VALUE "ProductVersion", "1.0.0.0"
+    }
+  }
+  BLOCK "VarFileInfo"
+  {
+    VALUE "Translation", 0x409, 1200
+  }
+}
