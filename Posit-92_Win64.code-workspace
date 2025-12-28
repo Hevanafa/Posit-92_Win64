@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../Posit-92_wasm"
+		}
+	],
+	"settings": {
+		"powershell.cwd": "Posit-92_win64"
+	}
+}

@@ -1,6 +1,7 @@
 {$R game.res}
 
-{$Mode TP}
+{$Mode ObjFPC}
+{$J-}
 
 uses
   SDL2Wrapper, Posit92,
