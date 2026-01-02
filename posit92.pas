@@ -26,7 +26,7 @@ function isKeyDown(const scancode: integer): boolean;
 function loadImage(const filename: string): longint;
 procedure loadBMFont(const filename: string; var font: TBMFont; var fontGlyphs: array of TBMFontGlyph);
 
-procedure update;
+procedure updateSDL;
 procedure vgaFlush;
 
 
@@ -69,7 +69,7 @@ begin
 end;
 
 
-procedure update;
+procedure updateSDL;
 var
   event: TSDL_Event;
   keyEvent: PSDL_KeyboardEvent;

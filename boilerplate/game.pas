@@ -15,22 +15,9 @@ const
   FrameTime = 16;
 
 var
-  sdlDone: boolean;
   gameTime: double;
   { More of your game state here }
 
-
-type
-  TGame = object(TPosit92)
-  public
-    procedure loadAssets;
-  private
-    procedure init;
-    procedure afterInit;
-    procedure cleanup;
-    procedure update;
-    procedure draw;
-  end;
 
 procedure drawMouse;
 begin
@@ -62,7 +49,7 @@ begin
   initSounds;
 end;
 
-procedure TGame.afterInit;
+procedure afterInit;
 begin
   loadAssets;
   hideCursor;
@@ -71,7 +58,7 @@ begin
   gameTime := 0.0
 end;
 
-procedure TGame.cleanup;
+procedure cleanup;
 begin
   closeLogger;
   showCursor;
@@ -82,9 +69,9 @@ begin
   cleanupSDL
 end;
 
-procedure TGame.update;
+procedure update;
 begin
-  inherited update;
+  updateSDL;
   updateDeltaTime;
 
   { Your update logic here }
@@ -93,7 +80,7 @@ begin
   gameTime := gameTime + dt
 end;
 
-procedure TGame.draw;
+procedure draw;
 var
   s: string;
   w: word;
@@ -115,29 +102,28 @@ end;
 
 
 var
-  game: TGame;
   lastFrameTime, frameTimeNow, elapsed: longword; { in ms }
 
 begin
-  game.init;
-  game.afterInit;
+  init;
+  afterInit;
 
-  game.done := false;
+  sdlDone := false;
 
   lastFrameTime := SDL_GetTicks;
 
-  while not game.done do begin
+  while not sdlDone do begin
     frameTimeNow := SDL_GetTicks;
     elapsed := frameTimeNow - lastFrameTime;
 
     if elapsed >= FrameTime then begin
       lastFrameTime := frameTimeNow - (elapsed mod FrameTime); { Carry over extra time }
-      game.update;
-      game.draw
+      update;
+      draw
     end;
 
     SDL_Delay(1)
   end;
 
-  game.cleanup
+  cleanup
 end.
