@@ -1,4 +1,9 @@
-{ Trimmed down version of LOGGER.PAS from POSIT-92 }
+{
+  Logger - Part of Posit-92 game engine
+  Hevanafa
+
+  Trimmed down version of LOGGER.PAS from Posit-92
+}
 
 unit Logger;
 
@@ -17,12 +22,12 @@ procedure flushLog; external 'env' name 'flushLog';
 {$endif}
 
 {$ifdef WIN64}
+procedure initLogger;
+procedure closeLogger;
+
 procedure writeLogI32(const value: longint);
 procedure writeLogF32(const value: double);
 procedure writeWarn(const msg: string);
-
-procedure initLogger;
-procedure closeLogger;
 {$endif}
 
 procedure writeLog(const msg: string);
@@ -34,6 +39,7 @@ implementation
 var
   logBuffer: array[0..255] of byte;
 {$endif}
+
 {$ifdef WIN64}
 uses CRT;
 
@@ -43,26 +49,6 @@ var
   logFile: Text;
   logOpened: boolean;
 {$endif}
-
-procedure initLogger;
-begin
-  assign(logFile, logFilename);
-  {$I-}
-  rewrite(logFile);
-  {$I+}
-  logOpened := (IOResult = 0);
-  if not logOpened then begin
-    writeLn('Failed to create "' + logFilename + '" file!');
-    readLn;
-    halt
-  end;
-end;
-
-procedure closeLogger;
-begin
-  if logOpened then
-    close(logFile);
-end;
 
 function getLogBuffer: pointer;
 begin
@@ -95,6 +81,26 @@ end;
 {$endif}
 
 {$ifdef WIN64}
+procedure initLogger;
+begin
+  assign(logFile, logFilename);
+  {$I-}
+  rewrite(logFile);
+  {$I+}
+  logOpened := (IOResult = 0);
+  if not logOpened then begin
+    writeLn('Failed to create "' + logFilename + '" file!');
+    readLn;
+    halt
+  end;
+end;
+
+procedure closeLogger;
+begin
+  if logOpened then
+    close(logFile);
+end;
+
 procedure writeLog(const msg: string);
 begin
   textColor(white);
@@ -104,17 +110,6 @@ begin
   writeln(logFile, msg);
   flush(logFile)
 end;
-
-procedure writeWarn(const msg: string);
-begin
-  textColor(yellow);
-  writeln(msg);
-
-  if not logOpened then exit;
-  writeln(logFile, msg);
-  flush(logFile)
-end;
-
 
 procedure writeLogI32(const value: longint);
 begin
@@ -133,6 +128,16 @@ begin
 
   if not logOpened then exit;
   writeln(logFile, value);
+  flush(logFile)
+end;
+
+procedure writeWarn(const msg: string);
+begin
+  textColor(yellow);
+  writeln(msg);
+
+  if not logOpened then exit;
+  writeln(logFile, msg);
   flush(logFile)
 end;
 {$endif}
