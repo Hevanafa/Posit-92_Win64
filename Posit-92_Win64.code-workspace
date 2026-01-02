@@ -8,6 +8,7 @@
 		}
 	],
 	"settings": {
-		"powershell.cwd": "Posit-92_win64"
+		"powershell.cwd": "Posit-92_win64",
+		"omnipascal.searchPath": "E:\\fpc-wasm\\fpcsrc\\rtl\\win;E:\\fpc-wasm\\fpcsrc\\packages\\rtl-console\\src\\win"
 	}
 }
