@@ -15,6 +15,7 @@ const
   FrameTime = 16;
 
 var
+  sdlDone: boolean;
   gameTime: double;
   { More of your game state here }
 
@@ -37,7 +38,7 @@ begin
 end;
 
 
-procedure TGame.loadAssets;
+procedure loadAssets;
 begin
   imgCursor := loadImage('assets\images\cursor.png');
   imgDosuEXE[0] := loadImage('assets\images\dosu_1.png');
@@ -50,10 +51,9 @@ begin
   { Load more assets here }
 end;
 
-procedure TGame.init;
+procedure init;
 begin
-  inherited init; { works the same as super.init() in JS }
-
+  initSDL;
   setTitle('Posit-92 with SDL2');
 
   initLogger;
@@ -79,7 +79,7 @@ begin
 
   { Your cleanup code here (after setting `done` to true) }
 
-  inherited cleanup;
+  cleanupSDL
 end;
 
 procedure TGame.update;
@@ -88,7 +88,7 @@ begin
   updateDeltaTime;
 
   { Your update logic here }
-  if isKeyDown(SC_ESC) then done := true;
+  if isKeyDown(SC_ESC) then sdlDone := true;
 
   gameTime := gameTime + dt
 end;

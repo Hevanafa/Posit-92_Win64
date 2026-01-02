@@ -8,30 +8,26 @@ uses
   SDL2Wrapper,
   BMFont, Keyboard;
 
-type
-  TPosit92 = object
-  public
-    procedure init;
-    procedure setTitle(const value: string);
-    procedure cleanup;
+var
+  sdlDone: boolean;
+  window: PSDL_Window;
+  renderer: PSDL_Renderer;
+  vgaTexture: PSDL_Texture;
+  keyState: array[0..127] of boolean;  { use DOS scancode }
 
-    procedure hideCursor;
-    procedure showCursor;
+procedure initSDL;
+procedure setTitle(const value: string);
+procedure cleanupSDL;
 
-    function isKeyDown(const scancode: integer): boolean;
-    function loadImage(const filename: string): longint;
-    procedure loadBMFont(const filename: string; var font: TBMFont; var fontGlyphs: array of TBMFontGlyph);
+procedure hideCursor;
+procedure showCursor;
 
-    procedure update;
-    procedure vgaFlush;
-  protected
-    done: boolean;
-  private
-    window: PSDL_Window;
-    renderer: PSDL_Renderer;
-    vgaTexture: PSDL_Texture;
-    keyState: array[0..127] of boolean;  { use DOS scancode }
-  end;
+function isKeyDown(const scancode: integer): boolean;
+function loadImage(const filename: string): longint;
+procedure loadBMFont(const filename: string; var font: TBMFont; var fontGlyphs: array of TBMFontGlyph);
+
+procedure update;
+procedure vgaFlush;
 
 
 implementation
@@ -44,7 +40,7 @@ uses
 const
   displayScale = 2;
 
-procedure TPosit92.init;
+procedure initSDL;
 begin
   if SDL_Init(SDL_INIT_VIDEO) <> 0 then begin
     writeln('SDL_Init failed!');
@@ -64,16 +60,16 @@ begin
     SDL_PIXELFORMAT_BGRA32, SDL_TEXTUREACCESS_STREAMING,
     vgaWidth, vgaHeight);
 
-  done := false
+  sdlDone := false
 end;
 
-procedure TPosit92.setTitle(const value: string);
+procedure setTitle(const value: string);
 begin
   SDL_SetWindowTitle(window, @value[1])
 end;
 
 
-procedure TPosit92.update;
+procedure update;
 var
   event: TSDL_Event;
   keyEvent: PSDL_KeyboardEvent;
@@ -83,7 +79,7 @@ var
 begin
   while SDL_PollEvent(@event) <> 0 do begin
     case event.eventType of 
-      SDL_QUIT_: done := true;
+      SDL_QUIT_: sdlDone := true;
 
       { Keyboard }
       SDL_KEYDOWN: begin
@@ -134,7 +130,7 @@ begin
   end;
 end;
 
-procedure TPosit92.cleanup;
+procedure cleanupSDL;
 begin
   { Important: Destroy objects in reverse order }
   SDL_DestroyRenderer(renderer);
@@ -143,22 +139,22 @@ begin
 end;
 
 
-procedure TPosit92.hideCursor;
+procedure hideCursor;
 begin
   SDL_ShowCursor(SDL_DISABLE)
 end;
 
-procedure TPosit92.showCursor;
+procedure showCursor;
 begin
   SDL_ShowCursor(SDL_ENABLE)
 end;
 
-function TPosit92.isKeyDown(const scancode: integer): boolean;
+function isKeyDown(const scancode: integer): boolean;
 begin
   isKeyDown := keyState[scancode]
 end;
 
-function TPosit92.loadImage(const filename: string): longint;
+function loadImage(const filename: string): longint;
 var
   strBuffer: PChar; { array[0..255] of char; }
   bufferSize: word;
@@ -198,7 +194,7 @@ begin
 end;
 
 { 32 to 126: 0 to 94 }
-procedure TPosit92.loadBMFont(const filename: string; var font: TBMFont; var fontGlyphs: array of TBMFontGlyph);
+procedure loadBMFont(const filename: string; var font: TBMFont; var fontGlyphs: array of TBMFontGlyph);
 var
   f: text;
   txtLine: string;
@@ -302,7 +298,7 @@ begin
   writeLogI32(font.imgHandle);
 end;
 
-procedure TPosit92.vgaFlush;
+procedure vgaFlush;
 begin
 {
   SDL_SetRenderDrawColor(renderer, $64, $95, $ED, $FF);

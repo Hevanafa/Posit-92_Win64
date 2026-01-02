@@ -3,6 +3,7 @@
 unit Logger;
 
 {$Mode TP}
+{$Define WIN64}
 
 interface
 
