@@ -24,8 +24,8 @@ boilerplate/*.dll
 boilerplate/*.rc
 
 # Demo projects
-DEMOS/sound/*.dll
-DEMOS/sound/*.ps1
+DEMOS/*/*.dll
+DEMOS/*/*.ps1
 
 
 # Misc
