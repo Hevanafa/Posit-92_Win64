@@ -1,6 +1,7 @@
 unit Posit92;
 
 {$Mode TP}
+{$J-}
 
 interface
 
@@ -39,7 +40,7 @@ implementation
 uses
   SysUtils,
   Conv, Logger, Mouse,
-  ImgRef, Strings, VGA;
+  ImgRef, UStrings, VGA;
 
 const
   displayScale = 2;
@@ -216,7 +217,10 @@ begin
     exit
   end;
 
+  { SetLength(pairs, 10);
+  SetLength(pair, 2); }
   glyphCount := 0;
+
   while not eof(f) do begin
     readln(f, txtLine);
 
