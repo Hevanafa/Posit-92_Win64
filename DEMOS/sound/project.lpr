@@ -1,7 +1,5 @@
 program Game;
 
-{$R game.res}
-
 {$Mode ObjFPC}
 {$H+}
 {$J-}
@@ -87,6 +85,10 @@ begin
   freeImage(imgDosuEXE[1]);
   freeImage(imgFullFont);
 
+  freeImage(defaultFont.imgHandle);
+
+  freemem(getSurfacePtr);
+
   { Your cleanup code here (after setting `done` to true) }
   closeLogger;
   cleanupSDL
@@ -162,6 +164,8 @@ end;
 var
   { done: boolean; }  { moved to Posit92 unit }
   lastFrameTime, frameTimeNow, elapsed: longword; { in ms }
+
+{$R *.res}
 
 begin
   init;
