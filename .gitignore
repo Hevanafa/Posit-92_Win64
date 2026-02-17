@@ -30,3 +30,9 @@ DEMOS/sound/*.ps1
 
 # Misc
 thumbs.db
+
+# Lazarus stuff
+backup/
+lib/
+*.lps
+*.dbg
