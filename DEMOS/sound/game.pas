@@ -1,3 +1,5 @@
+program Game;
+
 {$R game.res}
 
 {$Mode TP}
@@ -102,7 +104,7 @@ begin
   updateDeltaTime;
 
   { Your update logic here }
-  if isKeyDown(SC_ESC) then done := true;
+  if isKeyDown(SC_ESCAPE) then done := true;
 
   if lastSpacebar <> isKeyDown(SC_SPACE) then begin
     lastSpacebar := isKeyDown(SC_SPACE);
@@ -164,29 +166,29 @@ end;
 
 
 var
-  game: TGame;
+  gameInstance: TGame;
   lastFrameTime, frameTimeNow, elapsed: longword; { in ms }
 
 begin
-  game.init;
-  game.afterInit;
+  gameInstance.init;
+  gameInstance.afterInit;
 
-  game.done := false;
+  gameInstance.done := false;
 
   lastFrameTime := SDL_GetTicks;
 
-  while not game.done do begin
+  while not gameInstance.done do begin
     frameTimeNow := SDL_GetTicks;
     elapsed := frameTimeNow - lastFrameTime;
 
     if elapsed >= FrameTime then begin
       lastFrameTime := frameTimeNow - (elapsed mod FrameTime); { Carry over extra time }
-      game.update;
-      game.draw
+      gameInstance.update;
+      gameInstance.draw
     end;
 
     SDL_Delay(1)
   end;
 
-  game.cleanup
+  gameInstance.cleanup
 end.

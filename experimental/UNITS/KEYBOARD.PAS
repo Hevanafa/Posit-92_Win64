@@ -351,9 +351,6 @@ begin
     SDL_SCANCODE_LEFT: result := SC_LEFT;
     SDL_SCANCODE_RIGHT: result := SC_RIGHT;
 
-    SDL_SCANCODE_ESCAPE: result := SC_ESC;
-    SDL_SCANCODE_SPACE: result := SC_SPACE;
-    
     else result := 0;
   end;
 
