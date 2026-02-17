@@ -9,7 +9,7 @@ uses
   SDL2Wrapper, Posit92,
   Keyboard, Mouse, Logger,
   ImgRef, ImgRefFast,
-  Graphics, Timing, VGA,
+  Colour, Graphics, Timing, VGA,
   Assets;
 
 type
@@ -179,7 +179,9 @@ var
   h, m: word;
   grey: longword;
 begin
-  cls($FF6495ED);
+  { cls($FF6495ED); }
+  for a:=0 to vgaHeight - 1 do
+    hline(0, vgaWidth - 1, a, lerpColour($FFFFB08A, $FFD4C5E8, a / (vgaHeight - 1)));
 
   for a:=0 to high(ripples) do begin
     if not ripples[a].alive then continue;
