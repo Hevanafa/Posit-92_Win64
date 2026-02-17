@@ -5,6 +5,7 @@ program Game;
 {$J-}
 
 uses
+  SysUtils,
   SDL2Wrapper, Posit92,
   Keyboard, Mouse, Logger,
   ImgRef, ImgRefFast,
@@ -116,7 +117,7 @@ end;
 
 procedure afterInit;
 begin
-  setTitle('Posit-92 with SDL2');
+  setTitle('Ripple Demo');
 
   loadAssets;
   hideCursor;
@@ -161,7 +162,7 @@ begin
   for a:=0 to high(ripples) do begin
     if not ripples[a].alive then continue;
 
-    ripples[a].radius := ripples[a].radius + dt * 15.0;
+    ripples[a].radius := ripples[a].radius + dt * 48.0;
     ripples[a].opacity := ripples[a].opacity - dt;
 
     if ripples[a].opacity < 0 then ripples[a].alive := false;
@@ -175,6 +176,7 @@ var
   a: word;
   s: string;
   w: word;
+  h, m: word;
   grey: longword;
 begin
   cls($FF6495ED);
@@ -194,9 +196,15 @@ begin
   else
     spr(imgDosuEXE[0], 148, 88);
 
-  s := 'Hello world!';
+  s := 'It is time!';
   w := measureDefault(s);
   printDefault(s, (vgaWidth - w) div 2, 120);
+
+  h := trunc(getTimer / 3600);
+  m := trunc(getTimer) mod 3600 div 60;
+  s := format('%02d:%02d', [h, m]);
+  w := measureDefault(s);
+  printDefault(s, (vgaWidth - w) div 2, 130);
 
   drawMouse;
   vgaFlush
