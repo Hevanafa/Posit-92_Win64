@@ -9,7 +9,10 @@ uses
   SDL2Wrapper,
   BMFont, Keyboard;
 
-type
+var
+  done: boolean;
+
+{ type
   TPosit92 = object
   public
     procedure init;
@@ -31,8 +34,22 @@ type
     window: PSDL_Window;
     renderer: PSDL_Renderer;
     vgaTexture: PSDL_Texture;
-    keyState: array[0..127] of boolean;  { use DOS scancode }
-  end;
+    keyState: array[0..127] of boolean; }  { use DOS scancode }
+  { end; }
+
+procedure initSDL;
+procedure updateSDL;
+procedure cleanupSDL;
+
+procedure setTitle(const value: string);
+
+procedure hideCursor;
+procedure showCursor;
+
+function isKeyDown(const scancode: integer): boolean;
+function loadImage(const filename: string): longint;
+procedure loadBMFont(const filename: string; var font: TBMFont; var fontGlyphs: array of TBMFontGlyph);
+procedure vgaFlush;
 
 
 implementation
@@ -45,7 +62,13 @@ uses
 const
   displayScale = 2;
 
-procedure TPosit92.init;
+var
+  window: PSDL_Window;
+  renderer: PSDL_Renderer;
+  vgaTexture: PSDL_Texture;
+  keyState: array[0..127] of boolean;  { use DOS scancode }
+
+procedure initSDL;
 begin
   if SDL_Init(SDL_INIT_VIDEO) <> 0 then begin
     writeln('SDL_Init failed!');
@@ -68,13 +91,13 @@ begin
   done := false
 end;
 
-procedure TPosit92.setTitle(const value: string);
+procedure setTitle(const value: string);
 begin
   SDL_SetWindowTitle(window, @value[1])
 end;
 
 
-procedure TPosit92.update;
+procedure updateSDL;
 var
   event: TSDL_Event;
   keyEvent: PSDL_KeyboardEvent;
@@ -135,7 +158,7 @@ begin
   end;
 end;
 
-procedure TPosit92.cleanup;
+procedure cleanupSDL;
 begin
   { Important: Destroy objects in reverse order }
   SDL_DestroyRenderer(renderer);
@@ -144,22 +167,22 @@ begin
 end;
 
 
-procedure TPosit92.hideCursor;
+procedure hideCursor;
 begin
   SDL_ShowCursor(SDL_DISABLE)
 end;
 
-procedure TPosit92.showCursor;
+procedure showCursor;
 begin
   SDL_ShowCursor(SDL_ENABLE)
 end;
 
-function TPosit92.isKeyDown(const scancode: integer): boolean;
+function isKeyDown(const scancode: integer): boolean;
 begin
   isKeyDown := keyState[scancode]
 end;
 
-function TPosit92.loadImage(const filename: string): longint;
+function loadImage(const filename: string): longint;
 var
   strBuffer: array[0..255] of char;
   surface: PSDL_Surface;
@@ -198,7 +221,7 @@ begin
 end;
 
 { 32 to 126: 0 to 94 }
-procedure TPosit92.loadBMFont(const filename: string; var font: TBMFont; var fontGlyphs: array of TBMFontGlyph);
+procedure loadBMFont(const filename: string; var font: TBMFont; var fontGlyphs: array of TBMFontGlyph);
 var
   f: text;
   txtLine: string;
@@ -305,7 +328,7 @@ begin
   writeLogI32(font.imgHandle);
 end;
 
-procedure TPosit92.vgaFlush;
+procedure vgaFlush;
 begin
 {
   SDL_SetRenderDrawColor(renderer, $64, $95, $ED, $FF);

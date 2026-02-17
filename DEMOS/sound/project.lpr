@@ -2,7 +2,9 @@ program Game;
 
 {$R game.res}
 
-{$Mode TP}
+{$Mode ObjFPC}
+{$H+}
+{$J-}
 
 uses
   SDL2Wrapper, Posit92, Sounds,
@@ -23,7 +25,7 @@ var
   gameTime: double;
 
 
-type
+{ type
   TGame = object(TPosit92)
   public
     procedure loadAssets;
@@ -33,7 +35,7 @@ type
     procedure cleanup;
     procedure update;
     procedure draw;
-  end;
+  end; }
 
 procedure drawMouse;
 begin
@@ -46,7 +48,7 @@ begin
 end;
 
 
-procedure TGame.loadAssets;
+procedure loadAssets;
 begin
   imgCursor := loadImage('assets\images\cursor.png');
   imgDosuEXE[0] := loadImage('assets\images\dosu_1.png');
@@ -66,10 +68,9 @@ begin
   { Load more assets here }
 end;
 
-procedure TGame.init;
+procedure init;
 begin
-  inherited init; { works the same as super.init() in JS }
-
+  initSDL;
   setTitle('Posit-92 with SDL2');
 
   initLogger;
@@ -78,7 +79,7 @@ begin
   initSounds;
 end;
 
-procedure TGame.afterInit;
+procedure afterInit;
 begin
   loadAssets;
   hideCursor;
@@ -87,20 +88,19 @@ begin
   gameTime := 0.0
 end;
 
-procedure TGame.cleanup;
+procedure cleanup;
 begin
   cleanupSounds;
   showCursor;
 
   { Your cleanup code here (after setting `done` to true) }
-
-  inherited cleanup;
   closeLogger;
+  cleanupSDL
 end;
 
-procedure TGame.update;
+procedure update;
 begin
-  inherited update;
+  updateSDL;
   updateDeltaTime;
 
   { Your update logic here }
@@ -140,7 +140,7 @@ begin
   gameTime := gameTime + dt
 end;
 
-procedure TGame.draw;
+procedure draw;
 var
   s: string;
   w: word;
@@ -166,29 +166,31 @@ end;
 
 
 var
-  gameInstance: TGame;
+  done: boolean;
+  { gameInstance: TGame; }
   lastFrameTime, frameTimeNow, elapsed: longword; { in ms }
 
 begin
-  gameInstance.init;
-  gameInstance.afterInit;
+  init;
+  afterInit;
 
-  gameInstance.done := false;
+  done := false;
 
   lastFrameTime := SDL_GetTicks;
 
-  while not gameInstance.done do begin
+  while not done do begin
     frameTimeNow := SDL_GetTicks;
     elapsed := frameTimeNow - lastFrameTime;
 
     if elapsed >= FrameTime then begin
       lastFrameTime := frameTimeNow - (elapsed mod FrameTime); { Carry over extra time }
-      gameInstance.update;
-      gameInstance.draw
+      update;
+      draw
     end;
 
     SDL_Delay(1)
   end;
 
-  gameInstance.cleanup
+  cleanup
 end.
+

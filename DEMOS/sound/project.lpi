@@ -91,9 +91,10 @@
       <Unit>
         <Filename Value="project.lpr"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="Game"/>
       </Unit>
       <Unit>
-        <Filename Value="posit92.pas"/>
+        <Filename Value="..\..\experimental\posit92.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="Posit92"/>
       </Unit>
