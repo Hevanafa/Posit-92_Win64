@@ -12,31 +12,6 @@ uses
 var
   done: boolean;
 
-{ type
-  TPosit92 = object
-  public
-    procedure init;
-    procedure setTitle(const value: string);
-    procedure cleanup;
-
-    procedure hideCursor;
-    procedure showCursor;
-
-    function isKeyDown(const scancode: integer): boolean;
-    function loadImage(const filename: string): longint;
-    procedure loadBMFont(const filename: string; var font: TBMFont; var fontGlyphs: array of TBMFontGlyph);
-
-    procedure update;
-    procedure vgaFlush;
-  protected
-    done: boolean;
-  private
-    window: PSDL_Window;
-    renderer: PSDL_Renderer;
-    vgaTexture: PSDL_Texture;
-    keyState: array[0..127] of boolean; }  { use DOS scancode }
-  { end; }
-
 procedure initSDL;
 procedure updateSDL;
 procedure cleanupSDL;
@@ -240,8 +215,6 @@ begin
     exit
   end;
 
-  { SetLength(pairs, 10);
-  SetLength(pair, 2); }
   glyphCount := 0;
 
   while not eof(f) do begin
@@ -330,14 +303,8 @@ end;
 
 procedure vgaFlush;
 begin
-{
-  SDL_SetRenderDrawColor(renderer, $64, $95, $ED, $FF);
-  SDL_RenderClear(renderer);
-}
-
   SDL_UpdateTexture(vgaTexture, nil, getSurfacePtr, vgaWidth * 4); { pitch = width * 4 bytes }
   SDL_RenderCopy(renderer, vgaTexture, nil, nil);
-
   SDL_RenderPresent(renderer)
 end;
 

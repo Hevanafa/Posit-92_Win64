@@ -21,21 +21,9 @@ var
   lastSpacebar: boolean;
   lastD1, lastD2, lastD3, lastD4, lastD5: boolean;
 
-  { Init your game state here }
+  { Game state variables }
   gameTime: double;
 
-
-{ type
-  TGame = object(TPosit92)
-  public
-    procedure loadAssets;
-  private
-    procedure init;
-    procedure afterInit;
-    procedure cleanup;
-    procedure update;
-    procedure draw;
-  end; }
 
 procedure drawMouse;
 begin
@@ -74,7 +62,7 @@ begin
   setTitle('Posit-92 with SDL2');
 
   initLogger;
-  initBuffer;
+  initBuffer;  { Not available in WASM mode }
   initDeltaTime;
   initSounds;
 end;
@@ -92,6 +80,11 @@ procedure cleanup;
 begin
   cleanupSounds;
   showCursor;
+
+  freeImage(imgCursor);
+  freeImage(imgDosuEXE[0]);
+  freeImage(imgDosuEXE[1]);
+  freeImage(imgFullFont);
 
   { Your cleanup code here (after setting `done` to true) }
   closeLogger;
@@ -166,8 +159,7 @@ end;
 
 
 var
-  done: boolean;
-  { gameInstance: TGame; }
+  { done: boolean; }  { moved to Posit92 unit }
   lastFrameTime, frameTimeNow, elapsed: longword; { in ms }
 
 begin
@@ -193,4 +185,5 @@ begin
 
   cleanup
 end.
+
 
