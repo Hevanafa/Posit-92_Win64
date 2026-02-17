@@ -62,8 +62,6 @@ begin
     renderer,
     SDL_PIXELFORMAT_BGRA32, SDL_TEXTUREACCESS_STREAMING,
     vgaWidth, vgaHeight);
-
-  done := false
 end;
 
 procedure setTitle(const value: string);

@@ -38,12 +38,14 @@ end;
 
 function min(const a, b: double): double;
 begin
+  min := 0.0;
   if a<=b then min:=a
   else if a>b then min:=b
 end;
 
 function max(const a, b: double): double;
 begin
+  max := 0.0;
   if a<b then max:=b
   else if a>=b then max:=a
 end;
@@ -89,15 +91,20 @@ end;
 
 function floor(const value: double): integer;
 begin
-  floor := trunc(value)
+  if (value >= 0) or (frac(value) = 0) then
+    floor := trunc(value)
+  else
+    floor := trunc(value) - 1;
 end;
 
 function ceil(const value: double): integer;
 begin
-  if trunc(value) = value then
+  if frac(value) = 0 then
     ceil := trunc(value)
-  else
-    ceil := trunc(value + 1);
+  else if value > 0 then
+    ceil := trunc(value) + 1
+  else  { negative numbers }
+    ceil := trunc(value);
 end;
 
 { Ref: https://en.wikipedia.org/wiki/Atan2#Definition_and_computation }

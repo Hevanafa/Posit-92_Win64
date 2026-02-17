@@ -8,11 +8,12 @@
 unit Panic;
 
 {$Mode TP}
+{Define WASM}
 
 interface
 
 {$ifdef WASM}
-procedure jsPanicHalt(const textPtr: PByte; const textLen: integer); external 'env' name 'panicHalt';
+procedure jsPanicHalt(const textPtr: PByte; const textLen: integer); external 'env' name 'jsPanicHalt';
 {$endif}
 
 procedure panicHalt(const msg: string);
@@ -20,12 +21,11 @@ procedure panicHalt(const msg: string);
 
 implementation
 
-uses
 {$ifdef WASM}
-Assets, VGA;
+uses Assets, VGA;
 {$endif}
 {$ifdef WIN64}
-Logger;
+uses Logger;
 {$endif}
 
 
@@ -47,6 +47,7 @@ begin
     msgBuffer[a-1] := ord(msg[a]);
 
   jsPanicHalt(@msgBuffer, length(msg));
+  halt(1)
 end;
 {$endif}
 

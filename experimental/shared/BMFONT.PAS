@@ -20,13 +20,22 @@ type
   end;
 
   PBMFont = ^TBMFont;
-  TBMFont = packed record
+  TBMFont = record
     face: string[15];  { 16 bytes }
     filename: string[63];  { 64 bytes }
     lineHeight: word;  { 2 bytes }
-    { (N/A with packed record) + automatic 2-byte padding }
     imgHandle: longint;  { 84th byte }
   end;
+
+{ This procedure creates a new ImgRef instance }
+procedure cloneBMFont(
+  const srcFont: TBMFont; const srcFontGlyphs: array of TBMFontGlyph;
+  var destFont: TBMFont; var destFontGlyphs: array of TBMFontGlyph);
+
+procedure freeBMFont(
+  var font: TBMFont;
+  var fontGlyphs: array of TBMFontGlyph;
+  const freeImgHandle: boolean);
 
 procedure printBMFont(
   const font: TBMFont;
@@ -99,6 +108,35 @@ begin
     printBMFontChar := glyph.xadvance
   end else
     printBMFontChar := 0;
+end;
+
+procedure cloneBMFont(
+  const srcFont: TBMFont; const srcFontGlyphs: array of TBMFontGlyph;
+  var destFont: TBMFont; var destFontGlyphs: array of TBMFontGlyph);
+var
+  a: word;
+begin
+  destFont := srcFont;
+
+  for a:=0 to high(srcFontGlyphs) do
+    destFontGlyphs[a] := srcFontGlyphs[a];
+
+  destFont.imgHandle := copyImage(srcFont.imgHandle)
+end;
+
+procedure freeBMFont(
+  var font: TBMFont;
+  var fontGlyphs: array of TBMFontGlyph;
+  const freeImgHandle: boolean);
+var
+  a: Word;
+begin
+  if freeImgHandle then
+    freeImage(font.imgHandle);
+
+  fillchar(font, sizeof(TBMFont), 0);
+  for a:=0 to high(fontGlyphs) do
+    fillchar(fontGlyphs[a], sizeof(TBMFontGlyph), 0);
 end;
 
 procedure printBMFont(
@@ -208,6 +246,8 @@ var
   glyphIdx: integer;
   glyph: TBMFontGlyph;
 begin
+  printBMFontCharToDest := 0;
+
   if not isImageSet(destHandle) then exit;
 
   charcode := ord(ch);
