@@ -58,17 +58,18 @@ end;
 
 procedure init;
 begin
+  initVideoMem(320, 200, getmem(320 * 200 * 4));
+  initDeltaTime;
   initSDL;
-  setTitle('Posit-92 with SDL2');
 
   initLogger;
-  initBuffer;  { Not available in WASM mode }
-  initDeltaTime;
   initSounds;
 end;
 
 procedure afterInit;
 begin
+  setTitle('Posit-92 with SDL2');
+
   loadAssets;
   hideCursor;
 
