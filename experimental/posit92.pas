@@ -293,10 +293,7 @@ begin
 
   writeLog('Loaded ' + i32str(glyphCount) + ' glyphs');
 
-  font.imgHandle := loadImage(font.filename);
-
-  writeLog('font.imgHandle');
-  writeLogI32(font.imgHandle);
+  font.imgHandle := loadImage(font.filename)
 end;
 
 procedure vgaFlush;
