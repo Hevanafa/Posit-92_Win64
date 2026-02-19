@@ -204,7 +204,7 @@ begin
 
   h := trunc(getTimer / 3600);
   m := trunc(getTimer) mod 3600 div 60;
-  s := format('%02d:%02d', [h, m]);
+  s := format('%.2d:%.2d', [h, m]);
   w := measureDefault(s);
   printDefault(s, (vgaWidth - w) div 2, 130);
 
