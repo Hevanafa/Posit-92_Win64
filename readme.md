@@ -1,5 +1,6 @@
 #
 
+Posit-92 native Windows port based on the WebAssembly version
 
 ## Boilerplate
 
@@ -7,6 +8,14 @@
 
 `boilerplate` is the version that is usable with the current stable version
 
+## How To Turn Off Debugging Console
+
+To turn off the debugging console / terminal, follow this:
+1. Open **Project > Project Settings**
+2. Scroll down, find **Compiler Options**
+3. Click **Config and Target**
+4. Turn on **Win32 gui application**
+5. Press **OK**
 
 ## Compiler Setup
 
