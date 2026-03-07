@@ -242,7 +242,7 @@ var
 begin
   for b:=0 to vgaHeight - 1 do
   for a:=0 to vgaWidth - 1 do
-    legacyUnsafePset(a, b, colour);
+    unsafePset(a, b, colour);
 end;
 
 procedure clsBlend(const colour: longword);

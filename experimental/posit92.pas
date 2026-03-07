@@ -224,8 +224,14 @@ begin
       for a:=0 to high(pairs) do begin
         split(pairs[a], '=', pair);
         k := pair[0]; v := pair[1];
+
         if k = 'face' then
-          font.face := replaceAll(v, '"', '');
+          font.face := replaceAll(v, '"', '')
+        else if k = 'spacing' then begin
+          split(v, ',', pair);
+          font.spacing[0] := parseInt(pair[0]);
+          font.spacing[1] := parseInt(pair[1]);
+        end;
       end;
 
       { writeLog('font.face:' + font.face) }
