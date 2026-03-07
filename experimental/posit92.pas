@@ -199,7 +199,7 @@ var
   f: text;
   txtLine: string;
   a: word;
-  pairs: array[0..9] of string;
+  pairs: array[0..15] of string;
   pair: array[0..1] of string;
   k, v: string;
   tempGlyph: TBMFontGlyph;
@@ -224,6 +224,8 @@ begin
       for a:=0 to high(pairs) do begin
         split(pairs[a], '=', pair);
         k := pair[0]; v := pair[1];
+
+        { writeln('info ', k); }
 
         if k = 'face' then
           font.face := replaceAll(v, '"', '')
