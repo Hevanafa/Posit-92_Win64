@@ -20,7 +20,7 @@ To turn off the debugging console / terminal, follow this:
 
 ## Changing Windows Target: x64 to x86
 
-This option will make it possible to play games even on a Windows XP (32-bit) machine
+This option will make it possible to develop games even on a Windows XP (32-bit) machine
 
 Make sure the Free Pascal targeting `i386-win32` is already installed (read the section below to see how)
 
@@ -30,7 +30,7 @@ Make sure the Free Pascal targeting `i386-win32` is already installed (read the 
 4. Change the Target platform as follows:
    1. Target OS: **Win32**
    2. Target CPU family: **i386**
-   3. Leave the target processor as default
+   3. Leave the target processor to default
 5. Press **OK**
 
 After changing those settings, don't forget to replace the SDL DLLs with the appropriate processor architecture
