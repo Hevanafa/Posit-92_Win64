@@ -11,10 +11,6 @@ var
   defaultFont: TBMFont;
   defaultFontGlyphs: array[32..126] of TBMFontGlyph;
 
-  imgCursor: longint;
-  imgDosuEXE: array[0..1] of longint;
-  imgFullFont: longint;
-
 { BMFont boilerplate }
 procedure printDefault(const text: string; const x, y: integer);
 procedure printDefaultCentred(const text: string; const cx, y: integer);

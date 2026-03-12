@@ -7,7 +7,7 @@ program Game;
 uses
   SysUtils, DateUtils, Maths,
   SDL2Wrapper, Posit92,
-  FPS, Graphics,
+  BMFont, FPS, Graphics,
   Keyboard, Mouse, Logger,
   ImgRef, ImgRefFast,
   Timing, VGA,
@@ -50,10 +50,6 @@ end;
 
 procedure loadAssets;
 begin
-  imgCursor := loadImage('assets\images\cursor.png');
-  imgDosuEXE[0] := loadImage('assets\images\dosu_1.png');
-  imgDosuEXE[1] := loadImage('assets\images\dosu_2.png');
-
   loadBMFont(
     'assets\fonts\pico-8_regular_5.txt',
     defaultFont, defaultFontGlyphs);
@@ -87,13 +83,7 @@ procedure cleanup;
 begin
   showCursor;
 
-  freeImage(imgCursor);
-  freeImage(imgDosuEXE[0]);
-  freeImage(imgDosuEXE[1]);
-  freeImage(imgFullFont);
-
-  freeImage(defaultFont.imgHandle);
-
+  freeBMFont(defaultFont, defaultFontGlyphs, true);
   freemem(getSurfacePtr);
 
   { Your cleanup code here (after setting `done` to true) }
@@ -123,15 +113,8 @@ var
   x, y: double;
 
   dotw: smallint;
-  testStr: string;
-  w: word;
 begin
   cls(palette[0]);
-
-  if (trunc(gameTime * 4) and 1) > 0 then
-    spr(imgDosuEXE[1], 148, 88)
-  else
-    spr(imgDosuEXE[0], 148, 88);
 
   for a:=0 to 11 do begin
     angle := deg2rad(a * 30.0);
@@ -142,6 +125,13 @@ begin
       trunc(sin(angle) * 55 + vgaHeight div 2),
       palette[1]);
   end;
+
+  { printDefault(format('%.2d:%.2d:%.2d', [trunc(h), trunc(m), trunc(s)]), 10, 10); }
+  printDefaultCentred(FormatDateTime('dd-mm-yyyy', now), vgaWidth div 2, vgaHeight * 3 div 4 - defaultFont.lineHeight - 2);
+
+  dotw := DayOfTheWeek(now);
+  { testStr := format('Today is %s', [getDayName(dotw)]); }
+  printDefaultCentred(getDayName(dotw), vgaWidth div 2, vgaHeight * 3 div 4);
 
 
   positNow := getTimer;
@@ -163,13 +153,6 @@ begin
   x := cos(angle) * 40 + vgaWidth div 2;
   y := sin(angle) * 40 + vgaHeight div 2;
   line(vgaWidth div 2, vgaHeight div 2, trunc(x), trunc(y), palette[1]);
-
-  { printDefault(format('%.2d:%.2d:%.2d', [trunc(h), trunc(m), trunc(s)]), 10, 10); }
-  printDefaultCentred(FormatDateTime('dd-mm-yyyy', now), vgaWidth div 2, vgaHeight * 3 div 4 - defaultFont.lineHeight - 2);
-
-  dotw := DayOfTheWeek(now);
-  { testStr := format('Today is %s', [getDayName(dotw)]); }
-  printDefaultCentred(getDayName(dotw), vgaWidth div 2, vgaHeight * 3 div 4);
 
   drawFPS;
   drawMouse;
