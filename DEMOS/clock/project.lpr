@@ -97,7 +97,7 @@ var
   angle: double;
   x, y: double;
 begin
-  cls($FF6495ED);
+  cls(palette[0]);
 
   if (trunc(gameTime * 4) and 1) > 0 then
     spr(imgDosuEXE[1], 148, 88)
@@ -107,15 +107,24 @@ begin
   now := getTimer;
 
   h := now / 3600;
-  angle := deg2rad(h * 30.0);
-  x := cos(angle) * 10 + vgaWidth div 2;
-  y := sin(angle) * 10 + vgaHeight div 2;
+  angle := deg2rad(h * 30.0 - 90.0);
+  x := cos(angle) * 15 + vgaWidth div 2;
+  y := sin(angle) * 15 + vgaHeight div 2;
   line(vgaWidth div 2, vgaHeight div 2, trunc(x), trunc(y), palette[1]);
 
   m := trunc(now) mod 3600 div 60;
-  s := trunc(now) mod 60;
+  angle := deg2rad(m * 6.0 - 90.0);
+  x := cos(angle) * 30 + vgaWidth div 2;
+  y := sin(angle) * 30 + vgaHeight div 2;
+  line(vgaWidth div 2, vgaHeight div 2, trunc(x), trunc(y), palette[1]);
 
-  printDefault(format('%.2d:%.2d:%.2d', [trunc(h), trunc(m), trunc(s)]), 10, 10);
+  s := trunc(now) mod 60;
+  angle := deg2rad(s * 6.0 - 90.0);
+  x := cos(angle) * 40 + vgaWidth div 2;
+  y := sin(angle) * 40 + vgaHeight div 2;
+  line(vgaWidth div 2, vgaHeight div 2, trunc(x), trunc(y), palette[1]);
+
+  { printDefault(format('%.2d:%.2d:%.2d', [trunc(h), trunc(m), trunc(s)]), 10, 10); }
 
   drawMouse;
   vgaFlush
