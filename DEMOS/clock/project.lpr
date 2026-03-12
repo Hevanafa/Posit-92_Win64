@@ -63,7 +63,7 @@ procedure init;
 begin
   initVideoMem(128, 128, getmem(128 * 128 * 4));
   initDeltaTime;
-  initSDL;
+  initSDL(3);
   initLogger;
 end;
 

@@ -1,6 +1,7 @@
 unit Posit92;
 
-{$Mode TP}
+{$Mode ObjFPC}
+{$H-}  { Always use ShortString }
 {$J-}
 
 interface
@@ -12,7 +13,7 @@ uses
 var
   done: boolean;
 
-procedure initSDL;
+procedure initSDL(const aDisplayScale: smallint = 2);
 procedure updateSDL;
 procedure cleanupSDL;
 
@@ -34,21 +35,22 @@ uses
   Conv, Logger, Mouse,
   ImgRef, UStrings, VGA;
 
-const
-  displayScale = 2;
-
 var
+  displayScale: smallint;
   window: PSDL_Window;
   renderer: PSDL_Renderer;
   vgaTexture: PSDL_Texture;
+
   keyState: array[0..127] of boolean;  { use DOS scancode }
 
-procedure initSDL;
+procedure initSDL(const aDisplayScale: smallint);
 begin
   if SDL_Init(SDL_INIT_VIDEO) <> 0 then begin
     writeln('SDL_Init failed!');
     halt(1)
   end;
+
+  displayScale := aDisplayScale;
 
   window := SDL_CreateWindow(
     'SDL2 Window',
