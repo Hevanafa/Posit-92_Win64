@@ -11,14 +11,15 @@
         <MainUnitHasScaledStatement Value="False"/>
       </Flags>
       <SessionStorage Value="InProjectDir"/>
-      <Title Value="Game"/>
+      <Title Value="Posit-92 Clock"/>
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
       <Icon Value="0"/>
     </General>
     <VersionInfo>
       <UseVersionInfo Value="True"/>
-      <MinorVersionNr Value="4"/>
+      <MinorVersionNr Value="1"/>
+      <RevisionNr Value="5"/>
     </VersionInfo>
     <BuildModes>
       <Item Name="Default" Default="True"/>
@@ -63,7 +64,7 @@
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="game"/>
+            <Filename Value="posit-92_clock"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
@@ -82,6 +83,11 @@
               <RunWithoutDebug Value="True"/>
             </Debugging>
             <LinkSmart Value="True"/>
+            <Options>
+              <Win32>
+                <GraphicApplication Value="True"/>
+              </Win32>
+            </Options>
           </Linking>
         </CompilerOptions>
       </Item>
