@@ -25,7 +25,8 @@ var
 
 procedure drawMouse;
 begin
-  spr(imgCursor, mouseX, mouseY)
+  { spr(imgCursor, mouseX, mouseY) }
+  pset(mouseX, mouseY, Palette[1])
 end;
 
 
@@ -92,6 +93,7 @@ end;
 
 procedure draw;
 var
+  a: word;
   now: double;
   h, m, s: double;
   angle: double;
@@ -104,21 +106,32 @@ begin
   else
     spr(imgDosuEXE[0], 148, 88);
 
+  for a:=0 to 11 do begin
+    angle := deg2rad(a * 30.0);
+    line(
+      trunc(cos(angle) * 50 + vgaWidth div 2),
+      trunc(sin(angle) * 50 + vgaHeight div 2),
+      trunc(cos(angle) * 55 + vgaWidth div 2),
+      trunc(sin(angle) * 55 + vgaHeight div 2),
+      palette[1]);
+  end;
+
+
   now := getTimer;
 
-  h := now / 3600;
+  h := now / 3600.0;
   angle := deg2rad(h * 30.0 - 90.0);
   x := cos(angle) * 15 + vgaWidth div 2;
   y := sin(angle) * 15 + vgaHeight div 2;
   line(vgaWidth div 2, vgaHeight div 2, trunc(x), trunc(y), palette[1]);
 
-  m := trunc(now) mod 3600 div 60;
+  m := trunc(now) mod 3600 div 60 + frac(now / 60.0);
   angle := deg2rad(m * 6.0 - 90.0);
   x := cos(angle) * 30 + vgaWidth div 2;
   y := sin(angle) * 30 + vgaHeight div 2;
   line(vgaWidth div 2, vgaHeight div 2, trunc(x), trunc(y), palette[1]);
 
-  s := trunc(now) mod 60;
+  s := trunc(now) mod 60 + frac(now);
   angle := deg2rad(s * 6.0 - 90.0);
   x := cos(angle) * 40 + vgaWidth div 2;
   y := sin(angle) * 40 + vgaHeight div 2;
