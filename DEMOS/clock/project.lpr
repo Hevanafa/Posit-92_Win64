@@ -5,8 +5,9 @@ program Game;
 {$J-}
 
 uses
-  SysUtils,
+  SysUtils, Maths,
   SDL2Wrapper, Posit92,
+  Graphics,
   Keyboard, Mouse, Logger,
   ImgRef, ImgRefFast,
   Timing, VGA,
@@ -15,6 +16,7 @@ uses
 const
   TargetFPS = 60;
   FrameTime = 1000 div TargetFPS;
+  Palette: array[0..1] of longword = ($FF3C3C3C, $FFB5F80E);
 
 var
   { Game state variables }
@@ -91,7 +93,9 @@ end;
 procedure draw;
 var
   now: double;
-  h, m, s: byte;
+  h, m, s: double;
+  angle: double;
+  x, y: double;
 begin
   cls($FF6495ED);
 
@@ -101,11 +105,17 @@ begin
     spr(imgDosuEXE[0], 148, 88);
 
   now := getTimer;
-  h := trunc(now / 3600);
+
+  h := now / 3600;
+  angle := deg2rad(h * 30.0);
+  x := cos(angle) * 10 + vgaWidth div 2;
+  y := sin(angle) * 10 + vgaHeight div 2;
+  line(vgaWidth div 2, vgaHeight div 2, trunc(x), trunc(y), palette[1]);
+
   m := trunc(now) mod 3600 div 60;
   s := trunc(now) mod 60;
 
-  printDefault(format('%.2d:%.2d:%.2d', [h, m, s]), 10, 10);
+  printDefault(format('%.2d:%.2d:%.2d', [trunc(h), trunc(m), trunc(s)]), 10, 10);
 
   drawMouse;
   vgaFlush
