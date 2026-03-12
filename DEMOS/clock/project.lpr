@@ -165,12 +165,11 @@ begin
   line(vgaWidth div 2, vgaHeight div 2, trunc(x), trunc(y), palette[1]);
 
   { printDefault(format('%.2d:%.2d:%.2d', [trunc(h), trunc(m), trunc(s)]), 10, 10); }
+  printDefaultCentred(FormatDateTime('dd-mm-yyyy', now), vgaWidth div 2, vgaHeight * 3 div 4 - defaultFont.lineHeight - 2);
 
   dotw := DayOfTheWeek(now);
   { testStr := format('Today is %s', [getDayName(dotw)]); }
-  testStr := getDayName(dotw);
-  w := measureDefault(testStr);
-  printDefault(testStr, (vgaWidth - w) div 2, vgaHeight * 3 div 4);
+  printDefaultCentred(getDayName(dotw), vgaWidth div 2, vgaHeight * 3 div 4);
 
   drawFPS;
   drawMouse;
