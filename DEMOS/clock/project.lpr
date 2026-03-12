@@ -5,7 +5,7 @@ program Game;
 {$J-}
 
 uses
-  SysUtils, Maths,
+  SysUtils, DateUtils, Maths,
   SDL2Wrapper, Posit92,
   FPS, Graphics,
   Keyboard, Mouse, Logger,
@@ -34,6 +34,19 @@ begin
   pset(mouseX, mouseY, Palette[1])
 end;
 
+{ dotw: use DayOfTheWeek from DateUtils unit }
+function getDayName(dotw: smallint): string;
+begin
+  case dotw of
+  1: result := 'MON';
+  2: result := 'TUE';
+  3: result := 'WED';
+  4: result := 'THU';
+  5: result := 'FRI';
+  6: result := 'SAT';
+  7: result := 'SUN';
+  end;
+end;
 
 procedure loadAssets;
 begin
@@ -63,6 +76,8 @@ begin
   loadAssets;
   hideCursor;
   initFPSCounter;
+
+  { TODO: Call replaceColour }
 
   { Init your game state here }
   gameTime := 0.0
@@ -102,10 +117,14 @@ end;
 procedure draw;
 var
   a: word;
-  now: double;
+  positNow: double;
   h, m, s: double;
   angle: double;
   x, y: double;
+
+  dotw: smallint;
+  testStr: string;
+  w: word;
 begin
   cls(palette[0]);
 
@@ -125,27 +144,32 @@ begin
   end;
 
 
-  now := getTimer;
+  positNow := getTimer;
 
-  h := now / 3600.0;
+  h := positNow / 3600.0;
   angle := deg2rad(h * 30.0 - 90.0);
   x := cos(angle) * 15 + vgaWidth div 2;
   y := sin(angle) * 15 + vgaHeight div 2;
   line(vgaWidth div 2, vgaHeight div 2, trunc(x), trunc(y), palette[1]);
 
-  m := trunc(now) mod 3600 div 60 + frac(now / 60.0);
+  m := trunc(positNow) mod 3600 div 60 + frac(positNow / 60.0);
   angle := deg2rad(m * 6.0 - 90.0);
   x := cos(angle) * 30 + vgaWidth div 2;
   y := sin(angle) * 30 + vgaHeight div 2;
   line(vgaWidth div 2, vgaHeight div 2, trunc(x), trunc(y), palette[1]);
 
-  s := trunc(now) mod 60 + frac(now);
+  s := trunc(positNow) mod 60 + frac(positNow);
   angle := deg2rad(s * 6.0 - 90.0);
   x := cos(angle) * 40 + vgaWidth div 2;
   y := sin(angle) * 40 + vgaHeight div 2;
   line(vgaWidth div 2, vgaHeight div 2, trunc(x), trunc(y), palette[1]);
 
   { printDefault(format('%.2d:%.2d:%.2d', [trunc(h), trunc(m), trunc(s)]), 10, 10); }
+
+  dotw := DayOfTheWeek(now);
+  testStr := format('Today is %s', [getDayName(dotw)]);
+  w := measureDefault(testStr);
+  printDefault(testStr, (vgaWidth - w) div 2, 10);
 
   drawFPS;
   drawMouse;
