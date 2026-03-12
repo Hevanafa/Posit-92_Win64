@@ -9,13 +9,15 @@ uses
   SDL2Wrapper, Posit92,
   BMFont, FPS, Graphics,
   Keyboard, Mouse, Logger,
-  ImgRef, ImgRefFast,
+  ImgRef, ImgRefFast, SprEffects,
   Timing, VGA,
   Assets;
 
 const
   TargetFPS = 18;
   FrameTime = 1000 div TargetFPS;
+
+  White = $FFFFFFFF;
   Palette: array[0..1] of longword = ($FF3C3C3C, $FFB5F80E);
 
 var
@@ -73,7 +75,7 @@ begin
   hideCursor;
   initFPSCounter;
 
-  { TODO: Call replaceColour }
+  replaceColour(defaultFont.imgHandle, white, Palette[1]);
 
   { Init your game state here }
   gameTime := 0.0
