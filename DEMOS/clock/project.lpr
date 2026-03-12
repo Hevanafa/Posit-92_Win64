@@ -114,7 +114,7 @@ var
   positNow: double;
   h, m, s: double;
   angle: double;
-  x, y: double;
+  x1, y1, x2, y2: double;
 
   dotw: smallint;
 begin
@@ -140,23 +140,30 @@ begin
 
   positNow := getTimer;
 
+  circfill(vgaWidth div 2, vgaHeight div 2, 2, Palette[1]);
+
+  { Hour hand }
   h := positNow / 3600.0;
   angle := deg2rad(h * 30.0 - 90.0);
-  x := cos(angle) * 15 + vgaWidth div 2;
-  y := sin(angle) * 15 + vgaHeight div 2;
-  line(vgaWidth div 2, vgaHeight div 2, trunc(x), trunc(y), palette[1]);
+  x1 := cos(angle) * 24 + vgaWidth div 2;
+  y1 := sin(angle) * 24 + vgaHeight div 2;
+  line(vgaWidth div 2, vgaHeight div 2, trunc(x1), trunc(y1), palette[1]);
 
+  { Minute hand }
   m := trunc(positNow) mod 3600 div 60 + frac(positNow / 60.0);
   angle := deg2rad(m * 6.0 - 90.0);
-  x := cos(angle) * 30 + vgaWidth div 2;
-  y := sin(angle) * 30 + vgaHeight div 2;
-  line(vgaWidth div 2, vgaHeight div 2, trunc(x), trunc(y), palette[1]);
+  x1 := cos(angle) * 36 + vgaWidth div 2;
+  y1 := sin(angle) * 36 + vgaHeight div 2;
+  line(vgaWidth div 2, vgaHeight div 2, trunc(x1), trunc(y1), palette[1]);
 
+  { Second hand }
   s := trunc(positNow) mod 60 + frac(positNow);
   angle := deg2rad(s * 6.0 - 90.0);
-  x := cos(angle) * 40 + vgaWidth div 2;
-  y := sin(angle) * 40 + vgaHeight div 2;
-  line(vgaWidth div 2, vgaHeight div 2, trunc(x), trunc(y), palette[1]);
+  x1 := cos(angle) * 40 + vgaWidth div 2;
+  y1 := sin(angle) * 40 + vgaHeight div 2;
+  x2 := cos(angle) * -10 + vgaWidth div 2;
+  y2 := sin(angle) * -10 + vgaHeight div 2;
+  line(trunc(x1), trunc(y1), trunc(x2), trunc(y2), palette[1]);
 
   drawFPS;
   drawMouse;
