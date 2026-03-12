@@ -38,13 +38,13 @@ end;
 function getDayName(dotw: smallint): string;
 begin
   case dotw of
-  1: result := 'MON';
-  2: result := 'TUE';
-  3: result := 'WED';
-  4: result := 'THU';
-  5: result := 'FRI';
-  6: result := 'SAT';
-  7: result := 'SUN';
+  1: result := 'mon';
+  2: result := 'tue';
+  3: result := 'wed';
+  4: result := 'thu';
+  5: result := 'fri';
+  6: result := 'sat';
+  7: result := 'sun';
   end;
 end;
 
@@ -167,9 +167,10 @@ begin
   { printDefault(format('%.2d:%.2d:%.2d', [trunc(h), trunc(m), trunc(s)]), 10, 10); }
 
   dotw := DayOfTheWeek(now);
-  testStr := format('Today is %s', [getDayName(dotw)]);
+  { testStr := format('Today is %s', [getDayName(dotw)]); }
+  testStr := getDayName(dotw);
   w := measureDefault(testStr);
-  printDefault(testStr, (vgaWidth - w) div 2, 10);
+  printDefault(testStr, (vgaWidth - w) div 2, vgaHeight * 3 div 4);
 
   drawFPS;
   drawMouse;
