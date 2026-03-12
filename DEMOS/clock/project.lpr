@@ -5,6 +5,7 @@ program Game;
 {$J-}
 
 uses
+  SysUtils,
   SDL2Wrapper, Posit92,
   Keyboard, Mouse, Logger,
   ImgRef, ImgRefFast,
@@ -13,7 +14,7 @@ uses
 
 const
   TargetFPS = 60;
-  FrameTime = 16;
+  FrameTime = 1000 div TargetFPS;
 
 var
   { Game state variables }
@@ -33,7 +34,7 @@ begin
   imgDosuEXE[1] := loadImage('assets\images\dosu_2.png');
 
   loadBMFont(
-    'assets\fonts\tic-80_wide_font_6.txt',
+    'assets\fonts\pico-8_regular_5.txt',
     defaultFont, defaultFontGlyphs);
 
   { Load more assets here }
@@ -41,7 +42,7 @@ end;
 
 procedure init;
 begin
-  initVideoMem(320, 200, getmem(320 * 200 * 4));
+  initVideoMem(128, 128, getmem(128 * 128 * 4));
   initDeltaTime;
   initSDL;
   initLogger;
@@ -49,7 +50,7 @@ end;
 
 procedure afterInit;
 begin
-  setTitle('Posit-92 with SDL2');
+  setTitle('Posit-92 Clock');
 
   loadAssets;
   hideCursor;
@@ -89,8 +90,8 @@ end;
 
 procedure draw;
 var
-  s: string;
-  w: word;
+  now: double;
+  h, m, s: byte;
 begin
   cls($FF6495ED);
 
@@ -99,9 +100,12 @@ begin
   else
     spr(imgDosuEXE[0], 148, 88);
 
-  s := 'Hello world!';
-  w := measureDefault(s);
-  printDefault(s, (vgaWidth - w) div 2, 120);
+  now := getTimer;
+  h := trunc(now / 3600);
+  m := trunc(now) mod 3600 div 60;
+  s := trunc(now) mod 60;
+
+  printDefault(format('%.2d:%.2d:%.2d', [h, m, s]), 10, 10);
 
   drawMouse;
   vgaFlush
@@ -127,7 +131,7 @@ begin
     elapsed := frameTimeNow - lastFrameTime;
 
     if elapsed >= FrameTime then begin
-      lastFrameTime := frameTimeNow - (elapsed mod FrameTime); { Carry over extra time }
+      lastFrameTime := frameTimeNow - (elapsed mod FrameTime);  { Carry over extra time }
       update;
       draw
     end;
