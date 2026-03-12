@@ -147,14 +147,14 @@ begin
   angle := deg2rad(h * 30.0 - 90.0);
   x1 := cos(angle) * 24 + vgaWidth div 2;
   y1 := sin(angle) * 24 + vgaHeight div 2;
-  line(vgaWidth div 2, vgaHeight div 2, trunc(x1), trunc(y1), palette[1]);
+  line(vgaWidth div 2, vgaHeight div 2, round(x1), round(y1), palette[1]);
 
   { Minute hand }
   m := trunc(positNow) mod 3600 div 60 + frac(positNow / 60.0);
   angle := deg2rad(m * 6.0 - 90.0);
   x1 := cos(angle) * 36 + vgaWidth div 2;
   y1 := sin(angle) * 36 + vgaHeight div 2;
-  line(vgaWidth div 2, vgaHeight div 2, trunc(x1), trunc(y1), palette[1]);
+  line(vgaWidth div 2, vgaHeight div 2, round(x1), round(y1), palette[1]);
 
   { Second hand }
   s := trunc(positNow) mod 60 + frac(positNow);
@@ -163,7 +163,7 @@ begin
   y1 := sin(angle) * 40 + vgaHeight div 2;
   x2 := cos(angle) * -10 + vgaWidth div 2;
   y2 := sin(angle) * -10 + vgaHeight div 2;
-  line(trunc(x1), trunc(y1), trunc(x2), trunc(y2), palette[1]);
+  line(round(x1), round(y1), round(x2), round(y2), palette[1]);
 
   drawFPS;
   drawMouse;
