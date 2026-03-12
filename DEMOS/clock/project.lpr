@@ -7,14 +7,14 @@ program Game;
 uses
   SysUtils, Maths,
   SDL2Wrapper, Posit92,
-  Graphics,
+  FPS, Graphics,
   Keyboard, Mouse, Logger,
   ImgRef, ImgRefFast,
   Timing, VGA,
   Assets;
 
 const
-  TargetFPS = 60;
+  TargetFPS = 18;
   FrameTime = 1000 div TargetFPS;
   Palette: array[0..1] of longword = ($FF3C3C3C, $FFB5F80E);
 
@@ -22,6 +22,11 @@ var
   { Game state variables }
   gameTime: double;
 
+
+procedure drawFPS;
+begin
+  printDefault(format('FPS: %d', [getLastFPS]), vgaWidth - 50, 0);
+end;
 
 procedure drawMouse;
 begin
@@ -57,6 +62,7 @@ begin
 
   loadAssets;
   hideCursor;
+  initFPSCounter;
 
   { Init your game state here }
   gameTime := 0.0
@@ -84,6 +90,8 @@ procedure update;
 begin
   updateSDL;
   updateDeltaTime;
+
+  incrementFPS;
 
   { Your update logic here }
   if isKeyDown(SC_ESCAPE) then done := true;
@@ -139,7 +147,9 @@ begin
 
   { printDefault(format('%.2d:%.2d:%.2d', [trunc(h), trunc(m), trunc(s)]), 10, 10); }
 
+  drawFPS;
   drawMouse;
+
   vgaFlush
 end;
 
