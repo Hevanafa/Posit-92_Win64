@@ -37,8 +37,10 @@ begin
 end;
 
 { dotw: use DayOfTheWeek from DateUtils unit }
-function getDayName(dotw: smallint): string;
+function getDayName(const dotw: smallint): string;
 begin
+  result := '';
+
   case dotw of
   1: result := 'mon';
   2: result := 'tue';
