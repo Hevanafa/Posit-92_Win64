@@ -1,3 +1,7 @@
+{
+  Posit-92 Game Engine Unit for Windows
+}
+
 unit Posit92;
 
 {$Mode ObjFPC}
@@ -7,7 +11,7 @@ unit Posit92;
 interface
 
 uses
-  SDL2Wrapper, BMFont;
+  SDL2Wrapper, BMFont, Windows;
 
 var
   done: boolean;
@@ -26,7 +30,7 @@ function loadImage(const filename: string): longint;
 procedure loadBMFont(const filename: string; var font: TBMFont; var fontGlyphs: array of TBMFontGlyph);
 procedure vgaFlush;
 
-type
+{ type
   TSystemInfo = record
     wProcessorArchitecture: word;
     wReserved: word;
@@ -39,20 +43,21 @@ type
     dwAllocationGranularity: dword;
     wProcessorLevel: word;
     wProcessorRevision: word;
-  end;
+  end; }
 
 const
   ProcessorArchitectureAMD64 = 9;
   ProcessorArchitectureARM64 = 12;
   ProcessorArchitectureX86 = 0;
 
-procedure GetNativeSystemInfo(var lpSystemInfo: TSystemInfo); stdcall; external 'kernel32.dll';
+procedure GetNativeSystemInfo(var lpSystemInfo: TSYSTEMINFO); stdcall; external 'kernel32.dll';
+procedure printProcessorArchitecture;
 
 
 implementation
 
 uses
-  SysUtils, Windows,
+  SysUtils,
   Conv, Logger,
   Keyboard, Mouse,
   ImgRef, UStrings, VGA;
@@ -72,6 +77,14 @@ var
 
   keyState: array[0..127] of boolean;  { use DOS scancode }
 
+
+procedure printProcessorArchitecture;
+var
+  sysinfo: TSYSTEMINFO;
+begin
+  GetNativeSystemInfo(sysinfo);
+  writeln(format('Processor architecture: %d', [sysinfo.wProcessorArchitecture]))
+end;
 
 procedure initSDL(const aDisplayScale: smallint);
 { var

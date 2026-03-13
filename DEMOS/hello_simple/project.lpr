@@ -43,6 +43,7 @@ procedure init;
 begin
   initVideoMem(320, 200, getmem(320 * 200 * 4));
   initDeltaTime;
+  printProcessorArchitecture;
   initSDL;
   initLogger;
 end;
