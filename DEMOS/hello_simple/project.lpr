@@ -5,6 +5,7 @@ program Game;
 {$J-}  { Don't allow assignments to typed consts }
 
 uses
+  SysUtils,
   SDL2Wrapper, Posit92,
   Keyboard, Mouse,
   ImgRef, ImgRefFast,
@@ -43,7 +44,9 @@ procedure init;
 begin
   initVideoMem(320, 200, getmem(320 * 200 * 4));
   initDeltaTime;
+
   printProcessorArchitecture;
+
   initSDL;
   initLogger;
 end;
@@ -111,6 +114,9 @@ var
 {$R *.res}
 
 begin
+  writeln('cwd: ', GetCurrentDir);
+  writeln(getDllMachine('SDL2.dll'));
+
   init;
   afterInit;
 

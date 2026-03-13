@@ -50,7 +50,9 @@ const
   ProcessorArchitectureARM64 = 12;
   ProcessorArchitectureX86 = 0;
 
+function getDllMachine(const filename: string): word;
 procedure GetNativeSystemInfo(var lpSystemInfo: TSYSTEMINFO); stdcall; external 'kernel32.dll';
+
 procedure printProcessorArchitecture;
 
 
@@ -97,19 +99,37 @@ var
 
   keyState: array[0..127] of boolean;  { use DOS scancode }
 
+
 function getDllMachine(const filename: string): word;
 var
-  f: file;
+  f: file of byte;
   dosHeader: TDosHeader;
   peSignature: word;
   coffHeader: TCoffHeader;
 begin
   result := 0;
+
+  if not FileExists(filename) then begin
+    writeln(format('%s is missing!', [filename]));
+    exit
+  end;
+
   AssignFile(f, filename);
-  Reset(f, 1);
+  Reset(f);
 
   try
-    { TODO: Read the DOS header }
+    { Read DOS header }
+    BlockRead(f, dosHeader, sizeof(dosHeader));
+    if dosHeader.e_magic <> $5A4D then exit;
+
+    seek(f, dosHeader.e_lfanew);
+
+    BlockRead(f, peSignature, SizeOf(peSignature));
+    if peSignature <> $4550 then exit;
+
+    { Read COFF header }
+    BlockRead(f, coffHeader, sizeof(coffHeader));
+    result := coffHeader.machine
   finally
     CloseFile(f)
   end;
