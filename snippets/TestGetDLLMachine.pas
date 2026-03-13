@@ -41,6 +41,8 @@ type
     Characteristics: word;
   end;
 
+
+{ Ref: https://learn.microsoft.com/en-us/windows/win32/sysinfo/image-file-machine-constants }
 const
   IMAGE_FILE_MACHINE_I386 = $014C;
   IMAGE_FILE_MACHINE_AMD64 = $8664;
