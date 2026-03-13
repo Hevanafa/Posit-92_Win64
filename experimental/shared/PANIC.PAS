@@ -24,12 +24,12 @@ implementation
 {$ifdef WASM}
 uses VGA;
 {$endif}
-{$ifdef WIN64}
+{$ifdef Windows}
 uses Logger;
 {$endif}
 
 
-{$ifdef WIN64}
+{$ifdef Windows}
 procedure panicHalt(const msg: string);
 begin
   writeLog('PANIC: ' + msg);
