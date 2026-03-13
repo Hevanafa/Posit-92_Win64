@@ -13,7 +13,7 @@ uses
 
 const
   TargetFPS = 60;
-  FrameTime = 16;
+  FrameTime = 1000 div TargetFPS;
 
 var
   { Game state variables }
