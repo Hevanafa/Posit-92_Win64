@@ -25,6 +25,7 @@ var
 
 { BMFont boilerplate }
 procedure printDefault(const text: string; const x, y: integer);
+procedure printDefaultCentred(const text: string; const cx, y: integer);
 function measureDefault(const text: string): word;
 
 
@@ -33,6 +34,14 @@ implementation
 procedure printDefault(const text: string; const x, y: integer);
 begin
   printBMFont(defaultFont, defaultFontGlyphs, text, x, y)
+end;
+
+procedure printDefaultCentred(const text: string; const cx, y: integer);
+var
+  w: word;
+begin
+  w := measureDefault(text);
+  printDefault(text, cx - w div 2, y)
 end;
 
 function measureDefault(const text: string): word;

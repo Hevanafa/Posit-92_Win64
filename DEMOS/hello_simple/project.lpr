@@ -88,9 +88,6 @@ begin
 end;
 
 procedure draw;
-var
-  s: string;
-  w: word;
 begin
   cls($FF6495ED);
 
@@ -99,9 +96,7 @@ begin
   else
     spr(imgDosuEXE[0], 148, 88);
 
-  s := 'Hello world!';
-  w := measureDefault(s);
-  printDefault(s, (vgaWidth - w) div 2, 120);
+  printDefaultCentred('Hello world!', vgaWidth div 2, 120);
 
   drawMouse;
   vgaFlush
