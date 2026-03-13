@@ -1,3 +1,5 @@
+{ A simple program to get the DLL machine code }
+
 program TestGetDLLMachine;
 
 {$Mode ObjFPC}
@@ -39,6 +41,12 @@ type
     Characteristics: word;
   end;
 
+const
+  IMAGE_FILE_MACHINE_I386 = $014C;
+  IMAGE_FILE_MACHINE_AMD64 = $8664;
+  IMAGE_FILE_MACHINE_ARM64 = $AA64;
+
+
 function getDllMachine(const filename: string): word;
 var
   f: file of byte;
@@ -60,7 +68,7 @@ begin
     { Read DOS header }
     BlockRead(f, dosHeader, sizeof(dosHeader));
   
-    writeln('e_magic:', dosHeader.e_magic);
+    { writeln('e_magic:', dosHeader.e_magic); }
   
     if dosHeader.e_magic <> $5A4D then exit;
 
@@ -68,16 +76,14 @@ begin
 
     BlockRead(f, peSignature, SizeOf(peSignature));
   
-    writeln('peSignature:', peSignature);
+    { writeln('peSignature:', peSignature); }
   
     if peSignature <> $00004550 then exit;
   
-    writeln('after peSignature');
-
     { Read COFF header }
     BlockRead(f, coffHeader, sizeof(coffHeader));
   
-    writeln(coffHeader.NumberOfSections);
+    { writeln(coffHeader.NumberOfSections); }
   
     result := coffHeader.machine
   finally
@@ -91,5 +97,12 @@ begin
   { writeln(format('Machine: %x', [getDllMachine('SDL2_x64.dll')])); }
 
   writeln('x86');
-  writeln(getDllMachine('SDL2_x86.dll'))
+  writeln(getDllMachine('SDL2_x86.dll'));
+
+  write('The DLL is for ');
+  case getDllMachine('SDL2.dll') of
+  IMAGE_FILE_MACHINE_I386: writeln('i386');
+  IMAGE_FILE_MACHINE_AMD64: writeln('AMD64');
+  IMAGE_FILE_MACHINE_ARM64: writeln('ARM64');
+  end;
 end.
