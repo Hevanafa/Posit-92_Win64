@@ -1,8 +1,8 @@
 program Game;
 
 {$Mode ObjFPC}
-{$H+}
-{$J-}
+{$H+}  { Use AnsiStrings }
+{$J-}  { Don't allow assignments to typed consts }
 
 uses
   SDL2Wrapper, Posit92,

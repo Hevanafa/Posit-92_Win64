@@ -1,8 +1,8 @@
 unit Posit92;
 
 {$Mode ObjFPC}
-{$H-}  { Always use ShortString }
-{$J-}
+{$H-}  { Use ShortStrings }
+{$J-}  { Don't allow assignments to typed consts }
 
 interface
 
