@@ -26,6 +26,28 @@ function loadImage(const filename: string): longint;
 procedure loadBMFont(const filename: string; var font: TBMFont; var fontGlyphs: array of TBMFontGlyph);
 procedure vgaFlush;
 
+type
+  TSystemInfo = record
+    wProcessorArchitecture: word;
+    wReserved: word;
+    dwPageSize: dword;
+    lpMinimumApplicationAddress: pointer;
+    lpMaximumApplicationAddress: pointer;
+    dwActiveProcessorMask: dword;
+    dwNumberOfProcessors: dword;
+    dwProcesssorType: dword;
+    dwAllocationGranularity: dword;
+    wProcessorLevel: word;
+    wProcessorRevision: word;
+  end;
+
+const
+  ProcessorArchitectureAMD64 = 9;
+  ProcessorArchitectureARM64 = 12;
+  ProcessorArchitectureX86 = 0;
+
+procedure GetNativeSystemInfo(var lpSystemInfo: TSystemInfo); stdcall; external 'kernel32.dll';
+
 
 implementation
 
