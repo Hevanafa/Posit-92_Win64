@@ -62,6 +62,26 @@ uses
   Keyboard, Mouse,
   ImgRef, UStrings, VGA;
 
+type
+  TDosHeader = record
+    e_magic: word;
+    gap: array[0..5] of longint;
+    e_res: array[0..3] of word;
+    gap2: array[0..1] of LongInt;
+    e_res2: array[0..9] of word;
+    e_lfanew: dword;
+  end;
+
+  TCoffHeader = record
+    Machine: word;
+    NumberOfSections: word;
+    TimeDateStamp: dword;
+    PointerToSymbolTable: dword;
+    NumberOfSymbols: dword;
+    SizeOfOptionalHeader: word;
+    Characteristics: word;
+  end;
+
 const
   RequiredDLLs: array[0..2] of string = (
     'SDL2.dll',
@@ -77,6 +97,23 @@ var
 
   keyState: array[0..127] of boolean;  { use DOS scancode }
 
+function getDllMachine(const filename: string): word;
+var
+  f: file;
+  dosHeader: TDosHeader;
+  peSignature: word;
+  coffHeader: TCoffHeader;
+begin
+  result := 0;
+  AssignFile(f, filename);
+  Reset(f, 1);
+
+  try
+    { TODO: Read the DOS header }
+  finally
+    CloseFile(f)
+  end;
+end;
 
 procedure printProcessorArchitecture;
 var
