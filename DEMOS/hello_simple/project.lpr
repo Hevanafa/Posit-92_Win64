@@ -20,12 +20,10 @@ var
   { Game state variables }
   gameTime: double;
 
-
 procedure drawMouse;
 begin
   spr(imgCursor, mouseX, mouseY)
 end;
-
 
 procedure loadAssets;
 begin
@@ -44,8 +42,6 @@ procedure init;
 begin
   initVideoMem(320, 200, getmem(320 * 200 * 4));
   initDeltaTime;
-
-  printProcessorArchitecture;
 
   initSDL;
   initLogger;
@@ -114,9 +110,6 @@ var
 {$R *.res}
 
 begin
-  writeln('cwd: ', GetCurrentDir);
-  writeln(getDllMachine('SDL2.dll'));
-
   init;
   afterInit;
 

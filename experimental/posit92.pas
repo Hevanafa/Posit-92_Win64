@@ -11,7 +11,7 @@ unit Posit92;
 interface
 
 uses
-  SDL2Wrapper, BMFont, Windows;
+  SDL2Wrapper, BMFont;
 
 var
   done: boolean;
@@ -30,31 +30,6 @@ function loadImage(const filename: string): longint;
 procedure loadBMFont(const filename: string; var font: TBMFont; var fontGlyphs: array of TBMFontGlyph);
 procedure vgaFlush;
 
-{ type
-  TSystemInfo = record
-    wProcessorArchitecture: word;
-    wReserved: word;
-    dwPageSize: dword;
-    lpMinimumApplicationAddress: pointer;
-    lpMaximumApplicationAddress: pointer;
-    dwActiveProcessorMask: dword;
-    dwNumberOfProcessors: dword;
-    dwProcesssorType: dword;
-    dwAllocationGranularity: dword;
-    wProcessorLevel: word;
-    wProcessorRevision: word;
-  end; }
-
-const
-  ProcessorArchitectureAMD64 = 9;
-  ProcessorArchitectureARM64 = 12;
-  ProcessorArchitectureX86 = 0;
-
-function getDllMachine(const filename: string): word;
-procedure GetNativeSystemInfo(var lpSystemInfo: TSYSTEMINFO); stdcall; external 'kernel32.dll';
-
-procedure printProcessorArchitecture;
-
 
 implementation
 
@@ -64,33 +39,6 @@ uses
   Keyboard, Mouse,
   ImgRef, UStrings, VGA;
 
-type
-  TDosHeader = record
-    e_magic: word;
-    gap: array[0..5] of longint;
-    e_res: array[0..3] of word;
-    gap2: array[0..1] of LongInt;
-    e_res2: array[0..9] of word;
-    e_lfanew: dword;
-  end;
-
-  TCoffHeader = record
-    Machine: word;
-    NumberOfSections: word;
-    TimeDateStamp: dword;
-    PointerToSymbolTable: dword;
-    NumberOfSymbols: dword;
-    SizeOfOptionalHeader: word;
-    Characteristics: word;
-  end;
-
-const
-  RequiredDLLs: array[0..2] of string = (
-    'SDL2.dll',
-    'SDL2_image.dll',
-    'SDL2_mixer.dll'
-  );
-
 var
   displayScale: smallint;
   window: PSDL_Window;
@@ -99,60 +47,8 @@ var
 
   keyState: array[0..127] of boolean;  { use DOS scancode }
 
-
-function getDllMachine(const filename: string): word;
-var
-  f: file of byte;
-  dosHeader: TDosHeader;
-  peSignature: word;
-  coffHeader: TCoffHeader;
-begin
-  result := 0;
-
-  if not FileExists(filename) then begin
-    writeln(format('%s is missing!', [filename]));
-    exit
-  end;
-
-  AssignFile(f, filename);
-  Reset(f);
-
-  try
-    { Read DOS header }
-    BlockRead(f, dosHeader, sizeof(dosHeader));
-    if dosHeader.e_magic <> $5A4D then exit;
-
-    seek(f, dosHeader.e_lfanew);
-
-    BlockRead(f, peSignature, SizeOf(peSignature));
-    if peSignature <> $4550 then exit;
-
-    { Read COFF header }
-    BlockRead(f, coffHeader, sizeof(coffHeader));
-    result := coffHeader.machine
-  finally
-    CloseFile(f)
-  end;
-end;
-
-procedure printProcessorArchitecture;
-var
-  sysinfo: TSYSTEMINFO;
-begin
-  GetNativeSystemInfo(sysinfo);
-  writeln(format('Processor architecture: %d', [sysinfo.wProcessorArchitecture]))
-end;
-
 procedure initSDL(const aDisplayScale: smallint);
-{ var
-  filename: string; }
 begin
-  { for filename in RequiredDLLs do
-    if not FileExists(filename) then begin
-      MessageBox(0, pchar(format('Missing %s!', [filename])), 'Error', MB_OK or MB_ICONERROR);
-      halt(1)
-    end; }
-
   if SDL_Init(SDL_INIT_VIDEO) <> 0 then begin
     writeln('SDL_Init failed!');
     halt(1)
@@ -409,7 +305,7 @@ begin
 
   close(f);
 
-  writeLog('Loaded ' + i32str(glyphCount) + ' glyphs');
+  { writeLog('Loaded ' + i32str(glyphCount) + ' glyphs'); }
 
   font.imgHandle := loadImage(font.filename)
 end;
