@@ -15,8 +15,9 @@ interface
 {$ifdef WASM}
 procedure jsPanicHalt(const textPtr: PByte; const textLen: integer); external 'env' name 'jsPanicHalt';
 {$endif}
-
+{$ifdef Windows}
 procedure panicHalt(const msg: string);
+{$endif}
 
 
 implementation
@@ -25,14 +26,18 @@ implementation
 uses VGA;
 {$endif}
 {$ifdef Windows}
-uses Logger;
+uses Logger, Windows;
 {$endif}
 
 
 {$ifdef Windows}
 procedure panicHalt(const msg: string);
+var
+  s: string;
+  p: pchar;
 begin
-  writeLog('PANIC: ' + msg);
+  s := 'PANIC: ' + msg + #0;
+  MessageBox(0, PChar(@s[1]), 'Panic', MB_OK or MB_ICONERROR);
   halt(1)
 end;
 
