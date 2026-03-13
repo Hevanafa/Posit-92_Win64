@@ -6,7 +6,7 @@ program Game;
 
 uses
   SDL2Wrapper, Posit92,
-  UKeyboard, UMouse,
+  Keyboard, Mouse,
   ImgRef, ImgRefFast,
   Logger, Timing, VGA,
   Assets;
