@@ -35,6 +35,13 @@ uses
   Conv, Logger, Mouse,
   ImgRef, UStrings, VGA;
 
+const
+  RequiredDLLs: array[0..2] of string = (
+    'SDL2.dll',
+    'SDL2_image.dll',
+    'SDL2_mixer.dll'
+  );
+
 var
   displayScale: smallint;
   window: PSDL_Window;
@@ -43,8 +50,18 @@ var
 
   keyState: array[0..127] of boolean;  { use DOS scancode }
 
+
+
 procedure initSDL(const aDisplayScale: smallint);
+var
+  filename: string;
 begin
+  for filename in RequiredDLLs do
+    if not FileExists(filename) then begin
+      writeln(format('Missing %s!', [filename]));
+      halt(1)
+    end;
+
   if SDL_Init(SDL_INIT_VIDEO) <> 0 then begin
     writeln('SDL_Init failed!');
     halt(1)
