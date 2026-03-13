@@ -7,8 +7,7 @@ unit Posit92;
 interface
 
 uses
-  SDL2Wrapper,
-  BMFont, Keyboard;
+  SDL2Wrapper, BMFont;
 
 var
   done: boolean;
@@ -31,8 +30,9 @@ procedure vgaFlush;
 implementation
 
 uses
-  SysUtils,
-  Conv, Logger, Mouse,
+  SysUtils, Dialogs, LCLType, Controls,
+  Conv, Logger,
+  UKeyboard, UMouse,
   ImgRef, UStrings, VGA;
 
 const
@@ -58,7 +58,7 @@ var
 begin
   for filename in RequiredDLLs do
     if not FileExists(filename) then begin
-      writeln(format('Missing %s!', [filename]));
+      ShowMessage(format('Missing %s!', [filename]));
       halt(1)
     end;
 

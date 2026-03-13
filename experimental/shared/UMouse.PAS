@@ -5,7 +5,7 @@
   Contains a subset of the DOS version
 }
 
-unit Mouse;
+unit UMouse;
 
 {$Mode TP}
 

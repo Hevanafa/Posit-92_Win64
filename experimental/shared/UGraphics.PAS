@@ -3,7 +3,7 @@
   Hevanafa
 }
 
-unit Graphics;
+unit UGraphics;
 
 {$Mode TP}
 {$PointerMath ON}
