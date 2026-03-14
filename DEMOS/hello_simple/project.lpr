@@ -5,8 +5,8 @@ program Game;
 {$J-}  { Don't allow assignments to typed consts }
 
 uses
-  SysUtils,
-  SDL2Wrapper, Posit92,
+  SysUtils, SDL2,
+  Posit92,
   Keyboard, Mouse,
   ImgRef, ImgRefFast,
   Logger, Timing, VGA,
