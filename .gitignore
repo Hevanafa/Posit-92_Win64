@@ -37,3 +37,6 @@ backup/
 lib/
 *.lps
 *.dbg
+
+# Bun JS stuff
+node_modules/
