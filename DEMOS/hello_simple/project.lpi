@@ -31,7 +31,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="..\..\experimental;..\..\experimental\UNITS;..\..\experimental\shared"/>
+            <OtherUnitFiles Value="..\..\experimental\engine;..\..\experimental\shared\units;..\..\experimental\shared"/>
             <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
