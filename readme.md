@@ -1,6 +1,6 @@
 #
 
-Posit-92 native Windows port based on the WebAssembly version
+Posit-92 native Windows port based on the [WebAssembly](https://github.com/Hevanafa/Posit-92_Wasm) version
 
 ## Boilerplate
 
@@ -58,3 +58,7 @@ x86 (32-bit):
 - OS: windows
 
 Click **Install compiler** to begin the installation process
+
+## Credits
+
+- SDL2 bindings - [PascalGameDevelopment/SDL2-for-Pascal](https://github.com/PascalGameDevelopment/SDL2-for-Pascal) ([MPL license](./experimental/shared/sdl2/MPL-LICENSE))
