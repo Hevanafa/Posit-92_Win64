@@ -31,7 +31,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="..\..\experimental\engine;..\..\experimental\shared\units;..\..\experimental\shared"/>
+            <OtherUnitFiles Value="..\..\experimental\engine;..\..\experimental\shared\units;..\..\experimental\shared;..\..\experimental\shared\sdl2"/>
             <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -78,7 +78,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="..\..\experimental\engine;..\..\experimental\shared\units;..\..\experimental\shared"/>
+      <OtherUnitFiles Value="..\..\experimental\engine;..\..\experimental\shared\units;..\..\experimental\shared;..\..\experimental\shared\sdl2"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>
