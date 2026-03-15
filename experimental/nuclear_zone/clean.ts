@@ -1,10 +1,12 @@
 import Bun from "bun";
-import { readdirSync } from "node:fs";
+
+import { readdirSync, rmSync } from "node:fs";
 import path from "node:path";
+import { styleText } from "node:util";
 
 const TargetExtensions = [".a", ".o", ".ppu"];
 
-function collectFiles(dir): Array<string> {
+function collectFiles(dir: string): Array<string> {
   const result: Array<string> = [];
 
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -22,5 +24,14 @@ function collectFiles(dir): Array<string> {
 const files = collectFiles(import.meta.dir);
 
 if (files.length == 0)
-  console.log("No files needed to be cleaned");
-// TODO: Handle deletion
+  console.log(styleText("white", "No files needed to be cleaned"))
+else {
+  console.log(styleText("yellow", `Found ${ files.length } to delete`));
+
+  for (const f of files) {
+    console.log("  " + f);
+    rmSync(f)
+  }
+
+  console.log(styleText("cyan", `Deleted ${files.length} file(s)`))
+}
