@@ -11,6 +11,8 @@ const outputFile = "game.exe";
 
 const scriptDir = import.meta.dir;
 
+const optimiseExe = true;
+
 if (!existsSync(path.join(scriptDir, resfile))) {
   Bun.spawnSync(
     ["bun", "run", "make_res.ts"],
@@ -31,6 +33,7 @@ const result = Bun.spawnSync(
     "-Twin64",
     ...unitPaths.map(path => "-Fu" + path),
     `-o${outputFile}`,
+    optimiseExe ? "-O3" : "",
     primaryUnit
   ],
   { cwd: scriptDir, stdout: "pipe", stderr: "pipe" }
