@@ -40,3 +40,7 @@ lib/
 
 # Bun JS stuff
 node_modules/
+
+experimental/nuclear_zone/engine/*.pas
+experimental/nuclear_zone/shared/**/*.pas
+experimental/nuclear_zone/shared/**/*.inc
