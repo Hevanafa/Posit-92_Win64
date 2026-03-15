@@ -1,11 +1,10 @@
 import Bun from "bun";
 import { existsSync } from "node:fs";
 import path from "node:path";
-import { stderr, stdout } from "node:process";
 import { styleText } from "node:util";
 
 const compilerPath = "E:\\fpc-wasm\\fpc\\bin\\x86_64-win64\\fpc.exe";
-const primaryUnit = ".\\game.pas";
+const primaryUnit = existsSync(".\\game.lpr") ? ".\\game.lpr" : ".\\game.pas";
 const resfile = "game.res";
 const outputFile = "game.exe";
 
@@ -20,6 +19,7 @@ if (!existsSync(path.join(scriptDir, resfile))) {
 }
 
 const unitPaths = [
+  "engine",
   path.join("shared", "units"),
   path.join("shared", "sdl2"),
   "shared"
@@ -30,7 +30,8 @@ const result = Bun.spawnSync(
   { cwd: scriptDir, stdout: "pipe", stderr: "pipe" }
 );
 
-// TODO: Handle stdout and stderr
+const stdout = new TextDecoder().decode(result.stdout).trim();
+const stderr = new TextDecoder().decode(result.stderr).trim();
 
 console.log(styleText("cyan", "(STDOUT)"));
 console.log(stdout == "" ? styleText("gray", "(No data)") : stdout);
