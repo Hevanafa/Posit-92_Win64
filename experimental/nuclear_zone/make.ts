@@ -5,17 +5,17 @@ import { styleText } from "node:util";
 
 const compilerPath = "E:\\fpc-wasm\\fpc\\bin\\x86_64-win64\\fpc.exe";
 const primaryUnit = existsSync(".\\game.lpr") ? ".\\game.lpr" : ".\\game.pas";
+
 const resfile = "game.res";
 const outputFile = "game.exe";
 
 const scriptDir = import.meta.dir;
 
 if (!existsSync(path.join(scriptDir, resfile))) {
-  // TODO: Write make_res.ts
-  // Bun.spawnSync(
-  //   ["bun", "run", "make_res.ts"],
-  //   { cwd: scriptDir, stdio: ["inherit", "inherit", "inherit"] }
-  // )
+  Bun.spawnSync(
+    ["bun", "run", "make_res.ts"],
+    { cwd: scriptDir, stdio: ["inherit", "inherit", "inherit"] }
+  )
 }
 
 const unitPaths = [
@@ -26,7 +26,13 @@ const unitPaths = [
 ];
 
 const result = Bun.spawnSync(
-  [compilerPath, "-Twin64", ...unitPaths.map(path => "-Fu" + path), `-o${outputFile}`, primaryUnit],
+  [
+    compilerPath,
+    "-Twin64",
+    ...unitPaths.map(path => "-Fu" + path),
+    `-o${outputFile}`,
+    primaryUnit
+  ],
   { cwd: scriptDir, stdout: "pipe", stderr: "pipe" }
 );
 
