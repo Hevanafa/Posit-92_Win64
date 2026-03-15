@@ -1,5 +1,7 @@
 program Game;
 
+{APPTYPE GUI}  { Use this to hide the console window }
+
 {$Mode ObjFPC}
 {$H+}  { Use AnsiStrings }
 {$J-}  { Don't allow assignments to typed consts }
