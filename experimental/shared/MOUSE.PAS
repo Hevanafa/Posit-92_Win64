@@ -7,7 +7,8 @@
 
 unit Mouse;
 
-{$Mode TP}
+{$Mode ObjFPC}
+{$H+}{$J-}
 
 interface
 
@@ -18,7 +19,7 @@ const
   MouseButtonBoth = 3;
 
 var
-  mouseX, mouseY, mouseButton: integer;
+  mouseX, mouseY, mouseButton: smallint;
 
 {$ifdef WASM}
 { Hide system cursor }
@@ -32,9 +33,9 @@ procedure updateMouse;
 implementation
 
 {$ifdef WASM}
-function getMouseX: integer; external 'env' name 'getMouseX';
-function getMouseY: integer; external 'env' name 'getMouseY';
-function getMouseButton: integer; external 'env' name 'getMouseButton';
+function getMouseX: smallint; external 'env' name 'getMouseX';
+function getMouseY: smallint; external 'env' name 'getMouseY';
+function getMouseButton: smallint; external 'env' name 'getMouseButton';
 
 procedure updateMouse;
 begin

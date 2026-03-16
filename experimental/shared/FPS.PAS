@@ -7,15 +7,15 @@
 
 unit FPS;
 
-{$Mode TP}
+{$Mode ObjFPC}
+{$H+}{$J-}
 
 interface
 
 procedure initFPSCounter;
 procedure incrementFPS;
-{ procedure drawFPS; }
 
-function getLastFPS: integer;
+function getLastFPS: smallint;
 
 
 implementation
@@ -24,7 +24,7 @@ uses
   Conv, Timing, VGA;
 
 var
-  actualFPS, lastFPS: integer;
+  actualFPS, lastFPS: smallint;
   lastFPSTime: double; { in seconds }
 
 procedure initFPSCounter;
@@ -44,7 +44,7 @@ begin
   end;
 end;
 
-function getLastFPS: integer;
+function getLastFPS: smallint;
 begin
   getLastFPS := lastFPS
 end;

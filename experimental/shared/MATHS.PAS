@@ -5,8 +5,8 @@
 
 unit Maths;
 
-{$Mode TP}
-{$B-}
+{$Mode ObjFPC}
+{$H+}{$J-}
 
 interface
 
@@ -16,9 +16,9 @@ function max(const a, b: double): double;
 function deg2rad(const deg: double): double;
 function rad2deg(const rad: double): double;
 function i32power(const i, exp: longint): longint;
-function f32power(const i: double; exp: integer): double;
-function floor(const value: double): integer;
-function ceil(const value: double): integer;
+function f32power(const i: double; exp: longint): double;
+function floor(const value: double): longint;
+function ceil(const value: double): longint;
 function ArcTan2(const y, x: double): double;
 
 
@@ -62,34 +62,31 @@ end;
 
 function i32power(const i, exp: longint): longint;
 var
-  a, result: longint;
+  a: longint;
 begin
   if exp < 0 then panicHalt('i32power: Negative exp isn''t supported!');
   if exp = 0 then begin i32power := 1; exit end;
   if exp = 1 then begin i32power := i; exit end;
 
-  result := i;
+  i32power := i;
   for a := 2 to exp do
-    result := result * i;
-  i32power := result
+    i32power := i32power * i;
 end;
 
-function f32power(const i: double; exp: integer): double;
+function f32power(const i: double; exp: longint): double;
 var
-  a: integer;
-  result: double;
+  a: longint;
 begin
   if exp < 0 then panicHalt('f32power: Negative exp isn''t supported!');
   if exp = 0 then begin f32power := 1; exit end;
   if exp = 1 then begin f32power := i; exit end;
 
-  result := i;
+  f32power := i;
   for a := 2 to exp do
-    result := result * i;
-  f32power := result
+    f32power := f32power * i;
 end;
 
-function floor(const value: double): integer;
+function floor(const value: double): longint;
 begin
   if (value >= 0) or (frac(value) = 0) then
     floor := trunc(value)
@@ -97,7 +94,7 @@ begin
     floor := trunc(value) - 1;
 end;
 
-function ceil(const value: double): integer;
+function ceil(const value: double): longint;
 begin
   if frac(value) = 0 then
     ceil := trunc(value)

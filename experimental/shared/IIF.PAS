@@ -1,8 +1,11 @@
 unit IIF;
 
+{$Mode ObjFPC}
+{$H-}{$J-}
+
 interface
 
-function i16Iif(const expr: boolean; const truePart, falsePart: integer): integer;
+function i16Iif(const expr: boolean; const truePart, falsePart: smallint): smallint;
 function u16Iif(const expr: boolean; const truePart, falsePart: word): word;
 function i32Iif(const expr: boolean; const truePart, falsePart: longint): longint;
 function u32Iif(const expr: boolean; const truePart, falsePart: longword): longword;
@@ -11,7 +14,7 @@ function stringIif(const expr: boolean; const truePart, falsePart: string): stri
 
 implementation
 
-function i16Iif(const expr: boolean; const truePart, falsePart: integer): integer;
+function i16Iif(const expr: boolean; const truePart, falsePart: smallint): smallint;
 begin
   if expr then
     i16Iif := truePart

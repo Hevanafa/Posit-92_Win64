@@ -7,7 +7,8 @@
 
 unit UStrings;
 
-{$Mode TP}
+{$Mode ObjFPC}
+{$H-}{$J-}
 
 interface
 
@@ -21,8 +22,8 @@ function trimEnd(const txt: string): string;
 function trim(const txt: string): string;
 function lower(const txt: string): string;
 function upper(const txt: string): string;
-function padStart(text: string; const targetLength: integer; const padString: string): string;
-function padEnd(text: string; const targetLength: integer; const padString: string): string;
+function padStart(text: string; const targetLength: word; const padString: string): string;
+function padEnd(text: string; const targetLength: word; const padString: string): string;
 
 
 implementation
@@ -30,10 +31,9 @@ implementation
 { returns the number of elements }
 function split(text, delim: string; var output: array of string): word;
 var
-  i, p, startPos: integer;
-  delimLen: integer;
+  i, p, startPos: word;
+  delimLen: word;
   token: string;
-  result: word;
 begin
   result := 0;
   i := 1;
@@ -80,8 +80,7 @@ end;
 
 function replaceAll(const source, searchStr, replaceStr: string): string;
 var
-  result: string;
-  i, foundPos, searchLen: integer;
+  i, foundPos, searchLen: word;
 begin
   result := '';
   i := 1;
@@ -104,10 +103,10 @@ end;
 
 function trimStart(const txt: string): string;
 var
-  a, len: integer;
+  a, len: smallint;
 begin
   len := length(txt);
-  a:=1;
+  a := 1;
   while (a <= len) and (txt[a] = ' ') do
     inc(a);
   trimStart := copy(txt, a, len - a + 1)
@@ -115,7 +114,7 @@ end;
 
 function trimEnd(const txt: string): string;
 var
-  a: integer;
+  a: smallint;
 begin
   a := length(txt);
   while (a>0) and (txt[a] = ' ') do
@@ -131,8 +130,7 @@ end;
 { Similar to Lua & Python's str.lower() }
 function lower(const txt: string): string;
 var
-  a: integer;
-  result: string;
+  a: word;
 begin
   result := txt;
   for a:=1 to length(result) do
@@ -144,8 +142,7 @@ end;
 { Similar to Lua & Python's str.lower() }
 function upper(const txt: string): string;
 var
-  a: integer;
-  result: string;
+  a: word;
 begin
   result := txt;
   for a:=1 to length(result) do
@@ -154,7 +151,7 @@ begin
   upper := result
 end;
 
-function padStart(text: string; const targetLength: integer; const padString: string): string;
+function padStart(text: string; const targetLength: word; const padString: string): string;
 begin
   while length(text) < targetLength do
     text := padString + text;
@@ -162,7 +159,7 @@ begin
   padStart := text
 end;
 
-function padEnd(text: string; const targetLength: integer; const padString: string): string;
+function padEnd(text: string; const targetLength: word; const padString: string): string;
 begin
   while length(text) < targetLength do
     text := text + padString;

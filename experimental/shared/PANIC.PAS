@@ -7,12 +7,13 @@
 
 unit Panic;
 
-{$Mode TP}
+{$Mode ObjFPC}
+{$H-}{$J-}
 
 interface
 
 {$ifdef WASM}
-procedure jsPanicHalt(const textPtr: PByte; const textLen: integer); external 'env' name 'jsPanicHalt';
+procedure jsPanicHalt(const textPtr: PByte; const textLen: word); external 'env' name 'jsPanicHalt';
 {$endif}
 
 procedure panicHalt(const msg: string);
