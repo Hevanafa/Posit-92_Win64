@@ -1,6 +1,7 @@
 unit Keyboard;
 
-{$Mode TP}
+{$Mode ObjFPC}
+{$H+}{$J-}
 
 interface
 
@@ -280,81 +281,124 @@ function SDLToDOSScancode(const scancode: integer): integer;
 implementation
 
 function SDLToDOSScancode(const scancode: integer): integer;
-var
-  result: integer;
 begin
-  result := 0;
+  SDLToDOSScancode := 0;
 
   if (scancode in [SDL_SCANCODE_A..SDL_SCANCODE_Z]) then begin
-    result := scancode - SDL_SCANCODE_A + SC_A;
-    SDLToDOSScancode := result;
+    SDLToDOSScancode := scancode - SDL_SCANCODE_A + SC_A;
     exit
   end;
 
   if (scancode in [SDL_SCANCODE_1..SDL_SCANCODE_0]) then begin
-    result := scancode - (SDL_SCANCODE_1 - SC_1);
-    SDLToDOSScancode := result;
+    SDLToDOSScancode := scancode - (SDL_SCANCODE_1 - SC_1);
     exit
   end;
 
   { TODO: Numpad keys }
 
   case scancode of
-    SDL_SCANCODE_MINUS: result := SC_MINUS;
-    SDL_SCANCODE_EQUALS: result := SC_EQUALS;
-    SDL_SCANCODE_LEFTBRACKET: result := SC_LEFT_BRACKET;
-    SDL_SCANCODE_RIGHTBRACKET: result := SC_RIGHT_BRACKET;
-    SDL_SCANCODE_BACKSLASH: result := SC_BACKSLASH;
-    SDL_SCANCODE_SEMICOLON: result := SC_SEMICOLON;
-    SDL_SCANCODE_APOSTROPHE: result := SC_APOSTROPHE;
-    SDL_SCANCODE_GRAVE: result := SC_BACKQUOTE;
-    SDL_SCANCODE_COMMA: result := SC_COMMA;
-    SDL_SCANCODE_PERIOD: result := SC_PERIOD;
-    SDL_SCANCODE_SLASH: result := SC_SLASH;
+    SDL_SCANCODE_MINUS:
+      SDLToDOSScancode := SC_MINUS;
+    SDL_SCANCODE_EQUALS:
+      SDLToDOSScancode := SC_EQUALS;
+    SDL_SCANCODE_LEFTBRACKET:
+      SDLToDOSScancode := SC_LEFT_BRACKET;
+    SDL_SCANCODE_RIGHTBRACKET:
+      SDLToDOSScancode := SC_RIGHT_BRACKET;
 
-    SDL_SCANCODE_TAB: result := SC_TAB;
-    SDL_SCANCODE_BACKSPACE: result := SC_BACKSPACE;
-    SDL_SCANCODE_RETURN: result := SC_ENTER;
-    SDL_SCANCODE_ESCAPE: result := SC_ESCAPE;
-    SDL_SCANCODE_SPACE: result := SC_SPACE;
+    SDL_SCANCODE_BACKSLASH:
+      SDLToDOSScancode := SC_BACKSLASH;
+    SDL_SCANCODE_SEMICOLON:
+      SDLToDOSScancode := SC_SEMICOLON;
+    SDL_SCANCODE_APOSTROPHE:
+      SDLToDOSScancode := SC_APOSTROPHE;
+    SDL_SCANCODE_GRAVE:
+      SDLToDOSScancode := SC_BACKQUOTE;
 
-    SDL_SCANCODE_LSHIFT: result := SC_LEFT_SHIFT;
-    SDL_SCANCODE_RSHIFT: result := SC_RIGHT_SHIFT;
-    SDL_SCANCODE_LCTRL: result := SC_LEFT_CONTROL;
-    SDL_SCANCODE_LALT: result := SC_LEFT_ALT;
+    SDL_SCANCODE_COMMA:
+      SDLToDOSScancode := SC_COMMA;
+    SDL_SCANCODE_PERIOD:
+      SDLToDOSScancode := SC_PERIOD;
+    SDL_SCANCODE_SLASH:
+      SDLToDOSScancode := SC_SLASH;
+    SDL_SCANCODE_TAB:
+      SDLToDOSScancode := SC_TAB;
 
-    SDL_SCANCODE_F1: result := SC_F1;
-    SDL_SCANCODE_F2: result := SC_F2;
-    SDL_SCANCODE_F3: result := SC_F3;
-    SDL_SCANCODE_F4: result := SC_F4;
-    SDL_SCANCODE_F5: result := SC_F5;
-    SDL_SCANCODE_F6: result := SC_F6;
-    SDL_SCANCODE_F7: result := SC_F7;
-    SDL_SCANCODE_F8: result := SC_F8;
-    SDL_SCANCODE_F9: result := SC_F9;
-    SDL_SCANCODE_F10: result := SC_F10;
-    SDL_SCANCODE_F11: result := SC_F11;
-    SDL_SCANCODE_F12: result := SC_F12;
+    SDL_SCANCODE_BACKSPACE:
+      SDLToDOSScancode := SC_BACKSPACE;
+    SDL_SCANCODE_RETURN:
+      SDLToDOSScancode := SC_ENTER;
+    SDL_SCANCODE_ESCAPE:
+      SDLToDOSScancode := SC_ESCAPE;
+    SDL_SCANCODE_SPACE:
+      SDLToDOSScancode := SC_SPACE;
 
-    SDL_SCANCODE_CAPSLOCK: result := SC_CAPSLOCK;
-    SDL_SCANCODE_SCROLLLOCK: result := SC_SCROLLLOCK;
-    SDL_SCANCODE_NUMLOCKCLEAR: result := SC_NUMLOCK;
+    SDL_SCANCODE_LSHIFT:
+      SDLToDOSScancode := SC_LEFT_SHIFT;
+    SDL_SCANCODE_RSHIFT:
+      SDLToDOSScancode := SC_RIGHT_SHIFT;
+    SDL_SCANCODE_LCTRL:
+      SDLToDOSScancode := SC_LEFT_CONTROL;
+    SDL_SCANCODE_LALT:
+      SDLToDOSScancode := SC_LEFT_ALT;
 
-    SDL_SCANCODE_INSERT: result := SC_INSERT;
-    SDL_SCANCODE_DELETE: result := SC_DELETE;
-    SDL_SCANCODE_HOME: result := SC_HOME;
-    SDL_SCANCODE_END: result := SC_END;
-    SDL_SCANCODE_PAGEUP: result := SC_PAGEUP;
-    SDL_SCANCODE_PAGEDOWN: result := SC_PAGEDOWN;
-    SDL_SCANCODE_UP: result := SC_UP;
-    SDL_SCANCODE_DOWN: result := SC_DOWN;
-    SDL_SCANCODE_LEFT: result := SC_LEFT;
-    SDL_SCANCODE_RIGHT: result := SC_RIGHT;
+    SDL_SCANCODE_F1:
+      SDLToDOSScancode := SC_F1;
+    SDL_SCANCODE_F2:
+      SDLToDOSScancode := SC_F2;
+    SDL_SCANCODE_F3:
+      SDLToDOSScancode := SC_F3;
+    SDL_SCANCODE_F4:
+      SDLToDOSScancode := SC_F4;
+    SDL_SCANCODE_F5:
+      SDLToDOSScancode := SC_F5;
+    SDL_SCANCODE_F6:
+      SDLToDOSScancode := SC_F6;
+    SDL_SCANCODE_F7:
+      SDLToDOSScancode := SC_F7;
+    SDL_SCANCODE_F8:
+      SDLToDOSScancode := SC_F8;
+    SDL_SCANCODE_F9:
+      SDLToDOSScancode := SC_F9;
+    SDL_SCANCODE_F10:
+      SDLToDOSScancode := SC_F10;
+    SDL_SCANCODE_F11:
+      SDLToDOSScancode := SC_F11;
+    SDL_SCANCODE_F12:
+      SDLToDOSScancode := SC_F12;
 
-    else result := 0;
+    SDL_SCANCODE_CAPSLOCK:
+      SDLToDOSScancode := SC_CAPSLOCK;
+    SDL_SCANCODE_SCROLLLOCK:
+      SDLToDOSScancode := SC_SCROLLLOCK;
+    SDL_SCANCODE_NUMLOCKCLEAR:
+      SDLToDOSScancode := SC_NUMLOCK;
+
+    SDL_SCANCODE_INSERT:
+      SDLToDOSScancode := SC_INSERT;
+    SDL_SCANCODE_DELETE:
+      SDLToDOSScancode := SC_DELETE;
+    SDL_SCANCODE_HOME:
+      SDLToDOSScancode := SC_HOME;
+    SDL_SCANCODE_END:
+      SDLToDOSScancode := SC_END;
+
+    SDL_SCANCODE_PAGEUP:
+      SDLToDOSScancode := SC_PAGEUP;
+    SDL_SCANCODE_PAGEDOWN:
+      SDLToDOSScancode := SC_PAGEDOWN;
+      
+    SDL_SCANCODE_UP:
+      SDLToDOSScancode := SC_UP;
+    SDL_SCANCODE_DOWN:
+      SDLToDOSScancode := SC_DOWN;
+    SDL_SCANCODE_LEFT:
+      SDLToDOSScancode := SC_LEFT;
+    SDL_SCANCODE_RIGHT:
+      SDLToDOSScancode := SC_RIGHT;
+
+    else SDLToDOSScancode := 0;
   end;
-
-  SDLToDOSScancode := result;
 end;
 
 end.

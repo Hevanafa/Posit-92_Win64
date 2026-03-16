@@ -1,6 +1,7 @@
 unit SDL2Wrapper;
 
-{$Mode TP}
+{$Mode ObjFPC}
+{$H+}{$J-}
 
 interface
 
