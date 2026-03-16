@@ -171,6 +171,7 @@ var
 begin
   { writeLog('loadImage ' + filename); }
 
+  fillchar(strBuffer, length(strBuffer), #0);
   strpcopy(strBuffer, filename);
   surface := IMG_Load(strBuffer);
 

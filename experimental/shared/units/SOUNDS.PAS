@@ -95,6 +95,7 @@ begin
     exit
   end;
 
+  fillchar(strBuffer, length(strBuffer), #0);
   strpcopy(strBuffer, filename);
   chunk := Mix_LoadWAV(strBuffer);
 

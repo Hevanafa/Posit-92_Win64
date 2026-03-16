@@ -5,7 +5,7 @@ program Game;
 {$J-}
 
 uses
-  SDL2Wrapper, Posit92, Sounds,
+  SDL2, Posit92, Sounds,
   Keyboard, Mouse,
   Logger, ImgRef, ImgRefFast,
   Timing, VGA,
