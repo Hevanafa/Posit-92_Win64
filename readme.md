@@ -2,6 +2,8 @@
 
 Posit-92 native Windows port based on the [WebAssembly](https://github.com/Hevanafa/Posit-92_Wasm) version
 
+The features and version number strictly follow the WebAssembly version of the engine
+
 ## Boilerplate
 
 `DEMOS\hello_simple` is the boilerplate that is always up-to-date with the experimental features
