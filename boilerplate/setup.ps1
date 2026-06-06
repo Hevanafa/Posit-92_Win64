@@ -19,7 +19,14 @@ copy-item "$source\DLL\*.dll" ".\"
 copy-item "$source\shared\*.pas" ".\shared\"
 copy-item "$source\UNITS\*.pas" ".\UNITS\"
 
-$scripts = @("build_run", "clean", "make", "make_res", "run")
+# Copy Bun scripts
+$scripts = @("clean", "make", "make_res", "dist")
+foreach ($script in $scripts) {
+  copy-item "$source\scripts\$script.ts" ".\"
+}
+
+# Copy PowerShell scripts
+$scripts = @("run", "build_run");
 foreach ($script in $scripts) {
   copy-item "$source\scripts\$script.ps1" ".\"
 }
