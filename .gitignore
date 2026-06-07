@@ -14,14 +14,16 @@ dist/
 LOG.TXT
 
 # Boilerplate
+!boilerplate/setup.ps1
+
 boilerplate/shared/
 boilerplate/UNITS/
 boilerplate/*.ps1
-!boilerplate/setup.ps1
 boilerplate/posit92.pas
 boilerplate/posit-92.ico
 boilerplate/*.dll
 boilerplate/*.rc
+boilerplate/*.ts
 
 # Demo projects
 DEMOS/*/*.dll
