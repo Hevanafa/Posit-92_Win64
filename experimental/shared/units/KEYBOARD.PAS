@@ -285,7 +285,36 @@ begin
   SDLToDOSScancode := 0;
 
   if (scancode in [SDL_SCANCODE_A..SDL_SCANCODE_Z]) then begin
-    SDLToDOSScancode := scancode - SDL_SCANCODE_A + SC_A;
+    case scancode of
+      SDL_SCANCODE_Q: SDLToDOSScancode := SC_Q;
+      SDL_SCANCODE_W: SDLToDOSScancode := SC_W;
+      SDL_SCANCODE_E: SDLToDOSScancode := SC_E;
+      SDL_SCANCODE_R: SDLToDOSScancode := SC_R;
+      SDL_SCANCODE_T: SDLToDOSScancode := SC_T;
+      SDL_SCANCODE_Y: SDLToDOSScancode := SC_Y;
+      SDL_SCANCODE_U: SDLToDOSScancode := SC_U;
+      SDL_SCANCODE_I: SDLToDOSScancode := SC_I;
+      SDL_SCANCODE_O: SDLToDOSScancode := SC_O;
+      SDL_SCANCODE_P: SDLToDOSScancode := SC_P;
+
+      SDL_SCANCODE_A: SDLToDOSScancode := SC_A;
+      SDL_SCANCODE_S: SDLToDOSScancode := SC_S;
+      SDL_SCANCODE_D: SDLToDOSScancode := SC_D;
+      SDL_SCANCODE_F: SDLToDOSScancode := SC_F;
+      SDL_SCANCODE_G: SDLToDOSScancode := SC_G;
+      SDL_SCANCODE_H: SDLToDOSScancode := SC_H;
+      SDL_SCANCODE_J: SDLToDOSScancode := SC_J;
+      SDL_SCANCODE_K: SDLToDOSScancode := SC_K;
+      SDL_SCANCODE_L: SDLToDOSScancode := SC_L;
+
+      SDL_SCANCODE_Z: SDLToDOSScancode := SC_Z;
+      SDL_SCANCODE_X: SDLToDOSScancode := SC_X;
+      SDL_SCANCODE_C: SDLToDOSScancode := SC_C;
+      SDL_SCANCODE_V: SDLToDOSScancode := SC_V;
+      SDL_SCANCODE_B: SDLToDOSScancode := SC_B;
+      SDL_SCANCODE_N: SDLToDOSScancode := SC_N;
+      SDL_SCANCODE_M: SDLToDOSScancode := SC_M;
+    end;
     exit
   end;
 
