@@ -209,7 +209,9 @@ begin
   printDefault(s, (vgaWidth - w) div 2, 130);
 
   drawMouse;
-  vgaFlush
+
+  vgaUpload;
+  vgaPresent
 end;
 
 

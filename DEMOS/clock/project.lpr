@@ -168,7 +168,8 @@ begin
   drawFPS;
   drawMouse;
 
-  vgaFlush
+  vgaUpload;
+  vgaPresent
 end;
 
 

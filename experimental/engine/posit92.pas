@@ -30,6 +30,7 @@ function isKeyDown(const scancode: integer): boolean;
 function loadImage(const filename: string): longint;
 procedure loadBMFont(const filename: string; var font: TBMFont; var fontGlyphs: array of TBMFontGlyph);
 
+{ Uploads the pixel data to the GPU }
 procedure vgaUpload;
 procedure vgaPresent;
 
@@ -326,6 +327,5 @@ procedure vgaPresent;
 begin
   SDL_RenderPresent(renderer)
 end;
-
 
 end.
