@@ -66,8 +66,8 @@ sub handle_lpi {
 
   say "Configuring $project_file...";
 
-  open($fh, "<:", $project_file)
-    or warn "Couldn't open $project_file!";
+  open($fh, "<", $project_file)
+    or die "Couldn't open $project_file: $!";
 
   my @lines = <$fh>;
   close $fh;
@@ -80,7 +80,7 @@ sub handle_lpi {
     next if $line !~ /otherunitfiles/i;
 
     # say "-- Before --";
-    
+
     my ($dirs) = $line =~ /"(.*)"/;
     # say $dirs;
 
