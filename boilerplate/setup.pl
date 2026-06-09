@@ -8,12 +8,12 @@ use File::Copy qw(copy);
 use File::Find qw(find);
 use File::Path qw(make_path);
 
-say cwd;
+# Print current working directory
+# say cwd;
 
 my $src = abs_path("../DEMOS/hello_simple");
+my $dll_path = abs_path("../DLL/x64");
 my $dest = abs_path(".");
-
-# Copy from the demo folder
 
 sub copy_demo {
   # Quirk: `find` calls `chdir` into each directory as it "walks",
@@ -45,6 +45,13 @@ sub copy_demo {
   }, $src);
 }
 
+# Entry point
+
 copy_demo;
+
+for my $f (glob($dll_path."/*.dll")) {
+  # say "$f --> $dest/$f";
+  copy($f, $dest) or warn "Failed: $!"
+}
 
 print "Setup complete!"
