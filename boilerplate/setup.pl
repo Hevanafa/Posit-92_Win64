@@ -10,6 +10,7 @@ use Cwd qw(cwd abs_path);
 use File::Copy qw(copy);
 use File::Find qw(find);
 use File::Path qw(make_path);
+use File::Basename qw(dirname);
 
 # Print current working directory
 # say cwd;
@@ -33,18 +34,14 @@ sub copy_demo {
 
     # say "Relative path: ".$relative;
 
-    my @chunks = (split /\//, "$dest$relative");
-    @chunks = @chunks[0..$#chunks - 1];
-    my $target_dir = (join "/", @chunks);
+    my $target_dir = dirname("$dest$relative");
 
-    # say "Target dir  : ".$target_dir;
+    say "Target dir  : ".$target_dir;
 
     make_path($target_dir);
 
     copy($src_file, $target_dir."/".$filename)
       or warn "Failed to copy $File::Find::name $!";
-
-    # say "";
   }, $src);
 }
 
@@ -97,6 +94,17 @@ sub handle_lpi {
 }
 
 
+sub handle_shared {
+  find(sub {
+    return unless -f;
+
+    
+
+
+  }, abs_path("../experimental/shared"))
+}
+
+
 sub init_units {
   mkdir "units";
 
@@ -108,7 +116,7 @@ sub init_units {
 
 # Entry point
 
-# copy_demo;
+copy_demo;
 
 # for my $f (glob($dll_path."/*.dll")) {
 #   # say "$f --> $dest/$f";
@@ -118,14 +126,14 @@ sub init_units {
 
 # Copy unit files
 
-# mkdir "engine" if !(-d "engine");
+# mkdir "engine" unless -d "engine";
 
 # copy(
 #   abs_path("../experimental/engine/posit92.pas"),
 #   abs_path("engine"));
 
-
 # handle_lpi;
-init_units;
+# handle_shared;
+# init_units;
 
 print "Setup complete!"
