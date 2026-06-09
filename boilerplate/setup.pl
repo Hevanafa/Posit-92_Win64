@@ -17,6 +17,7 @@ use File::Basename qw(dirname);
 
 my $src = abs_path("../DEMOS/hello_simple");
 my $dll_path = abs_path("../DLL/x64");
+my $scripts_path = abs_path("../scripts");
 my $shared_dir = abs_path("../experimental/shared");
 
 my $dest = abs_path(".");
@@ -123,28 +124,35 @@ sub init_units {
   close $fh;
 }
 
-
-# Entry point
-
-copy_demo;
-
-# Copy SDL2 DLL files
-for my $f (glob($dll_path."/*.dll")) {
-  # say "$f --> $dest/$f";
-  copy($f, $dest) or warn "Failed: $!"
+sub copy_scripts {
+  for my $f (glob($scripts_path."/*.ts")) {
+    copy($f, $dest) or warn "Failed: $!"
+  }
 }
 
 
+# Entry point
+
+# copy_demo;
+
+# Copy SDL2 DLL files
+# for my $f (glob($dll_path."/*.dll")) {
+#   # say "$f --> $dest/$f";
+#   copy($f, $dest) or warn "Failed: $!"
+# }
+
+
 # Copy unit files
-mkdir "engine" unless -d "engine";
+# mkdir "engine" unless -d "engine";
 
-copy(
-  abs_path("../experimental/engine/posit92.pas"),
-  abs_path("engine"));
+# copy(
+#   abs_path("../experimental/engine/posit92.pas"),
+#   abs_path("engine"));
 
-handle_shared;
+# handle_shared;
 
-handle_lpi;
-init_units;
+# handle_lpi;
+# init_units;
+copy_scripts;
 
 print "Setup complete!"
