@@ -76,7 +76,6 @@ begin
   SDL_SetWindowTitle(window, @value[1])
 end;
 
-
 procedure updateSDL;
 var
   event: TSDL_Event;
