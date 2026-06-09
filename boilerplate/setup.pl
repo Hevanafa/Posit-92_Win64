@@ -15,9 +15,9 @@ use File::Basename qw(dirname);
 # Print current working directory
 # say cwd;
 
-my $src = abs_path("../DEMOS/hello_simple");
-my $dll_path = abs_path("../DLL/x64");
-my $scripts_path = abs_path("../scripts");
+my $demo_dir = abs_path("../DEMOS/hello_simple");
+my $dll_dir = abs_path("../DLL/x64");
+my $scripts_dir = abs_path("../scripts");
 my $shared_dir = abs_path("../experimental/shared");
 
 my $dest = abs_path(".");
@@ -33,7 +33,7 @@ sub copy_demo {
     my $src_file = $File::Find::name;
     # my $dirname = $File::Find::dir;
 
-    (my $relative = $src_file) =~ s/^\Q$src\E//;
+    (my $relative = $src_file) =~ s/^\Q$demo_dir\E//;
     my $target_dir = dirname("$dest$relative");
 
     # say "Relative   : ".$relative;
@@ -43,12 +43,12 @@ sub copy_demo {
 
     copy($src_file, $target_dir."/".$filename)
       or warn "Failed to copy $File::Find::name $!";
-  }, $src);
+  }, $demo_dir);
 }
 
 # Copy SDL2 DLL files
 sub copy_sdl2 {
-  for my $f (glob($dll_path."/*.dll")) {
+  for my $f (glob($dll_dir."/*.dll")) {
     # say "$f --> $dest/$f";
     copy($f, $dest) or warn "Failed: $!"
   }
@@ -126,7 +126,7 @@ sub copy_shared {
 
 sub init_units {
   say "Initialising units folder";
-  
+
   mkdir "units";
 
   open(my $fh, ">", "units\\readme.txt");
@@ -135,7 +135,7 @@ sub init_units {
 }
 
 sub copy_scripts {
-  for my $f (glob($scripts_path."/*.ts")) {
+  for my $f (glob($scripts_dir."/*.ts")) {
     copy($f, $dest) or warn "Failed: $!"
   }
 }
@@ -143,20 +143,20 @@ sub copy_scripts {
 
 # Entry point
 
-# copy_demo;
+copy_demo;
 copy_sdl2;
 
 # Copy unit files
-# mkdir "engine" unless -d "engine";
+mkdir "engine" unless -d "engine";
 
-# copy(
-#   abs_path("../experimental/engine/posit92.pas"),
-#   abs_path("engine"));
+copy(
+  abs_path("../experimental/engine/posit92.pas"),
+  abs_path("engine"));
 
-# copy_shared;
+copy_shared;
 
-# handle_lpi;
-# init_units;
+handle_lpi;
+init_units;
 copy_scripts;
 
 print "Setup complete!"
