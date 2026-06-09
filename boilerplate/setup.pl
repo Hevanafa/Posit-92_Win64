@@ -68,8 +68,13 @@ sub copy_demo {
 
 # Handle .lpi file
 
-open(my $fh, "<:", "project.lpi")
-  or warn "Couldn't open project.lpi!";
+my $project_file = "project.lpi";
+my $fh;
+
+say "Processing $project_file";
+
+open($fh, "<:", $project_file)
+  or warn "Couldn't open $project_file!";
 
 my @lines = <$fh>;
 close $fh;
@@ -81,6 +86,7 @@ for (0..$#lines) {
 
   next if $line !~ /otherunitfiles/i;
 
+  say "-- Before --";
   my ($dirs) = $line =~ /"(.*)"/;
   say $dirs;
 
@@ -91,13 +97,20 @@ for (0..$#lines) {
     $_ =~ s/^\.\.\\\.\.\\experimental\\//r;
   } @dirs;
 
-  say join " -- ", @dirs;
+  say "-- After replacement --";
 
-  my ($spaces) = $line =~ /^(\s+)/;
-  $spaces = length $spaces;
+  my $replacement = join ";", @dirs;
+  say $replacement;
 
-  say $spaces
+  $line =~ s/"(.*)"/"$replacement"/;
+  say $line;
+
+  $lines[$_] = $line;
+
+  say ""
 }
 
+open($fh, ">", $project_file);
+say $fh $_ for @lines;
 
 print "Setup complete!"
