@@ -97,6 +97,14 @@ sub handle_lpi {
 }
 
 
+sub init_units {
+  mkdir "units";
+
+  open(my $fh, ">", "units\\readme.txt");
+  print $fh "Add your user-defined unit files here";
+  close $fh;
+}
+
 
 # Entry point
 
@@ -117,6 +125,7 @@ sub handle_lpi {
 #   abs_path("engine"));
 
 
-handle_lpi;
+# handle_lpi;
+init_units;
 
 print "Setup complete!"
