@@ -59,10 +59,36 @@ sub copy_demo {
 
 # Copy unit files
 
-mkdir "engine" if !(-d "engine");
+# mkdir "engine" if !(-d "engine");
 
-copy(
-  abs_path("../experimental/engine/posit92.pas"),
-  abs_path("engine"));
+# copy(
+#   abs_path("../experimental/engine/posit92.pas"),
+#   abs_path("engine"));
+
+
+# Handle .lpi file
+
+open(my $fh, "<:", "project.lpi")
+  or warn "Couldn't open project.lpi!";
+
+my @lines = <$fh>;
+close $fh;
+
+chomp(@lines);
+
+for my $line (@lines) {
+  next if $line !~ /otherunitfiles/i;
+
+  my ($dirs) = $line =~ /"(.*)"/;
+  say $dirs;
+
+  my @dirs = $dirs =~ /[^;]+/g;
+  @dirs = map {
+    ($_ =~ /[^\\]+/g)[-1]
+  } @dirs;
+
+  say join " -- ", @dirs
+}
+
 
 print "Setup complete!"
