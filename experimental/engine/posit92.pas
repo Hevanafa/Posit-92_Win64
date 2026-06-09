@@ -11,7 +11,8 @@ unit Posit92;
 interface
 
 uses
-  SDL2Wrapper, BMFont;
+  SDL2, sdl2_image,
+  { SDL2Wrapper, } BMFont;
 
 var
   done: boolean;
@@ -66,7 +67,7 @@ begin
 
   vgaTexture := SDL_CreateTexture(
     renderer,
-    SDL_PIXELFORMAT_BGRA32, SDL_TEXTUREACCESS_STREAMING,
+    SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING,
     vgaWidth, vgaHeight);
 end;
 
@@ -85,8 +86,11 @@ var
   buttonEvent: PSDL_MouseButtonEvent;
 begin
   while SDL_PollEvent(@event) <> 0 do begin
-    case event.eventType of 
-      SDL_QUIT_: done := true;
+    { case event.eventType of } { SDL2Wrapper }
+    case event.type_ of
+      { SDL_QUIT_: } { SDL2Wrapper }
+      SDL_QUITEV:
+        done := true;
 
       { Keyboard }
       SDL_KEYDOWN: begin
@@ -171,7 +175,6 @@ var
 begin
   { writeLog('loadImage ' + filename); }
 
-  fillchar(strBuffer, length(strBuffer), #0);
   strpcopy(strBuffer, filename);
   surface := IMG_Load(strBuffer);
 
