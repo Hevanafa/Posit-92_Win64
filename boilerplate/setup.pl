@@ -2,7 +2,7 @@ use strict;
 use warnings;
 use 5.032001;
 
-use Cwd qw(cwd);
+use Cwd qw(cwd abs_path);
 
 use File::Copy qw(copy);
 use File::Find qw(find);
@@ -10,15 +10,20 @@ use File::Path qw(make_path);
 
 say cwd;
 
-my $src = "../DEMOS/hello_simple";
-my $dest = ".";
+my $src = abs_path("../DEMOS/hello_simple");
+my $dest = abs_path(".");
+
+# Copy from the demo folder
+
+# Quirk: `find` calls `chdir` into each directory as it "walks",
+# since it's essentially a "walker", so using abs_path is necessary
 
 find(sub {
   return unless -f;
 
   my $filename = $_;
   my $src_file = $File::Find::name;
-  my $dirname = $File::Find::dir;
+  # my $dirname = $File::Find::dir;
 
   (my $relative = $src_file) =~ s/^\Q$src\E//;
 
