@@ -33,12 +33,10 @@ sub copy_demo {
     # my $dirname = $File::Find::dir;
 
     (my $relative = $src_file) =~ s/^\Q$src\E//;
-
-    # say "Relative path: ".$relative;
-
     my $target_dir = dirname("$dest$relative");
 
-    say "Target dir  : ".$target_dir;
+    # say "Relative   : ".$relative;
+    # say "Target dir : ".$target_dir;
 
     make_path($target_dir);
 
@@ -67,9 +65,9 @@ sub handle_lpi {
 
     next if $line !~ /otherunitfiles/i;
 
-    say "-- Before --";
+    # say "-- Before --";
     my ($dirs) = $line =~ /"(.*)"/;
-    say $dirs;
+    # say $dirs;
 
     my @dirs = $dirs =~ /[^;]+/g;
 
@@ -78,17 +76,17 @@ sub handle_lpi {
       $_ =~ s/^\.\.\\\.\.\\experimental\\//r;
     } @dirs;
 
-    say "-- After replacement --";
+    # say "-- After replacement --";
 
     my $replacement = join ";", @dirs;
-    say $replacement;
+    # say $replacement;
 
     $line =~ s/"(.*)"/"$replacement"/;
-    say $line;
+    # say $line;
 
     $lines[$_] = $line;
 
-    say ""
+    # say ""
   }
 
   open($fh, ">", $project_file);
@@ -106,10 +104,8 @@ sub handle_shared {
     (my $relative = $src_file) =~ s/^\Q$shared_dir\E//;
     my $target_dir = dirname("$dest/shared$relative");
 
-    # $relative = "shared$relative";
-
-    say "Relative : ".$relative;
-    say "Target   : ".$target_dir;
+    # say "Relative : ".$relative;
+    # say "Target   : ".$target_dir;
 
     make_path($target_dir);
 
@@ -130,24 +126,25 @@ sub init_units {
 
 # Entry point
 
-# copy_demo;
+copy_demo;
 
-# for my $f (glob($dll_path."/*.dll")) {
-#   # say "$f --> $dest/$f";
-#   copy($f, $dest) or warn "Failed: $!"
-# }
+# Copy SDL2 DLL files
+for my $f (glob($dll_path."/*.dll")) {
+  # say "$f --> $dest/$f";
+  copy($f, $dest) or warn "Failed: $!"
+}
 
 
 # Copy unit files
+mkdir "engine" unless -d "engine";
 
-# mkdir "engine" unless -d "engine";
+copy(
+  abs_path("../experimental/engine/posit92.pas"),
+  abs_path("engine"));
 
-# copy(
-#   abs_path("../experimental/engine/posit92.pas"),
-#   abs_path("engine"));
-
-# handle_lpi;
 handle_shared;
-# init_units;
+
+handle_lpi;
+init_units;
 
 print "Setup complete!"
