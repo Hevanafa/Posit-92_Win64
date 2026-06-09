@@ -17,6 +17,8 @@ use File::Basename qw(dirname);
 
 my $src = abs_path("../DEMOS/hello_simple");
 my $dll_path = abs_path("../DLL/x64");
+my $shared_dir = abs_path("../experimental/shared");
+
 my $dest = abs_path(".");
 
 sub copy_demo {
@@ -98,10 +100,22 @@ sub handle_shared {
   find(sub {
     return unless -f;
 
-    
+    my $filename = $_;
+    my $src_file = $File::Find::name;
 
+    (my $relative = $src_file) =~ s/^\Q$shared_dir\E//;
+    my $target_dir = dirname("$dest/shared$relative");
 
-  }, abs_path("../experimental/shared"))
+    # $relative = "shared$relative";
+
+    say "Relative : ".$relative;
+    say "Target   : ".$target_dir;
+
+    make_path($target_dir);
+
+    copy($src_file, $target_dir."/".$filename)
+      or warn "Failed to copy $File::Find::name $!";
+  }, $shared_dir)
 }
 
 
@@ -116,7 +130,7 @@ sub init_units {
 
 # Entry point
 
-copy_demo;
+# copy_demo;
 
 # for my $f (glob($dll_path."/*.dll")) {
 #   # say "$f --> $dest/$f";
@@ -133,7 +147,7 @@ copy_demo;
 #   abs_path("engine"));
 
 # handle_lpi;
-# handle_shared;
+handle_shared;
 # init_units;
 
 print "Setup complete!"
