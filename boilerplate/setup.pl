@@ -76,18 +76,27 @@ close $fh;
 
 chomp(@lines);
 
-for my $line (@lines) {
+for (0..$#lines) {
+  my $line = $lines[$_];
+
   next if $line !~ /otherunitfiles/i;
 
   my ($dirs) = $line =~ /"(.*)"/;
   say $dirs;
 
   my @dirs = $dirs =~ /[^;]+/g;
+
+  # Remove the "..\..\experimental\" prefix
   @dirs = map {
-    ($_ =~ /[^\\]+/g)[-1]
+    $_ =~ s/^\.\.\\\.\.\\experimental\\//r;
   } @dirs;
 
-  say join " -- ", @dirs
+  say join " -- ", @dirs;
+
+  my ($spaces) = $line =~ /^(\s+)/;
+  $spaces = length $spaces;
+
+  say $spaces
 }
 
 
