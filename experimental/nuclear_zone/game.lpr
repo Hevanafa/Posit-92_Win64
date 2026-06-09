@@ -101,7 +101,9 @@ begin
   printDefaultCentred('Hello world!', vgaWidth div 2, 120);
 
   drawMouse;
-  vgaFlush
+
+  vgaUpload;
+  vgaPresent
 end;
 
 

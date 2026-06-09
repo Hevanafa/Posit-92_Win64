@@ -29,7 +29,9 @@ procedure showCursor;
 function isKeyDown(const scancode: integer): boolean;
 function loadImage(const filename: string): longint;
 procedure loadBMFont(const filename: string; var font: TBMFont; var fontGlyphs: array of TBMFontGlyph);
-procedure vgaFlush;
+
+procedure vgaUpload;
+procedure vgaPresent;
 
 
 implementation
@@ -75,6 +77,7 @@ procedure setTitle(const value: string);
 begin
   SDL_SetWindowTitle(window, @value[1])
 end;
+
 
 procedure updateSDL;
 var
@@ -313,10 +316,14 @@ begin
   font.imgHandle := loadImage(font.filename)
 end;
 
-procedure vgaFlush;
+procedure vgaUpload;
 begin
   SDL_UpdateTexture(vgaTexture, nil, getSurfacePtr, vgaWidth * 4); { pitch = width * 4 bytes }
-  SDL_RenderCopy(renderer, vgaTexture, nil, nil);
+  SDL_RenderCopy(renderer, vgaTexture, nil, nil)
+end;
+
+procedure vgaPresent;
+begin
   SDL_RenderPresent(renderer)
 end;
 

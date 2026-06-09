@@ -59,7 +59,7 @@ uses
 var
   _vgaWidth, _vgaHeight: smallint;
   bufferSize: longword;
-  surface: PByteArray;
+  activeSurface: PByteArray;
 
 function vgaWidth: smallint;
 begin
@@ -78,13 +78,13 @@ begin
   _vgaHeight := height;
   bufferSize := _vgaWidth * _vgaHeight * 4;
 
-  surface := startAddr;
-  fillchar(surface^, bufferSize, 0);
+  activeSurface := startAddr;
+  fillchar(activeSurface^, bufferSize, 0);
 end;
 
 function getSurfacePtr: PByteArray;
 begin
-  getSurfacePtr := surface
+  getSurfacePtr := activeSurface
 end;
 
 function unsafePget(const x, y: smallint): longword;
@@ -94,10 +94,10 @@ begin
   offset := (x + y * _vgaWidth) * 4;
 
   { RGBA to ARGB }
-  unsafePget := surface^[offset + 3] shl 24
-    or surface^[offset] shl 16
-    or surface^[offset + 1] shl 8
-    or surface^[offset + 2]
+  unsafePget := activeSurface^[offset + 3] shl 24
+    or activeSurface^[offset] shl 16
+    or activeSurface^[offset + 1] shl 8
+    or activeSurface^[offset + 2]
 end;
 
 { Gets the colour of a pixel }
@@ -118,16 +118,16 @@ begin
   offset := (y * vgaWidth + x) * 4;
 
   { ARGB to RGBA }
-  surface^[offset] := (colour shr 16) and $FF;
-  surface^[offset + 1] := (colour shr 8) and $FF;
-  surface^[offset + 2] := colour and $FF;
-  surface^[offset + 3] := (colour shr 24) and $FF;
+  activeSurface^[offset] := (colour shr 16) and $FF;
+  activeSurface^[offset + 1] := (colour shr 8) and $FF;
+  activeSurface^[offset + 2] := colour and $FF;
+  activeSurface^[offset + 3] := (colour shr 24) and $FF;
 end;
 
 procedure unsafePset(const x, y: smallint; const colour: longword);
 begin
   { ARGB to RGBA }
-  PLongWord(@surface^[(y * vgaWidth + x) * 4])^ :=
+  PLongWord(@activeSurface^[(y * vgaWidth + x) * 4])^ :=
     ((colour and $00FF0000) shr 16)
     or ((colour and $0000FF00))
     or ((colour and $000000FF) shl 16)
@@ -163,17 +163,17 @@ begin
 
   { Handle opaque pixel }
   if srcA = 255 then begin
-    surface^[offset] := srcR;
-    surface^[offset + 1] := srcG;
-    surface^[offset + 2] := srcB;
-    surface^[offset + 3] := srcA;
+    activeSurface^[offset] := srcR;
+    activeSurface^[offset + 1] := srcG;
+    activeSurface^[offset + 2] := srcB;
+    activeSurface^[offset + 3] := srcA;
     exit
   end;
 
-  destR := surface^[offset];
-  destG := surface^[offset + 1];
-  destB := surface^[offset + 2];
-  destA := surface^[offset + 3];
+  destR := activeSurface^[offset];
+  destG := activeSurface^[offset + 1];
+  destB := activeSurface^[offset + 2];
+  destA := activeSurface^[offset + 3];
   
   { Handle alpha blending }
   alpha := srcA / 255.0;
@@ -184,10 +184,10 @@ begin
   outB := round(srcB * alpha + destB * invAlpha);
   outA := srcA + round(destA * invAlpha);
 
-  surface^[offset] := outR;
-  surface^[offset + 1] := outG;
-  surface^[offset + 2] := outB;
-  surface^[offset + 3] := outA;
+  activeSurface^[offset] := outR;
+  activeSurface^[offset + 1] := outG;
+  activeSurface^[offset + 2] := outB;
+  activeSurface^[offset + 3] := outA;
 end;
 
 procedure unsafePsetBlend(const x, y: smallint; const colour: longword);
@@ -214,16 +214,16 @@ begin
     exit
   end;
 
-  destR := surface^[offset];
-  destG := surface^[offset + 1];
-  destB := surface^[offset + 2];
-  destA := surface^[offset + 3];
+  destR := activeSurface^[offset];
+  destG := activeSurface^[offset + 1];
+  destB := activeSurface^[offset + 2];
+  destA := activeSurface^[offset + 3];
   
   { Handle alpha blending }
   alpha := srcA / 255.0;
   invAlpha := 1.0 - alpha;
 
-  PLongWord(@surface^[offset])^ :=
+  PLongWord(@activeSurface^[offset])^ :=
     (round(srcR * alpha + destR * invAlpha))
     or (round(srcG * alpha + destG * invAlpha) shl 8)
     or (round(srcB * alpha + destB * invAlpha) shl 16)
