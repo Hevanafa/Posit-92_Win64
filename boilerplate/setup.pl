@@ -48,6 +48,56 @@ sub copy_demo {
   }, $src);
 }
 
+
+sub handle_lpi {
+  my $project_file = "project.lpi";
+  my $fh;
+
+  say "Processing $project_file";
+
+  open($fh, "<:", $project_file)
+    or warn "Couldn't open $project_file!";
+
+  my @lines = <$fh>;
+  close $fh;
+
+  chomp(@lines);
+
+  for (0..$#lines) {
+    my $line = $lines[$_];
+
+    next if $line !~ /otherunitfiles/i;
+
+    say "-- Before --";
+    my ($dirs) = $line =~ /"(.*)"/;
+    say $dirs;
+
+    my @dirs = $dirs =~ /[^;]+/g;
+
+    # Remove the "..\..\experimental\" prefix
+    @dirs = map {
+      $_ =~ s/^\.\.\\\.\.\\experimental\\//r;
+    } @dirs;
+
+    say "-- After replacement --";
+
+    my $replacement = join ";", @dirs;
+    say $replacement;
+
+    $line =~ s/"(.*)"/"$replacement"/;
+    say $line;
+
+    $lines[$_] = $line;
+
+    say ""
+  }
+
+  open($fh, ">", $project_file);
+  say $fh $_ for @lines;
+}
+
+
+
 # Entry point
 
 # copy_demo;
@@ -56,6 +106,7 @@ sub copy_demo {
 #   # say "$f --> $dest/$f";
 #   copy($f, $dest) or warn "Failed: $!"
 # }
+
 
 # Copy unit files
 
@@ -66,51 +117,6 @@ sub copy_demo {
 #   abs_path("engine"));
 
 
-# Handle .lpi file
-
-my $project_file = "project.lpi";
-my $fh;
-
-say "Processing $project_file";
-
-open($fh, "<:", $project_file)
-  or warn "Couldn't open $project_file!";
-
-my @lines = <$fh>;
-close $fh;
-
-chomp(@lines);
-
-for (0..$#lines) {
-  my $line = $lines[$_];
-
-  next if $line !~ /otherunitfiles/i;
-
-  say "-- Before --";
-  my ($dirs) = $line =~ /"(.*)"/;
-  say $dirs;
-
-  my @dirs = $dirs =~ /[^;]+/g;
-
-  # Remove the "..\..\experimental\" prefix
-  @dirs = map {
-    $_ =~ s/^\.\.\\\.\.\\experimental\\//r;
-  } @dirs;
-
-  say "-- After replacement --";
-
-  my $replacement = join ";", @dirs;
-  say $replacement;
-
-  $line =~ s/"(.*)"/"$replacement"/;
-  say $line;
-
-  $lines[$_] = $line;
-
-  say ""
-}
-
-open($fh, ">", $project_file);
-say $fh $_ for @lines;
+handle_lpi;
 
 print "Setup complete!"
