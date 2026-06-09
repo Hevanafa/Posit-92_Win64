@@ -50,11 +50,19 @@ sub copy_demo {
 
 # Entry point
 
-copy_demo;
+# copy_demo;
 
-for my $f (glob($dll_path."/*.dll")) {
-  # say "$f --> $dest/$f";
-  copy($f, $dest) or warn "Failed: $!"
-}
+# for my $f (glob($dll_path."/*.dll")) {
+#   # say "$f --> $dest/$f";
+#   copy($f, $dest) or warn "Failed: $!"
+# }
+
+# Copy unit files
+
+mkdir "engine" if !(-d "engine");
+
+copy(
+  abs_path("../experimental/engine/posit92.pas"),
+  abs_path("engine"));
 
 print "Setup complete!"
