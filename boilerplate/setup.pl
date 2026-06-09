@@ -11,6 +11,7 @@ use File::Copy qw(copy);
 use File::Find qw(find);
 use File::Path qw(make_path);
 use File::Basename qw(dirname);
+use Term::ANSIColor qw(colored);
 
 # Print current working directory
 # say cwd;
@@ -23,6 +24,8 @@ my $shared_dir = abs_path("../experimental/shared");
 my $dest = abs_path(".");
 
 sub copy_demo {
+  say "Copying from demo $demo_dir...";
+
   # Quirk: `find` calls `chdir` into each directory as it "walks",
   # since it's essentially a "walker", so using abs_path is necessary
 
@@ -48,6 +51,8 @@ sub copy_demo {
 
 # Copy SDL2 DLL files
 sub copy_sdl2 {
+  say "Copying SDL2 DLL files...";
+
   for my $f (glob($dll_dir."/*.dll")) {
     # say "$f --> $dest/$f";
     copy($f, $dest) or warn "Failed: $!"
@@ -59,7 +64,7 @@ sub handle_lpi {
   my $project_file = "project.lpi";
   my $fh;
 
-  say "Processing $project_file";
+  say "Configuring $project_file...";
 
   open($fh, "<:", $project_file)
     or warn "Couldn't open $project_file!";
@@ -75,6 +80,7 @@ sub handle_lpi {
     next if $line !~ /otherunitfiles/i;
 
     # say "-- Before --";
+    
     my ($dirs) = $line =~ /"(.*)"/;
     # say $dirs;
 
@@ -86,6 +92,8 @@ sub handle_lpi {
     } @dirs;
 
     # say "-- After replacement --";
+
+    push @dirs, "units";
 
     my $replacement = join ";", @dirs;
     # say $replacement;
@@ -104,6 +112,8 @@ sub handle_lpi {
 
 # Copy shared units
 sub copy_shared {
+  say "Copying shared units...";
+
   find(sub {
     return unless -f;
 
@@ -125,7 +135,7 @@ sub copy_shared {
 
 
 sub init_units {
-  say "Initialising units folder";
+  say "Initialising units folder...";
 
   mkdir "units";
 
@@ -159,4 +169,6 @@ handle_lpi;
 init_units;
 copy_scripts;
 
-print "Setup complete!"
+say colored("Setup complete!", "bright_green");
+say colored("You can open project.lpi in Lazarus IDE, or", "bright_green");
+say colored("  project.lpr to see the entry point", "bright_green")
