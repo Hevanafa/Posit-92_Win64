@@ -12,13 +12,24 @@ my $dest = ".";
 find(sub {
   return unless -f;
 
-  (my $relative = $File::Find::name) =~ s/^\Q$src\E//;
+  my $filename = $_;
+  my $full_path = $File::Find::name;
+  my $dirname = $File::Find::dir;
+
+  (my $relative = $full_path) =~ s/^\Q$src\E//;
+
   say "Relative path: ".$relative;
 
-  my $target = "$dest/$relative";
+  my @chunks = (split /\//, "$dest$relative");
+  @chunks = @chunks[0..$#chunks - 1];
+  my $target_dir = (join "/", @chunks);
 
-  make_path((split /\//, $target)[0..-2]);
-  copy($File::Find::name, $target) or warn "Failed to copy $File::Find::name $!"
+  say "Target dir  : ".$target_dir;
+
+  # make_path((split /\//, $target)[0..-2]);
+  # copy($full_path, $target) or warn "Failed to copy $File::Find::name $!"
+
+  say "";
 }, $src);
 
 print "Setup complete!"
