@@ -1,3 +1,6 @@
+# Boilerplate setup script
+# Part of Posit-92 game engine
+
 use strict;
 use warnings;
 use 5.032001;
