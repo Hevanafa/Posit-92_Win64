@@ -46,6 +46,14 @@ sub copy_demo {
   }, $src);
 }
 
+# Copy SDL2 DLL files
+sub copy_sdl2 {
+  for my $f (glob($dll_path."/*.dll")) {
+    # say "$f --> $dest/$f";
+    copy($f, $dest) or warn "Failed: $!"
+  }
+}
+
 
 sub handle_lpi {
   my $project_file = "project.lpi";
@@ -94,8 +102,8 @@ sub handle_lpi {
   say $fh $_ for @lines;
 }
 
-
-sub handle_shared {
+# Copy shared units
+sub copy_shared {
   find(sub {
     return unless -f;
 
@@ -117,6 +125,8 @@ sub handle_shared {
 
 
 sub init_units {
+  say "Initialising units folder";
+  
   mkdir "units";
 
   open(my $fh, ">", "units\\readme.txt");
@@ -134,13 +144,7 @@ sub copy_scripts {
 # Entry point
 
 # copy_demo;
-
-# Copy SDL2 DLL files
-# for my $f (glob($dll_path."/*.dll")) {
-#   # say "$f --> $dest/$f";
-#   copy($f, $dest) or warn "Failed: $!"
-# }
-
+copy_sdl2;
 
 # Copy unit files
 # mkdir "engine" unless -d "engine";
@@ -149,7 +153,7 @@ sub copy_scripts {
 #   abs_path("../experimental/engine/posit92.pas"),
 #   abs_path("engine"));
 
-# handle_shared;
+# copy_shared;
 
 # handle_lpi;
 # init_units;
