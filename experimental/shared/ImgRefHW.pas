@@ -1,3 +1,10 @@
+{
+  Part of Posit-92 game engine
+  Hardware images / textures
+
+  This unit is only usable with SDL2 at this moment
+}
+
 unit ImgRefHW;
 
 interface
