@@ -47,6 +47,9 @@
             </Debugging>
             <LinkSmart Value="True"/>
           </Linking>
+          <Other>
+            <CustomOptions Value="-dUSE_SDL2"/>
+          </Other>
         </CompilerOptions>
       </Item>
     </BuildModes>
@@ -104,7 +107,7 @@
       </Debugging>
     </Linking>
     <Other>
-      <CustomOptions Value="-dWIN64"/>
+      <CustomOptions Value="-dUSE_SDL2"/>
     </Other>
   </CompilerOptions>
   <Debugging>

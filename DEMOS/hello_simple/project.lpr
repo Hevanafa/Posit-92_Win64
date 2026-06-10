@@ -13,7 +13,7 @@ uses
   Assets;
 
 const
-  TargetFPS = 20;
+  TargetFPS = 60;
   FrameTime = 1000 div TargetFPS;
 
 var
