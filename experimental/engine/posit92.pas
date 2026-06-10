@@ -330,9 +330,21 @@ var
   tex: PSDL_Texture;
 begin
   surface := IMG_Load(pchar(ansistring(filename)));
+  if surface = nil then begin
+    writelog('IMG_Load failed: ' + SDL_GetError);
+    exit(-1)
+  end;
+
   tex := SDL_CreateTextureFromSurface(renderer, surface);
+  if tex = nil then begin
+    writelog('CreateTexture failed: ' + SDL_GetError);
+    exit(-1)
+  end;
+
   SDL_FreeSurface(surface);
-  hwLoadImage := hwRegisterTexRef(tex, surface^.w, surface^.h)
+  hwLoadImage := hwRegisterTexRef(tex, surface^.w, surface^.h);
+
+  writelog(format('hwLoadImage %d: %s', [hwLoadImage, filename]))
 end;
 
 procedure vgaUpload;

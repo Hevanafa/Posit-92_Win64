@@ -101,11 +101,11 @@ begin
 
   printDefaultCentred('Hello world!', vgaWidth div 2, 120);
 
-  drawMouse;
   vgaUpload;
 
   { Begin hardware layer }
-  { TODO: Implement the hardware layer }
+
+  drawMouse;
 
   vgaPresent
 end;
