@@ -241,7 +241,7 @@ end;
 procedure cls(const colour: longword);
 var
   a, b: byte;
-  rgba: longword;
+  rgba, fill: longword;
 begin
   a := (colour and $FF000000) shr 24;
   rgba := (colour and $FFFFFF) shl 8 or a;
@@ -249,14 +249,16 @@ begin
   { hexstr: cnt is in nibbles (half byte), not bytes }
   writelog('rgba: ' + hexstr(rgba, 8));
 
-  { TODO: Fix the orange-ish yellow background }
-  FillDWord(getSurfacePtr^, vgaWidth * vgaHeight, rgba);
+  { Reverse the byte order }
+  fill :=
+    (rgba and $FF shl 24) or
+    (rgba and $FF00 shl 8) or
+    (rgba and $FF0000 shr 8) or
+    (rgba and $FF000000 shr 24);
+
+  FillDWord(getSurfacePtr^, vgaWidth * vgaHeight, fill);
 
   writelog('Surface: ' + hexstr(activeSurface^[0] shl 8 or activeSurface^[1] shl 8 or activeSurface^[2] shl 8 or activeSurface^[3], 8));
-
-  { for b:=0 to vgaHeight - 1 do
-  for a:=0 to vgaWidth - 1 do
-    unsafePset(a, b, colour); }
 end;
 
 procedure clsBlend(const colour: longword);
