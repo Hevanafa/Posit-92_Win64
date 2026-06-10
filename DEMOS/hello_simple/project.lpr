@@ -101,6 +101,8 @@ begin
 
   printDefaultCentred('Hello world!', vgaWidth div 2, 120);
 
+  printDefault(format('Mouse: { %d, %d }', [mouseX, mouseY]), 10, 10);
+
   vgaUpload;
 
   { Begin hardware layer }

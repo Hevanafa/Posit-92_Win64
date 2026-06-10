@@ -71,6 +71,7 @@ begin
     SDL_WINDOW_SHOWN);
 
   renderer := SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+  SDL_RenderSetLogicalSize(renderer, vgaWidth, vgaHeight);
 
   vgaTexture := SDL_CreateTexture(
     renderer,
@@ -123,8 +124,8 @@ begin
       { Mouse }
       SDL_MOUSEMOTION: begin
         mouseEvent := PSDL_MouseMotionEvent(@event);
-        mouseX := mouseEvent^.x div displayScale;
-        mouseY := mouseEvent^.y div displayScale;
+        mouseX := mouseEvent^.x;
+        mouseY := mouseEvent^.y;
       end;
 
       SDL_MOUSEBUTTONDOWN: begin
