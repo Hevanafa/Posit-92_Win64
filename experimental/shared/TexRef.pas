@@ -25,6 +25,10 @@ procedure hwFreeTex(const imgHandle: longint);
 
 { Blitting procedures }
 procedure hwspr(const imgHandle: longint; const x, y: smallint);
+procedure hwsprRegion(
+  const imgHandle: longint;
+  const srcX, srcY, srcW, srcH: smallint;
+  const destX, destY: smallint);
 
 
 implementation
@@ -98,6 +102,28 @@ begin
   dest.h := texRefs[imgHandle].height;
 
   SDL_RenderCopy(renderer, texRefs[imgHandle].texture, nil, @dest)
+end;
+
+procedure hwsprRegion(
+  const imgHandle: longint;
+  const srcX, srcY, srcW, srcH: smallint;
+  const destX, destY: smallint);
+var
+  src, dest: TSDL_Rect;
+begin
+  if not hwIsImageSet(imgHandle) then exit;
+
+  src.x := srcX;
+  src.y := srcY;
+  src.w := srcW;
+  src.h := srcH;
+
+  dest.x := destX;
+  dest.y := destY;
+  dest.w := srcW;
+  dest.h := srcH;
+
+  SDL_RenderCopy(renderer, texRefs[imgHandle].texture, @src, @dest)
 end;
 
 initialization
