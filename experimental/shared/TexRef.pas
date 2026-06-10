@@ -36,5 +36,13 @@ begin
   texRefs[imgHandle].texture := tex
 end;
 
+function hwIsImageSet(const imgHandle: longint): boolean;
+begin
+  hwIsImageSet := (imgHandle > 0) and (texRefs[imgHandle].texture <> nil)
+end;
+
+initialization
+  fillchar(texRefs, sizeof(texRefs, 0)
+
 end.
 
