@@ -41,8 +41,17 @@ begin
   hwIsImageSet := (imgHandle > 0) and (texRefs[imgHandle].texture <> nil)
 end;
 
+procedure hwFreeImage(const imgHandle: longint);
+begin
+  if not hwIsImageSet(imgHandle) then exit;
+
+  texRefs[imgHandle].width := 0;
+  texRefs[imgHandle].height := 0;
+  SDL_DestroyTexture(texRefs[imgHandle].texture)
+end;
+
 initialization
-  fillchar(texRefs, sizeof(texRefs, 0)
+  fillchar(texRefs, sizeof(texRefs), 0)
 
 end.
 
