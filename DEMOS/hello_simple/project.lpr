@@ -8,7 +8,7 @@ uses
   SysUtils, SDL2,
   Posit92,
   Keyboard, Mouse,
-  ImgRef, ImgRefFast,
+  ImgRef, ImgRefFast, TexRef,
   Logger, Timing, VGA,
   Assets;
 
@@ -89,6 +89,7 @@ end;
 
 procedure draw;
 begin
+  { Begin software layer }
   cls($FF6495ED);
 
   if (trunc(gameTime * 4) and 1) > 0 then
@@ -99,8 +100,11 @@ begin
   printDefaultCentred('Hello world!', vgaWidth div 2, 120);
 
   drawMouse;
-
   vgaUpload;
+
+  { Begin hardware layer }
+  { TODO: Implement the hardware layer }
+
   vgaPresent
 end;
 

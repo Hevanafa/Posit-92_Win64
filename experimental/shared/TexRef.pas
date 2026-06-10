@@ -19,6 +19,7 @@ type
     texture: PSDL_Texture;
   end;
 
+procedure hwSetRenderer(const r: PSDL_Renderer);
 function hwRegisterTexRef(const tex: PSDL_Texture; const w, h: smallint): longint;
 
 
@@ -32,6 +33,12 @@ const
 
 var
   texRefs: array[1..MaxTexRefs] of TTexRef;
+  renderer: PSDL_Renderer;
+
+procedure hwSetRenderer(const r: PSDL_Renderer);
+begin
+  renderer := r
+end;
 
 function hwIsImageSet(const imgHandle: longint): boolean;
 begin
@@ -72,6 +79,21 @@ begin
   texRefs[imgHandle].width := 0;
   texRefs[imgHandle].height := 0;
   SDL_DestroyTexture(texRefs[imgHandle].texture)
+end;
+
+
+procedure hwspr(const imgHandle: longint; const x, y: smallint);
+var
+  dest: TSDL_Rect;
+begin
+  if not hwIsImageSet(imgHandle) then exit;
+
+  dest.x := x;
+  dest.y := y;
+  dest.w := texRefs[imgHandle].width;
+  dest.h := texRefs[imgHandle].height;
+
+  SDL_RenderCopy(renderer, texRefs[imgHandle].texture, nil, @dest)
 end;
 
 initialization
