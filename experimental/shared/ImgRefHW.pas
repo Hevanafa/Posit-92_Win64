@@ -12,11 +12,11 @@ interface
 uses sdl2, sdl2_image;
 
 type
-  PImageRefHW = ^TImageRefHW;
-  TImageRefHW = record
+  PTexRef = ^TTexRef;
+  TTexRef = record
     width: smallint;
     height: smallint;
-    dataPtr: PSDL_Texture;
+    texture: PSDL_Texture;
   end;
 
 
@@ -26,7 +26,7 @@ const
   MaxTexRefs = 128;
 
 var
-  texRefs: array[1..MaxTexRefs] of TImageRefHW;
+  texRefs: array[1..MaxTexRefs] of TTexRef;
 
 end.
 
