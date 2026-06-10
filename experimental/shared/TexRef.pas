@@ -19,9 +19,13 @@ type
     texture: PSDL_Texture;
   end;
 
-procedure hwRegisterTexRef(const imgHandle: longint; const tex: PSDL_Texture; const w, h: smallint);
+function hwRegisterTexRef(const tex: PSDL_Texture; const w, h: smallint): longint;
+
 
 implementation
+
+uses
+  Panic;
 
 const
   MaxTexRefs = 128;
@@ -29,19 +33,38 @@ const
 var
   texRefs: array[1..MaxTexRefs] of TTexRef;
 
-procedure hwRegisterTexRef(const imgHandle: longint; const tex: PSDL_Texture; const w, h: smallint);
-begin
-  texRefs[imgHandle].width := w;
-  texRefs[imgHandle].height := h;
-  texRefs[imgHandle].texture := tex
-end;
-
 function hwIsImageSet(const imgHandle: longint): boolean;
 begin
   hwIsImageSet := (imgHandle > 0) and (texRefs[imgHandle].texture <> nil)
 end;
 
-procedure hwFreeImage(const imgHandle: longint);
+function hwFindEmptyImageSlot: longint;
+var
+  a: longint;
+begin
+  for a:=1 to high(texRefs) do
+    if not hwIsImageSet(a) then begin
+      hwFindEmptyImageSlot := a;
+      exit
+    end;
+
+  hwFindEmptyImageSlot := -1
+end;
+
+function hwRegisterTexRef(const tex: PSDL_Texture; const w, h: smallint): longint;
+var
+  imgHandle: longint;
+begin
+  imgHandle := hwFindEmptyImageSlot;
+
+  if imgHandle < 1 then panicHalt('Texture ref pool is full!');
+
+  texRefs[imgHandle].width := w;
+  texRefs[imgHandle].height := h;
+  texRefs[imgHandle].texture := tex
+end;
+
+procedure hwFreeTex(const imgHandle: longint);
 begin
   if not hwIsImageSet(imgHandle) then exit;
 
