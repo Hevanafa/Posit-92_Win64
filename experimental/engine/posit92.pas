@@ -343,9 +343,11 @@ begin
   end;
 
   SDL_FreeSurface(surface);
+
+  SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
   hwLoadImage := hwRegisterTexRef(tex, surface^.w, surface^.h);
 
-  writelog(format('hwLoadImage %d: %s', [hwLoadImage, filename]))
+  { writelog(format('hwLoadImage %d: %s', [hwLoadImage, filename])) }
 end;
 
 procedure vgaUpload;
