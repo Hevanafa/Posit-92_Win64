@@ -27,6 +27,7 @@ procedure hideCursor;
 procedure showCursor;
 
 function isKeyDown(const scancode: integer): boolean;
+
 function loadImage(const filename: string): longint;
 procedure loadBMFont(const filename: string; var font: TBMFont; var fontGlyphs: array of TBMFontGlyph);
 
