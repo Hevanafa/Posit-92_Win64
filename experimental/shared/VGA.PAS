@@ -29,8 +29,9 @@ function vgaHeight: smallint;
 procedure initVideoMem(const width, height: smallint; const startAddr: PByteArray); public name 'initVideoMem';
 function getSurfacePtr: PByteArray; public name 'getSurfacePtr';
 
-{ Colour format: $AARRGGBB }
+{ colour format: $AARRGGBB, ARGB like in QB64 PE }
 procedure cls(const colour: longword);
+{ colour format: $AARRGGBB }
 procedure clsBlend(const colour: longword);
 
 function unsafePget(const x, y: smallint): longword;
@@ -53,7 +54,7 @@ uses
 {$endif}
 {$ifdef Windows}
 uses
-  Logger;
+  Conv, Logger;
 {$endif}
 
 var
@@ -239,11 +240,23 @@ end;
 
 procedure cls(const colour: longword);
 var
-  a, b: word;
+  a, b: byte;
+  rgba: longword;
 begin
-  for b:=0 to vgaHeight - 1 do
+  a := (colour and $FF000000) shr 24;
+  rgba := (colour and $FFFFFF) shl 8 or a;
+
+  { hexstr: cnt is in nibbles (half byte), not bytes }
+  writelog('rgba: ' + hexstr(rgba, 8));
+
+  { TODO: Fix the orange-ish yellow background }
+  FillDWord(getSurfacePtr^, vgaWidth * vgaHeight, rgba);
+
+  writelog('Surface: ' + hexstr(activeSurface^[0] shl 8 or activeSurface^[1] shl 8 or activeSurface^[2] shl 8 or activeSurface^[3], 8));
+
+  { for b:=0 to vgaHeight - 1 do
   for a:=0 to vgaWidth - 1 do
-    unsafePset(a, b, colour);
+    unsafePset(a, b, colour); }
 end;
 
 procedure clsBlend(const colour: longword);

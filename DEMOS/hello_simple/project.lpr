@@ -13,7 +13,7 @@ uses
   Assets;
 
 const
-  TargetFPS = 60;
+  TargetFPS = 20;
   FrameTime = 1000 div TargetFPS;
 
 var
@@ -89,7 +89,7 @@ end;
 
 procedure draw;
 begin
-  { cls($FF6495ED); }
+  cls($FF6495ED);
 
   if (trunc(gameTime * 4) and 1) > 0 then
     spr(imgDosuEXE[1], 148, 88)
