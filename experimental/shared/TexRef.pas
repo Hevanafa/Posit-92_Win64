@@ -59,6 +59,7 @@ begin
 
   if imgHandle < 1 then panicHalt('Texture ref pool is full!');
 
+  hwRegisterTexRef := imgHandle;
   texRefs[imgHandle].width := w;
   texRefs[imgHandle].height := h;
   texRefs[imgHandle].texture := tex

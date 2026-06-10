@@ -42,7 +42,8 @@ uses
   SysUtils,
   Conv, Logger,
   Keyboard, Mouse,
-  ImgRef, UStrings, VGA;
+  ImgRef, TexRef,
+  UStrings, VGA;
 
 var
   displayScale: smallint;
@@ -316,6 +317,18 @@ begin
   { writeLog('Loaded ' + i32str(glyphCount) + ' glyphs'); }
 
   font.imgHandle := loadImage(font.filename)
+end;
+
+
+function hwLoadImage(const filename: string): longint;
+var
+  surface: PSDL_Surface;
+  tex: PSDL_Texture;
+begin
+  surface := IMG_Load(pchar(ansistring(filename)));
+  tex := SDL_CreateTextureFromSurface(renderer, surface);
+  SDL_FreeSurface(surface);
+  hwLoadImage := hwRegisterTexRef(tex, surface^.w, surface^.h)
 end;
 
 procedure vgaUpload;
