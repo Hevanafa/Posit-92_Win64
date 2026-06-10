@@ -22,12 +22,14 @@ var
 
 procedure drawMouse;
 begin
-  spr(imgCursor, mouseX, mouseY)
+  { spr(imgCursor, mouseX, mouseY) }
+  hwspr(hwCursor, mouseX, mouseY)
 end;
 
 procedure loadAssets;
 begin
-  imgCursor := loadImage('assets\images\cursor.png');
+  { imgCursor := loadImage('assets\images\cursor.png'); }
+  hwCursor := hwLoadImage('assets\images\cursor.png');
   imgDosuEXE[0] := loadImage('assets\images\dosu_1.png');
   imgDosuEXE[1] := loadImage('assets\images\dosu_2.png');
 

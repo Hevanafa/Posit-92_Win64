@@ -21,6 +21,10 @@ type
 
 procedure hwSetRenderer(const r: PSDL_Renderer);
 function hwRegisterTexRef(const tex: PSDL_Texture; const w, h: smallint): longint;
+procedure hwFreeTex(const imgHandle: longint);
+
+{ Blitting procedures }
+procedure hwspr(const imgHandle: longint; const x, y: smallint);
 
 
 implementation
