@@ -66,7 +66,7 @@ begin
     vgaWidth * displayScale, vgaHeight * displayScale,
     SDL_WINDOW_SHOWN);
 
-  renderer := SDL_CreateRenderer(window, -1, 0);
+  renderer := SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
   vgaTexture := SDL_CreateTexture(
     renderer,
@@ -319,6 +319,10 @@ end;
 
 procedure vgaUpload;
 begin
+  SDL_SetRenderDrawColor(renderer, $ed, $95, $64, $ff);
+  SDL_RenderClear(renderer);
+
+  SDL_SetTextureBlendMode(vgaTexture, SDL_BLENDMODE_BLEND);
   SDL_UpdateTexture(vgaTexture, nil, getSurfacePtr, vgaWidth * 4); { pitch = width * 4 bytes }
   SDL_RenderCopy(renderer, vgaTexture, nil, nil)
 end;

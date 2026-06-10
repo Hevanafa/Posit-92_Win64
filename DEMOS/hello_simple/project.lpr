@@ -89,7 +89,7 @@ end;
 
 procedure draw;
 begin
-  cls($FF6495ED);
+  { cls($FF6495ED); }
 
   if (trunc(gameTime * 4) and 1) > 0 then
     spr(imgDosuEXE[1], 148, 88)
