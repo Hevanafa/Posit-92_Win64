@@ -5,7 +5,7 @@
   This unit is only usable with SDL2 at this moment
 }
 
-unit ImgRefHW;
+unit TexRef;
 
 interface
 
@@ -19,6 +19,7 @@ type
     texture: PSDL_Texture;
   end;
 
+procedure registerTexRef(const imgHandle: longint; const tex: PSDL_Texture; const w, h: smallint);
 
 implementation
 
@@ -27,6 +28,13 @@ const
 
 var
   texRefs: array[1..MaxTexRefs] of TTexRef;
+
+procedure registerTexRef(const imgHandle: longint; const tex: PSDL_Texture; const w, h: smallint);
+begin
+  texRefs[imgHandle].width := w;
+  texRefs[imgHandle].height := h;
+  texRefs[imgHandle].texture := tex
+end;
 
 end.
 
