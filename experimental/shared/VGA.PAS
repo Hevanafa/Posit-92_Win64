@@ -239,17 +239,12 @@ begin
 end;
 
 procedure cls(const colour: longword);
-var
-  a, b: byte;
-  rgba, fill: longword;
 begin
-  a := (colour and $FF000000) shr 24;
-  rgba := (colour and $FFFFFF) shl 8 or a;
-
-  { Reverse the byte order }
-  fill := SwapEndian(rgba);
-
-  FillDWord(getSurfacePtr^, vgaWidth * vgaHeight, fill)
+  FillDWord(
+    getSurfacePtr^,
+    vgaWidth * vgaHeight,
+    { convert ARGB to RGBA + flip the byte order }
+    SwapEndian((colour and $FFFFFF shl 8) or (colour and $FF000000 shr 24)))
 end;
 
 procedure clsBlend(const colour: longword);
