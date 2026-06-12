@@ -19,7 +19,8 @@ type
   TByteArray = array[0..0] of byte;
 
 {$ifdef WASM}
-procedure vgaFlush; external 'env' name 'vgaFlush';
+procedure vgaUpload; external 'env' name 'vgaUpload';
+procedure vgaPresent; external 'env' name 'vgaPresent';
 {$endif}
 
 function vgaWidth: smallint;
@@ -29,7 +30,7 @@ function vgaHeight: smallint;
 procedure initVideoMem(const width, height: smallint; const startAddr: PByteArray); public name 'initVideoMem';
 function getSurfacePtr: PByteArray; public name 'getSurfacePtr';
 
-{ colour format: $AARRGGBB, ARGB like in QB64 PE }
+{ colour format: $AARRGGBB like in QB64 PE }
 procedure cls(const colour: longword);
 { colour format: $AARRGGBB }
 procedure clsBlend(const colour: longword);
@@ -44,6 +45,14 @@ procedure pset(const x, y: smallint; const colour: longword);
 procedure unsafePsetBlend(const x, y: smallint; const colour: longword);
 procedure psetBlend(const x, y: smallint; const colour: longword);
 
+function clipX1: smallint;
+function clipY1: smallint;
+function clipX2: smallint;
+function clipY2: smallint;
+
+procedure setClip(x1, y1, x2, y2: smallint);
+procedure resetClip;
+
 
 implementation
 
@@ -54,13 +63,16 @@ uses
 {$endif}
 {$ifdef Windows}
 uses
-  Conv, Logger;
+  Logger;
 {$endif}
 
 var
   _vgaWidth, _vgaHeight: smallint;
   bufferSize: longword;
   activeSurface: PByteArray;
+
+  { inclusive clipping bounds }
+  _clipX1, _clipY1, _clipX2, _clipY2: smallint;
 
 function vgaWidth: smallint;
 begin
@@ -78,6 +90,8 @@ begin
   _vgaWidth := width;
   _vgaHeight := height;
   bufferSize := _vgaWidth * _vgaHeight * 4;
+
+  resetClip;
 
   activeSurface := startAddr;
   fillchar(activeSurface^, bufferSize, 0);
@@ -138,7 +152,9 @@ end;
 { colour: AARRGGBB }
 procedure pset(const x, y: smallint; const colour: longword);
 begin
-  if (x >= vgaWidth) or (x < 0) or (y >= vgaHeight) or (y < 0) then exit;
+  if (x > _clipX2) or (x < _clipX1) or (y > _clipY2) or (y < _clipX1) then
+    exit;
+
   unsafePset(x, y, colour)
 end;
 
@@ -233,7 +249,7 @@ end;
 
 procedure psetBlend(const x, y: smallint; const colour: longword);
 begin
-  if (x >= vgaWidth) or (x < 0) or (y >= vgaHeight) or (y < 0) then exit;
+  if (x > _clipX2) or (x < _clipX1) or (y > _clipY2) or (y < _clipY1) then exit;
 
   unsafePsetBlend(x, y, colour)
 end;
@@ -256,5 +272,52 @@ begin
     unsafePsetBlend(a, b, colour);
 end;
 
+function clipX1: smallint;
+begin
+  clipX1 := _clipX1
+end;
+
+function clipY1: smallint;
+begin
+  clipY1 := _clipY1
+end;
+
+function clipX2: smallint;
+begin
+  clipX2 := _clipX2
+end;
+
+function clipY2: smallint;
+begin
+  clipY2 := _clipY2
+end;
+
+procedure setClip(x1, y1, x2, y2: smallint);
+var
+  temp: smallint;
+begin
+  if x1 > x2 then begin
+    temp := x1;  x1 := x2;  x2 := temp
+  end;
+  if y1 > y2 then begin
+    temp := y1;  y1 := y2;  y2 := temp
+  end;
+
+  if x1 < 0 then x1 := 0;
+  if x2 >= _vgaWidth then x2 := _vgaWidth - 1;
+  if y1 < 0 then y1 := 0;
+  if y2 >= _vgaHeight then y2 := _vgaHeight - 1;
+
+  _clipX1 := x1;  _clipY1 := y1;
+  _clipX2 := x2;  _clipY2 := y2;
+end;
+
+procedure resetClip;
+begin
+  _clipX1 := 0;
+  _clipY1 := 0;
+  _clipX2 := _vgaWidth - 1;
+  _clipY2 := _vgaHeight - 1;
+end;
 
 end.
