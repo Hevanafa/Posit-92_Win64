@@ -6,6 +6,11 @@ unit P92Core;
 
 interface
 
+{$ifdef Windows}
+uses BMFont, SDL2;
+{$endif}
+
+{$ifdef P92_WASM}
 function GetBootOptionBoolean(key: string): boolean;
 function JsGetBootOptionBoolean: boolean; external 'env' name 'JsGetBootOptionBoolean';
 
@@ -16,6 +21,7 @@ procedure SetCGAFontHandle(value: longint);
 function IsEngineReady: boolean; public name 'IsEngineReady';
 procedure HostCallOnPreload; external 'env' name 'HostCallOnPreload';
 procedure HostCallOnReady; external 'env' name 'HostCallOnReady';
+{$endif}
 
 procedure P92Boot; public name 'P92Boot';
 procedure P92Update; public name 'P92Update';
@@ -26,21 +32,45 @@ procedure PrintChar(const c: char; const x, y: smallint);
 procedure Print(const txt: string; const x, y: smallint);
 procedure PrintWrap(const txt: string; x, y, wrapWidth: smallint);
 
+{$ifdef Windows}
+procedure InitSDL(const aDisplayScale: smallint = 2);
+procedure UpdateSDL;
+procedure CleanupSDL;
+
+procedure SetTitle(const value: string);
+
+procedure HideCursor;
+procedure ShowCursor;
+
+function IsKeyDown(const scancode: integer): boolean;
+
+function LoadImage(const filename: string): longint;
+procedure LoadBMFont(const filename: string; var font: TBMFontLegacy; var fontGlyphs: array of TBMFontGlyph);
+
+function HwLoadImage(const filename: string): longint;
+
+{ Uploads the pixel data to the GPU }
+procedure VgaUpload;
+procedure VgaPresent;
+{$endif}
 
 implementation
 
 uses
+{$ifdef Windows}
+  SysUtils,
+  P92Conversions, P92AssetRegistry, P92Logger,
+  P92Keyboard, P92Mouse,
+  P92Tex, P92TexRef,
+  P92Strings, P92Timing, P92FPS, P92Sounds, P92VGA
+{$endif}
+{$ifdef P92_WASM}
   P92Fonts, P92AssetRegistry,
   P92Conversions,
   P92FPS, P92Logger,
   P92Sounds, P92Timing,
   P92Keyboard, P92Mouse,
-  P92TexDraw, P92VGA
-{$ifdef Windows}
-  , Posit92
-{$endif}
-{$ifdef P92_WASM}
-  , P92WasmHost, P92WasmMemMgr, P92InteropBuf, P92Loading,
+  P92TexDraw, P92VGA, P92WasmHost, P92WasmMemMgr, P92InteropBuf, P92Loading,
 {$endif}
 {$ifdef P92_IMMEDIATE_GUI}
   , P92ImmediateGUI
@@ -49,6 +79,17 @@ uses
   , P92WebGL
 {$endif}
   ;
+
+var
+  displayScale: smallint;
+  window: PSDL_Window;
+  renderer: PSDL_Renderer;
+  vgaTexture: PSDL_Texture;
+
+  keyState: array[0..127] of boolean;  { use DOS scancode }
+
+type
+  TGenericCallback = procedure;
 
 type
   TEngineRunStates = (
@@ -106,10 +147,12 @@ begin
   SetupWebGLShaders;
 {$endif}
 
+{$ifdef P92_WASM}
   { Read boot options }
 
   enableDefaultBMFont := GetBootOptionBoolean('defaultFont');
   enableScreenshotHotkey := GetBootOptionBoolean('enableScreenshotHotkey');
+{$endif}
 end;
 
 procedure SetCGAFontHandle(value: longint);
@@ -281,8 +324,25 @@ begin
       inc(y, 8);
     end;
   end;
-
 end;
+
+{$ifdef Windows}
+procedure P92Run(
+  Init: TGenericCallback;
+  OnPreload: TGenericCallback;
+  OnReady: TGenericCallback
+);
+begin
+  P92Boot;
+
+  InitPreloadState;
+  OnPreload;
+  InitReadyState;
+  OnReady;
+
+  { TODO: Game loop }
+end;
+{$endif}
 
 end.
 

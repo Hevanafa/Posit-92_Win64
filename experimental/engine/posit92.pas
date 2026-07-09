@@ -17,60 +17,9 @@ uses
 var
   done: boolean;
 
-procedure P92Run;
-
-procedure InitSDL(const aDisplayScale: smallint = 2);
-procedure UpdateSDL;
-procedure CleanupSDL;
-
-procedure SetTitle(const value: string);
-
-procedure HideCursor;
-procedure ShowCursor;
-
-function IsKeyDown(const scancode: integer): boolean;
-
-function LoadImage(const filename: string): longint;
-procedure LoadBMFont(const filename: string; var font: TBMFontLegacy; var fontGlyphs: array of TBMFontGlyph);
-
-function HwLoadImage(const filename: string): longint;
-
-{ Uploads the pixel data to the GPU }
-procedure VgaUpload;
-procedure VgaPresent;
-
 
 implementation
 
-uses
-  SysUtils,
-  P92Conversions, P92Logger,
-  P92Keyboard, P92Mouse,
-  P92Tex, P92TexRef,
-  P92Strings, P92VGA;
-
-var
-  displayScale: smallint;
-  window: PSDL_Window;
-  renderer: PSDL_Renderer;
-  vgaTexture: PSDL_Texture;
-
-  keyState: array[0..127] of boolean;  { use DOS scancode }
-
-type
-  TGenericCallback = procedure;
-
-procedure P92Run(
-  init: TGenericCallback;
-  OnPreload: TGenericCallback;
-  OnReady: TGenericCallback
-);
-begin
-  P92Boot;
-
-  OnPreload;
-  OnReady;
-end;
 
 procedure InitSDL(const aDisplayScale: smallint);
 begin
