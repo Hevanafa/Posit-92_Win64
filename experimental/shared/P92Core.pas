@@ -1,8 +1,8 @@
 unit P92Core;
 
 {$Mode ObjFPC}
-{$H-}
-{$J+}
+{$H-}  { Use ShortStrings }
+{$J+}  { Don't allow assignments to typed consts }
 
 interface
 
@@ -80,7 +80,10 @@ uses
 {$endif}
   ;
 
+{$ifdef Windows}
 var
+  done: boolean;
+
   displayScale: smallint;
   window: PSDL_Window;
   renderer: PSDL_Renderer;
@@ -90,6 +93,7 @@ var
 
 type
   TGenericCallback = procedure;
+{$endif}
 
 type
   TEngineRunStates = (
@@ -341,6 +345,316 @@ begin
   OnReady;
 
   { TODO: Game loop }
+end;
+
+procedure InitSDL(const aDisplayScale: smallint);
+begin
+  if SDL_Init(SDL_INIT_VIDEO) <> 0 then begin
+    writeln('SDL_Init failed!');
+    halt(1)
+  end;
+
+  displayScale := aDisplayScale;
+
+  window := SDL_CreateWindow(
+    'SDL2 Window',
+    SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+    vgaWidth * displayScale, vgaHeight * displayScale,
+    SDL_WINDOW_SHOWN);
+
+  renderer := SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+  SDL_RenderSetLogicalSize(renderer, vgaWidth, vgaHeight);
+
+  vgaTexture := SDL_CreateTexture(
+    renderer,
+    SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING,
+    vgaWidth, vgaHeight);
+
+  HwSetRenderer(renderer)
+end;
+
+procedure SetTitle(const value: string);
+begin
+  SDL_SetWindowTitle(window, @value[1])
+end;
+
+
+procedure UpdateSDL;
+var
+  event: TSDL_Event;
+  keyEvent: PSDL_KeyboardEvent;
+  dosScancode: integer;
+  mouseEvent: PSDL_MouseMotionEvent;
+  buttonEvent: PSDL_MouseButtonEvent;
+begin
+  while SDL_PollEvent(@event) <> 0 do begin
+    { case event.eventType of } { SDL2Wrapper }
+    case event.type_ of
+      { SDL_QUIT_: } { SDL2Wrapper }
+      SDL_QUITEV:
+        done := true;
+
+      { Keyboard }
+      SDL_KEYDOWN: begin
+        keyEvent := PSDL_KeyboardEvent(@event);
+        if keyEvent^.repeat_ = 0 then begin
+          dosScancode := SDLToDOSScancode(keyEvent^.keysym.scancode);
+
+          if dosScancode <> 0 then
+            keyState[dosScancode] := true;
+        end;
+      end;
+
+      SDL_KEYUP: begin
+        keyEvent := PSDL_KeyboardEvent(@event);
+        dosScancode := SDLToDOSScancode(keyEvent^.keysym.scancode);
+
+        if dosScancode <> 0 then
+          keyState[dosScancode] := false;
+      end;
+
+      { Mouse }
+      SDL_MOUSEMOTION: begin
+        mouseEvent := PSDL_MouseMotionEvent(@event);
+        mouseX := mouseEvent^.x;
+        mouseY := mouseEvent^.y;
+      end;
+
+      SDL_MOUSEBUTTONDOWN: begin
+        buttonEvent := PSDL_MouseButtonEvent(@event);
+        case buttonEvent^.button of
+          SDL_BUTTON_LEFT:
+            mouseButton := mouseButton or MouseButtonLeft;
+          SDL_BUTTON_RIGHT:
+            mouseButton := mouseButton or MouseButtonRight;
+        end;
+      end;
+
+      SDL_MOUSEBUTTONUP: begin
+        buttonEvent := PSDL_MouseButtonEvent(@event);
+        case buttonEvent^.button of
+          SDL_BUTTON_LEFT:
+            mouseButton := mouseButton xor MouseButtonLeft;
+          SDL_BUTTON_RIGHT:
+            mouseButton := mouseButton xor MouseButtonRight;
+        end;
+      end;
+    end;
+  end;
+end;
+
+procedure CleanupSDL;
+begin
+  { Important: Destroy objects in reverse order }
+  SDL_DestroyRenderer(renderer);
+  SDL_DestroyWindow(window);
+  SDL_Quit
+end;
+
+
+procedure HideCursor;
+begin
+  SDL_ShowCursor(SDL_DISABLE)
+end;
+
+procedure ShowCursor;
+begin
+  SDL_ShowCursor(SDL_ENABLE)
+end;
+
+function IsKeyDown(const scancode: integer): boolean;
+begin
+  isKeyDown := keyState[scancode]
+end;
+
+function LoadImage(const filename: string): longint;
+var
+  strBuffer: array[0..255] of char;
+  surface: PSDL_Surface;
+  imgHandle: longint;
+  image: PImageRef;
+  src, dest: PByte;
+begin
+  { writeLog('loadImage ' + filename); }
+
+  strpcopy(strBuffer, filename);
+  surface := IMG_Load(strBuffer);
+
+  if surface = nil then begin
+    writeLog('loadImage: Failed to load ' + filename);
+    loadImage := -1;
+    exit
+  end;
+
+  if surface^.format^.BitsPerPixel <> 32 then begin
+    WriteWarn('loadImage: Warning: ' + filename + ' is not 32 BPP!');
+    writeLog('loadImage: Convert it to 32 BPP then reload');
+    SDL_FreeSurface(surface);
+    loadImage := -1;
+    exit
+  end;
+
+  imgHandle := newImage(surface^.w, surface^.h);
+  image := getImagePtr(imgHandle);
+
+  src := PByte(surface^.pixels);
+  dest := image^.dataPtr;
+  move(src^, dest^, surface^.w * surface^.h * 4);
+
+  SDL_FreeSurface(surface);
+  loadImage := imgHandle
+end;
+
+{ 32 to 126: 0 to 94 }
+procedure LoadBMFont(const filename: string; var font: TBMFontLegacy; var fontGlyphs: array of TBMFontGlyph);
+var
+  f: text;
+  txtLine: string;
+  a: word;
+  pairs: array[0..15] of string;
+  pair: array[0..1] of string;
+  k, v: string;
+  tempGlyph: TBMFontGlyph;
+  glyphCount: word;
+begin
+  assign(f, filename);
+  {$I-} reset(f); {$I+}
+
+  if IOResult <> 0 then begin
+    writeLog('Failed to open BMFont file: ' + filename);
+    exit
+  end;
+
+  glyphCount := 0;
+
+  while not eof(f) do begin
+    readln(f, txtLine);
+
+    if startsWith(txtLine, 'info') then begin
+      split(txtLine, ' ', pairs);
+
+      for a:=0 to high(pairs) do begin
+        split(pairs[a], '=', pair);
+        k := pair[0]; v := pair[1];
+
+        { writeln('info ', k); }
+
+        if k = 'face' then
+          font.face := replaceAll(v, '"', '')
+        else if k = 'spacing' then begin
+          split(v, ',', pair);
+          font.spacing[0] := parseInt(pair[0]);
+          font.spacing[1] := parseInt(pair[1]);
+        end;
+      end;
+
+      { writeLog('font.face:' + font.face) }
+
+    end else if startsWith(txtLine, 'common') then begin
+      split(txtLine, ' ', pairs);
+
+      for a:=0 to high(pairs) do begin
+        split(pairs[a], '=', pair);
+        k := pair[0]; v := pair[1];
+        if k = 'lineHeight' then
+          font.lineHeight := parseInt(v);
+      end;
+
+    end else if startsWith(txtLine, 'page') then begin
+      split(txtLine, ' ', pairs);
+
+      for a:=0 to high(pairs) do begin
+        split(pairs[a], '=', pair);
+        k := pair[0]; v := pair[1];
+        if k = 'file' then
+          font.filename := replaceAll(v, '"', '');
+      end;
+
+    end else if startsWith(txtLine, 'char') and not startsWith(txtLine, 'chars') then begin
+      while contains(txtLine, '  ') do
+        txtLine := replaceAll(txtLine, '  ', ' ');
+
+      { Parse the whole nine first, then copy the record to the list of font glyphs }
+      split(txtLine, ' ', pairs);
+
+      for a:=0 to high(pairs) do begin
+        split(pairs[a], '=', pair);
+        k := pair[0]; v := pair[1];
+
+        { case-of can't be used with strings in Mode TP }
+        if k = 'id' then
+          tempGlyph.id := parseInt(v)
+        else if k = 'x' then
+          tempGlyph.x := parseInt(v)
+        else if k = 'y' then
+          tempGlyph.y := parseInt(v)
+        else if k = 'width' then
+          tempGlyph.width := parseInt(v)
+        else if k = 'height' then
+          tempGlyph.height := parseInt(v)
+        else if k = 'xoffset' then
+          tempGlyph.xoffset := parseInt(v)
+        else if k = 'yoffset' then
+          tempGlyph.yoffset := parseInt(v)
+        else if k = 'xadvance' then
+          tempGlyph.xadvance := parseInt(v);
+      end;
+
+      { array of glyphs starts from 0, ends at 94 }
+      { Assuming glyph.id always starts from 32 }
+      if (tempGlyph.id - 32) in [low(fontGlyphs)..high(fontGlyphs)] then begin
+        fontGlyphs[tempGlyph.id - 32] := tempGlyph;
+        inc(glyphCount)
+      end;
+    end;
+  end;
+
+  close(f);
+
+  { writeLog('Loaded ' + i32str(glyphCount) + ' glyphs'); }
+
+  font.imgHandle := loadImage(font.filename)
+end;
+
+
+function HwLoadImage(const filename: string): longint;
+var
+  surface: PSDL_Surface;
+  tex: PSDL_Texture;
+begin
+  surface := IMG_Load(pchar(ansistring(filename)));
+  if surface = nil then begin
+    writelog('IMG_Load failed: ' + SDL_GetError);
+    exit(-1)
+  end;
+
+  tex := SDL_CreateTextureFromSurface(renderer, surface);
+  if tex = nil then begin
+    writelog('CreateTexture failed: ' + SDL_GetError);
+    exit(-1)
+  end;
+
+  SDL_FreeSurface(surface);
+
+  SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
+  hwLoadImage := HwRegisterTexRef(tex, surface^.w, surface^.h);
+
+  { writelog(format('hwLoadImage %d: %s', [hwLoadImage, filename])) }
+end;
+
+procedure VgaUpload;
+begin
+  { SDL_SetRenderDrawColor(renderer, $ed, $95, $64, $ff);
+  SDL_RenderClear(renderer); }
+
+  SDL_SetTextureBlendMode(vgaTexture, SDL_BLENDMODE_BLEND);
+  SDL_UpdateTexture(vgaTexture, nil, getSurfacePtr, vgaWidth * 4); { pitch = width * 4 bytes }
+  SDL_RenderCopy(renderer, vgaTexture, nil, nil)
+end;
+
+procedure VgaPresent;
+begin
+  SDL_RenderPresent(renderer)
 end;
 {$endif}
 
