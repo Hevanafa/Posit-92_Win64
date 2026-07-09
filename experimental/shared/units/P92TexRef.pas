@@ -5,7 +5,7 @@
   This unit is only usable with SDL2 at this moment
 }
 
-unit TexRef;
+unit P92TexRef;
 
 interface
 
