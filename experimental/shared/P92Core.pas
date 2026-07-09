@@ -222,7 +222,7 @@ begin
 {$ifdef Windows}
   { imgCursor := LoadImage('assets\images\cursor.png'); }
   hwCursor := HwLoadImage('assets\images\cursor.png');
-  { TODO: LoadDefaultFont; }
+  LoadDefaultFont;
 {$endif}
 {$ifdef P92_WASM}
   HostCallOnPreload
@@ -623,10 +623,10 @@ var
 begin
   fontHandle := FindUnusedBMFontHandle;
 
-  { TODO: Investigate this }
-  { bmfonts[fontHandle].status := AssetStatusLoading;
-  bmfonts[fontHandle].errorCode := 0; }
+  bmfonts[fontHandle].status := AssetStatusLoading;
+  bmfonts[fontHandle].errorCode := 0;
 
+  LoadBMFont := fontHandle;
   font := BorrowBMFontPtr(fontHandle);
 
   assign(f, filename);
@@ -726,10 +726,8 @@ begin
   close(f);
 
   { writeLog('Loaded ' + i32str(glyphCount) + ' glyphs'); }
-  {
   bmfonts[fontHandle].status := AssetStatusReady;
   bmfonts[fontHandle].errorCode := 0;
-  }
 
   font^.texHandle := LoadImage(textureFilename)
 end;

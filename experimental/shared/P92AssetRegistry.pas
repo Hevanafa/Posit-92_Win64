@@ -66,8 +66,8 @@ function RequestImage(const path: string): TTextureHandle;
 
 { function GetTextureEntryPtr(const texHandle: TTextureHandle): PSoftwareTexEntry; }
 
-function BorrowBMFontEntryPtr(const bmfontHandle: longint): PBMFontEntry;
-function BorrowBMFontPtr(const bmfontHandle: longint): PBMFont;
+function BorrowBMFontEntryPtr(const bmfontHandle: TBMFontHandle): PBMFontEntry;
+function BorrowBMFontPtr(const bmfontHandle: TBMFontHandle): PBMFont;
 
 {$ifdef P92_WASM}
 procedure JsRequestBMFont(bmfontHandle: longint); external 'env' name 'JsRequestBMFont';
@@ -97,6 +97,7 @@ procedure PascalSoundFailed(sndHandle: longint; errorCode: smallint); public nam
 implementation
 
 uses
+  SysUtils,
   P92Conversions, P92Logger, P92Panic, P92Strings
 {$ifdef P92_WASM}
   , P92InteropBuf
@@ -235,7 +236,7 @@ begin
   GetTextureEntryPtr := @textures[texHandle]
 end; }
 
-function BorrowBMFontEntryPtr(const bmfontHandle: longint): PBMFontEntry;
+function BorrowBMFontEntryPtr(const bmfontHandle: TBMFontHandle): PBMFontEntry;
 begin
   if (bmfontHandle < low(bmfonts)) or (bmfontHandle > high(bmfonts)) then
     PanicHalt('GetBMFontEntry: Invalid bmfontHandle: ' + I32Str(bmfontHandle));
@@ -246,10 +247,10 @@ begin
   BorrowBMFontEntryPtr := @bmfonts[bmfontHandle]
 end;
 
-function BorrowBMFontPtr(const bmfontHandle: longint): PBMFont;
+function BorrowBMFontPtr(const bmfontHandle: TBMFontHandle): PBMFont;
 begin
-  if bmfonts[bmfontHandle].status <> AssetStatusReady then
-    PanicHalt('Attempting to use bmfont ' + i32str(bmfontHandle));
+  { if bmfonts[bmfontHandle].status <> AssetStatusReady then
+    raise Exception.Create('Attempting to use bmfont ' + i32str(bmfontHandle)); }
 
   BorrowBMFontPtr := @bmfonts[bmfontHandle]
 end;
