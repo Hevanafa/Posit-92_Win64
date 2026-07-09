@@ -8,8 +8,8 @@ uses
   SysUtils, SDL2,
   Posit92,
   Keyboard, Mouse,
-  ImgRef, ImgRefFast, TexRef,
-  Logger, Timing, VGA,
+  P92Tex, P92TexDraw, TexRef,
+  Logger, Timing, P92VGA,
   Assets;
 
 const

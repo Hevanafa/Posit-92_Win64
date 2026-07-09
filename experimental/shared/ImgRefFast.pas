@@ -1,5 +1,6 @@
 { 
-  ImgRefFast unit - Part of Posit-92 game engine
+  ImgRefFast unit (legacy)
+  Part of Posit-92 game engine
   Hevanafa
   
   Based on SprFast unit
@@ -54,7 +55,7 @@ procedure sprFlipInPlace(const imgHandle: longint; const flip: smallint);
 
 implementation
 
-uses Logger, Conv, ImgRef, Maths, Panic, VGA;
+uses Logger, Conv, ImgRef, P92Maths, P92Panic, P92VGA;
 
 procedure spr(const imgHandle: longint; const x, y: smallint);
 var

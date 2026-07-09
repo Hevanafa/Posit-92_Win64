@@ -5,21 +5,19 @@
   Trimmed down version of LOGGER.PAS from Posit-92
 }
 
-unit Logger;
+unit P92Logger;
 
 {$Mode ObjFPC}
-{$H-}{$J-}
+{$H+}
+{$J-}
 
 interface
 
-{$ifdef WASM}
+{$ifdef P92_WASM}
 { Must be registered in importObject }
-procedure writeLogI32(const value: longint); external 'env' name 'writeLogI32';
-procedure writeLogF32(const value: double); external 'env' name 'writeLogF32';
-
-function getLogBuffer: pointer; public name 'getLogBuffer';
-{ Forwards logBuffer to JS }
-procedure flushLog; external 'env' name 'flushLog';
+procedure WriteLogI32(const value: longint); external 'env' name 'WriteLogI32';
+procedure WriteLogF32(const value: double); external 'env' name 'WriteLogF32';
+procedure FlushLog; external 'env' name 'FlushLog';
 {$endif}
 
 {$ifdef Windows}
@@ -31,14 +29,13 @@ procedure writeLogF32(const value: double);
 procedure writeWarn(const msg: string);
 {$endif}
 
-procedure writeLog(const msg: string);
+procedure WriteLog(const msg: string);
 
 
 implementation
 
-{$ifdef WASM}
-var
-  logBuffer: array[0..255] of byte;
+{$ifdef P92_WASM}
+uses P92InteropBuf;
 {$endif}
 
 {$ifdef Windows}
@@ -51,33 +48,12 @@ var
   logOpened: boolean;
 {$endif}
 
-function getLogBuffer: pointer;
+
+{$ifdef P92_WASM}
+procedure WriteLog(const msg: string);
 begin
-{$ifdef WASM}
-  getLogBuffer := @logBuffer
-{$else}
-  getLogBuffer := nil
-{$endif}
-end;
-
-
-{$ifdef WASM}
-procedure writeLog(const msg: string);
-var
-  a: byte;
-  len: word;
-begin
-  len := length(msg);
-
-  { Cap length to 255 }
-  if len > 255 then len := 255;
-
-  logBuffer[0] := len;
-  for a:=1 to len do
-    logBuffer[a] := ord(msg[a]);
-
-  { JS will read logBuffer }
-  flushLog
+  WriteInteropString(msg);
+  FlushLog
 end;
 {$endif}
 

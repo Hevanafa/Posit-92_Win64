@@ -1,9 +1,10 @@
 {
-  Maths unit - Part of Posit-92 game engine
-  Hevanafa
+  Maths unit
+  Part of Posit-92 game engine
+  By Hevanafa
 }
 
-unit Maths;
+unit P92Maths;
 
 {$Mode ObjFPC}
 {$H+}{$J-}
@@ -24,7 +25,7 @@ function ArcTan2(const y, x: double): double;
 
 implementation
 
-uses Panic;
+uses P92Panic;
 
 function clamp(const value, min, max: double): double;
 begin
@@ -64,7 +65,7 @@ function i32power(const i, exp: longint): longint;
 var
   a: longint;
 begin
-  if exp < 0 then panicHalt('i32power: Negative exp isn''t supported!');
+  if exp < 0 then PanicHalt('i32power: Negative exp isn''t supported!');
   if exp = 0 then begin i32power := 1; exit end;
   if exp = 1 then begin i32power := i; exit end;
 
@@ -77,7 +78,7 @@ function f32power(const i: double; exp: longint): double;
 var
   a: longint;
 begin
-  if exp < 0 then panicHalt('f32power: Negative exp isn''t supported!');
+  if exp < 0 then PanicHalt('f32power: Negative exp isn''t supported!');
   if exp = 0 then begin f32power := 1; exit end;
   if exp = 1 then begin f32power := i; exit end;
 

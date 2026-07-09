@@ -1,6 +1,7 @@
 {
-  ImgRef unit - Part of Posit-92 game engine
-  Hevanafa
+  ImgRef unit (legacy)
+  Part of Posit-92 game engine
+  By Hevanafa
 
   Base unit for ImgRefFast and ImgRefComp
   Most of the procedures & functions here are based on Bitmap and SprFast units
@@ -63,7 +64,7 @@ uses
 {$endif}
 {$ifdef Windows}
 {$endif}
-  VGA;
+  P92VGA;
 
 const
   MaxImageRefs = 256;
