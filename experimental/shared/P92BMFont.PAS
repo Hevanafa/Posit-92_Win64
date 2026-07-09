@@ -51,6 +51,8 @@ procedure FreeBMFontLegacy(
   var fontGlyphs: array of TBMFontGlyph;
   const freeImgHandle: boolean);
 
+procedure FreeBMFont(const fontHandle: TBMFontHandle);
+
 procedure PrintBMFont(
   const fontHandle: TBMFontHandle;
   const text: string;
@@ -150,6 +152,21 @@ begin
   fillchar(font, sizeof(TBMFontLegacy), 0);
   for a:=0 to high(fontGlyphs) do
     fillchar(fontGlyphs[a], sizeof(TBMFontGlyph), 0);
+end;
+
+procedure FreeBMFont(const fontHandle: TBMFontHandle);
+var
+  a: word;
+begin
+  bmfonts[fontHandle].status := AssetStatusEmpty;
+  bmfonts[fontHandle].errorCode := 0;
+
+  fillchar(bmfonts[fontHandle].font, sizeof(TBMFont), 0);
+
+  for a:=0 to high(bmfonts[fontHandle].font.glyphs) do
+    fillchar(bmfonts[fontHandle].font.glyphs[a], sizeof(TBMFontGlyph), 0);
+
+  FreeTexture(BorrowBMFontPtr(fontHandle)^.texHandle)
 end;
 
 procedure PrintBMFont(

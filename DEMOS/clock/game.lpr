@@ -82,7 +82,7 @@ end;
 procedure OnCleanup;
 begin
   showCursor;
-  freeBMFont(defaultFont, defaultFontGlyphs, true);
+  freeBMFont(pico8Font)
 end;
 
 procedure Update;
@@ -115,7 +115,10 @@ begin
   end;
 
   { printDefault(format('%.2d:%.2d:%.2d', [trunc(h), trunc(m), trunc(s)]), 10, 10); }
-  printDefaultCentred(FormatDateTime('dd-mm-yyyy', now), vgaWidth div 2, vgaHeight * 3 div 4 - defaultFont.lineHeight - 2);
+  printDefaultCentred(
+    FormatDateTime('dd-mm-yyyy', now),
+    vgaWidth div 2,
+    vgaHeight * 3 div 4 - BorrowBMFontPtr(pico8Font)^.lineHeight - 2);
 
   dotw := DayOfTheWeek(now);
   { testStr := format('Today is %s', [GetDayName(dotw)]); }
