@@ -48,15 +48,19 @@ var
   bmfonts: array[1..9] of TBMFontEntry;
   sounds: array[1..255] of TSoundEntry;
 
+{$ifdef P92_WASM}
 function GetAssetReadyCount: longword;
 function GetAssetTotalCount: longword;
 function AllAssetsReady: boolean;
+{$endif}
 
 procedure InitAssetRegistry;
 function FindUnusedTextureHandle: TTextureHandle;
 
+{$ifdef P92_WASM}
 procedure JsRequestImage(texHandle: longint); external 'env' name 'JsRequestImage';
 function RequestImage(const path: string): TTextureHandle;
+{$endif}
 
 { function GetTextureEntryPtr(const texHandle: TTextureHandle): PSoftwareTexEntry; }
 
@@ -65,7 +69,6 @@ function BorrowBMFontPtr(const bmfontHandle: longint): PBMFont;
 
 {$ifdef P92_WASM}
 procedure JsRequestBMFont(bmfontHandle: longint); external 'env' name 'JsRequestBMFont';
-{$endif}
 function RequestBMFont(const path: string): longint;
 
 function GetBMFontBufferPtr: pointer; public name 'GetBMFontBufferPtr';
@@ -73,9 +76,7 @@ function GetBMFontBufferLen: smallint; public name 'GetBMFontBufferLen';
 procedure SetBMFontBufferLen(value: smallint); public name 'SetBMFontBufferLen';
 function GetBMFontBufferCapacity: smallint; public name 'GetBMFontBufferCapacity';
 
-{$ifdef P92_WASM}
 procedure JsRequestSound(sndHandle: longint); external 'env' name 'JsRequestSound';
-{$endif}
 function RequestSound(const path: string): longint;
 
 { Reporting procedures }
@@ -88,6 +89,7 @@ procedure PascalBMFontFailed(bmfontHandle: longint; errorCode: smallint); public
 
 procedure PascalSoundLoaded(sndHandle: longint); public name 'PascalSoundLoaded';
 procedure PascalSoundFailed(sndHandle: longint; errorCode: smallint); public name 'PascalSoundFailed';
+{$endif}
 
 
 implementation
@@ -203,6 +205,7 @@ begin
   FindUnusedSoundHandle := -1
 end;
 
+{$ifdef P92_WASM}
 function RequestImage(const path: string): TTextureHandle;
 var
   texHandle: longint;
@@ -220,7 +223,7 @@ begin
 
   RequestImage := texHandle
 end;
-
+{$endif}
 
 { function GetTextureEntryPtr(const texHandle: TTextureHandle): PSoftwareTexEntry;
 begin
@@ -249,6 +252,7 @@ begin
   BorrowBMFontPtr := @bmfonts[bmfontHandle]
 end;
 
+{$ifdef P92_WASM}
 function RequestBMFont(const path: string): longint;
 var
   handle: longint;
@@ -306,6 +310,7 @@ begin
 
   RequestSound := sndHandle
 end;
+{$endif}
 
 { Report asset state to Pascal }
 
@@ -348,6 +353,7 @@ begin
 end;
 }
 
+{$ifdef P92_WASM}
 procedure ParseBMFontLine(bmfontHandle: longint; line: ShortString);
 var
   filename: shortstring;
@@ -542,5 +548,6 @@ begin
   sounds[sndHandle].status := AssetStatusFailed;
   sounds[sndHandle].errorCode := errorCode
 end;
+{$endif}
 
 end.
