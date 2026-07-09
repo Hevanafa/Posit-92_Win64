@@ -7,9 +7,9 @@ program Game;
 uses
   SysUtils, SDL2,
   Posit92,
-  Keyboard, Mouse,
+  Keyboard, P92Mouse,
   P92Tex, P92TexDraw, TexRef,
-  Logger, Timing, P92VGA,
+  Logger, Timing, P92Panic, P92VGA,
   Assets;
 
 const
