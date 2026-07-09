@@ -17,16 +17,8 @@ var
   { Game state variables }
   gameTime: double;
 
-procedure DrawMouse;
-begin
-  { spr(imgCursor, mouseX, mouseY) }
-  HwSpr(hwCursor, mouseX, mouseY)
-end;
-
 procedure OnPreload;
 begin
-  { imgCursor := LoadImage('assets\images\cursor.png'); }
-  hwCursor := HwLoadImage('assets\images\cursor.png');
   imgDosuEXE[0] := LoadImage('assets\images\dosu_1.png');
   imgDosuEXE[1] := LoadImage('assets\images\dosu_2.png');
 
@@ -39,10 +31,8 @@ end;
 
 procedure OnReady;
 begin
-  SetTitle('Posit-92 with SDL2');
-
-  OnPreload;
   HideCursor;
+  SetTitle('Posit-92 with SDL2');
 
   { Init your game state here }
   gameTime := 0.0
@@ -58,18 +48,12 @@ begin
   FreeTexture(imgFullFont);
 
   FreeTexture(defaultFont.imgHandle);
-
-  freemem(getSurfacePtr);
-
-  { Your OnCleanup code here (after setting `done` to true) }
-  CloseLogger;
-  CleanupSDL
 end;
 
 procedure Update;
 begin
   { Your Update logic here }
-  if IsKeyDown(SC_ESCAPE) then done := true;
+  if IsKeyDown(SC_ESCAPE) then SignalDone;
 
   gameTime := gameTime + DeltaTime
 end;
@@ -87,21 +71,13 @@ begin
   printDefaultCentred('Hello world!', vgaWidth div 2, 120);
 
   printDefault(format('Mouse: { %d, %d }', [mouseX, mouseY]), 10, 10);
-
-  VgaUpload;
-
-  { Begin hardware layer }
-
-  DrawMouse;
-
-  VgaPresent
 end;
 
 
 {$R *.res}
 
 begin
-  P92Start(@Init, @OnPreload, @OnReady, @Update, @Draw, @OnCleanup);
+  P92Start(@OnPreload, @OnReady, @Update, @Draw, @OnCleanup);
 
 end.
 

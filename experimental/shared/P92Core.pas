@@ -36,10 +36,13 @@ procedure PrintWrap(const txt: string; x, y, wrapWidth: smallint);
 type
   TCallback = procedure;
 
+procedure SignalDone;
 procedure P92Start(
-  Init: TCallback;
   OnPreload: TCallback;
-  OnReady: TCallback
+  OnReady: TCallback;
+  Update: TCallback;
+  Draw: TCallback;
+  OnCleanup: TCallback
 );
 
 procedure InitSDL(const aDisplayScale: smallint = 2);
@@ -68,7 +71,7 @@ implementation
 
 uses
 {$ifdef Windows}
-  SysUtils,
+  SysUtils, SDL2_Image,
   P92Fonts, P92Conversions, P92AssetRegistry, P92Logger,
   P92Keyboard, P92Mouse,
   P92Tex, P92TexDraw, P92TexRef,
@@ -107,6 +110,8 @@ var
   keyState: array[0..127] of boolean;  { use DOS scancode }
 
   lastFrameTime, frameTimeNow, elapsed: longword; { in ms }
+
+  hwCursor: longint;
 {$endif}
 
 type
@@ -212,6 +217,10 @@ begin
   if enableDefaultBMFont then
     LoadDefaultFont;
 
+{$ifdef Windows}
+  { imgCursor := LoadImage('assets\images\cursor.png'); }
+  hwCursor := HwLoadImage('assets\images\cursor.png');
+{$endif}
 {$ifdef P92_WASM}
   HostCallOnPreload
 {$endif}
@@ -282,12 +291,20 @@ begin
 {$endif}
 end;
 
+procedure DrawMouse;
+begin
+  { spr(imgCursor, mouseX, mouseY) }
+  HwSpr(hwCursor, mouseX, mouseY)
+end;
+
 procedure P92Draw;
 begin
   cls($FF000000);
 
+{$ifdef P92_WASM}
   if engineRunState = ersPreload then
     RenderLoadingScreen;
+{$endif}
 end;
 
 procedure P92AfterDraw;
@@ -301,7 +318,9 @@ begin
   WebGLPresent;
 {$else}
   VgaUpload;
-  VgaPresent;
+  { Begin hardware layer }
+  DrawMouse;
+  VgaPresent
 {$endif}
 end;
 
@@ -360,8 +379,21 @@ begin
 end;
 
 {$ifdef Windows}
+procedure SignalDone;
+begin
+ done := true
+end;
+
+procedure P92AfterCleanup;
+begin
+  freemem(getSurfacePtr);
+
+  { Your OnCleanup code here (after setting `done` to true) }
+  CloseLogger;
+  CleanupSDL
+end;
+
 procedure P92Start(
-  Init: TCallback;
   OnPreload: TCallback;
   OnReady: TCallback;
   Update: TCallback;
@@ -400,7 +432,8 @@ begin
     SDL_Delay(1)
   end;
 
-  OnCleanup
+  OnCleanup;
+  P92AfterCleanup
 end;
 
 procedure InitSDL(const aDisplayScale: smallint);
@@ -528,7 +561,7 @@ var
   strBuffer: array[0..255] of char;
   surface: PSDL_Surface;
   imgHandle: longint;
-  image: PImageRef;
+  texture: PSoftwareTex;
   src, dest: PByte;
 begin
   { writeLog('loadImage ' + filename); }
@@ -550,11 +583,11 @@ begin
     exit
   end;
 
-  imgHandle := newImage(surface^.w, surface^.h);
-  image := getImagePtr(imgHandle);
+  imgHandle := NewTexture(surface^.w, surface^.h);
+  texture := BorrowTexturePtr(imgHandle);
 
   src := PByte(surface^.pixels);
-  dest := image^.dataPtr;
+  dest := texture^.pixelData;
   move(src^, dest^, surface^.w * surface^.h * 4);
 
   SDL_FreeSurface(surface);

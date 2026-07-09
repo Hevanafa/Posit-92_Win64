@@ -17,8 +17,6 @@ var
   imgDosuEXE: array[0..1] of longint;
   imgFullFont: longint;
 
-  hwCursor: longint;
-
 { BMFont boilerplate }
 procedure printDefault(const text: string; const x, y: integer);
 procedure printDefaultCentred(const text: string; const cx, y: integer);
