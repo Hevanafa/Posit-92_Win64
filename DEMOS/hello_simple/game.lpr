@@ -38,12 +38,8 @@ procedure OnCleanup;
 begin
   ShowCursor;
 
-  FreeTexture(imgCursor);
   FreeTexture(imgDosuEXE[0]);
   FreeTexture(imgDosuEXE[1]);
-  FreeTexture(imgFullFont);
-
-  FreeTexture(defaultFont.imgHandle);
 end;
 
 procedure Update;

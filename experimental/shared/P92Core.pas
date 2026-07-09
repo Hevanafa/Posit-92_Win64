@@ -222,6 +222,7 @@ begin
 {$ifdef Windows}
   { imgCursor := LoadImage('assets\images\cursor.png'); }
   hwCursor := HwLoadImage('assets\images\cursor.png');
+  { TODO: LoadDefaultFont; }
 {$endif}
 {$ifdef P92_WASM}
   HostCallOnPreload
@@ -383,14 +384,20 @@ end;
 {$ifdef Windows}
 procedure SignalDone;
 begin
- done := true
+  done := true
 end;
 
-procedure P92AfterCleanup;
+procedure P92Cleanup;
 begin
-  freemem(getSurfacePtr);
+  { TODO: free both the imgCursor and the default font }
+  { FreeTexture(imgCursor);
+  FreeTexture(defaultFont.imgHandle); }
 
-  { Your OnCleanup code here (after setting `done` to true) }
+  freemem(getSurfacePtr);
+end;
+
+procedure P92Shutdown;
+begin
   CloseLogger;
   CleanupSDL
 end;
@@ -435,7 +442,9 @@ begin
   end;
 
   OnCleanup;
-  P92AfterCleanup
+
+  P92Cleanup;
+  P92Shutdown
 end;
 
 procedure InitSDL(const aDisplayScale: smallint);
@@ -562,7 +571,7 @@ function LoadImage(const filename: string): TTextureHandle;
 var
   strBuffer: array[0..255] of char;
   surface: PSDL_Surface;
-  imgHandle: longint;
+  texHandle: TTextureHandle;
   texture: PSoftwareTex;
   src, dest: PByte;
 begin
@@ -585,15 +594,15 @@ begin
     exit
   end;
 
-  imgHandle := NewTexture(surface^.w, surface^.h);
-  texture := BorrowTexturePtr(imgHandle);
+  texHandle := NewTexture(surface^.w, surface^.h);
+  texture := BorrowTexturePtr(texHandle);
 
   src := PByte(surface^.pixels);
   dest := texture^.pixelData;
   move(src^, dest^, surface^.w * surface^.h * 4);
 
   SDL_FreeSurface(surface);
-  loadImage := imgHandle
+  loadImage := texHandle
 end;
 
 { 32 to 126: 0 to 94 }
@@ -601,16 +610,23 @@ function LoadBMFont(const filename: string): TBMFontHandle;
 var
   fontHandle: TBMFontHandle;
   font: PBMFont;
+
   f: text;
+  textureFilename: string;
   txtLine: string;
   a: word;
   pairs: array[0..15] of string;
   pair: array[0..1] of string;
   k, v: string;
-  tempGlyph: TBMFontGlyph;
+  newGlyph: TBMFontGlyph;
   glyphCount: word;
 begin
   fontHandle := FindUnusedBMFontHandle;
+
+  { TODO: Investigate this }
+  { bmfonts[fontHandle].status := AssetStatusLoading;
+  bmfonts[fontHandle].errorCode := 0; }
+
   font := BorrowBMFontPtr(fontHandle);
 
   assign(f, filename);
@@ -665,14 +681,16 @@ begin
         k := pair[0]; v := pair[1];
 
         if k = 'file' then
-          font^.filename := replaceAll(v, '"', '');
+          textureFilename := replaceAll(v, '"', '');
       end;
 
     end else if startsWith(txtLine, 'char') and not startsWith(txtLine, 'chars') then begin
       while contains(txtLine, '  ') do
         txtLine := replaceAll(txtLine, '  ', ' ');
 
-      { Parse the whole nine first, then copy the record to the list of font glyphs }
+      newGlyph := default(TBMFontGlyph);
+
+      { Parse the whole line first, then copy the record to the list of font glyphs }
       split(txtLine, ' ', pairs);
 
       for a:=0 to high(pairs) do begin
@@ -681,27 +699,25 @@ begin
 
         { case-of can't be used with strings in Mode TP }
         if k = 'id' then
-          tempGlyph.id := parseInt(v)
+          newGlyph.id := parseInt(v)
         else if k = 'x' then
-          tempGlyph.x := parseInt(v)
+          newGlyph.x := parseInt(v)
         else if k = 'y' then
-          tempGlyph.y := parseInt(v)
+          newGlyph.y := parseInt(v)
         else if k = 'width' then
-          tempGlyph.width := parseInt(v)
+          newGlyph.width := parseInt(v)
         else if k = 'height' then
-          tempGlyph.height := parseInt(v)
+          newGlyph.height := parseInt(v)
         else if k = 'xoffset' then
-          tempGlyph.xoffset := parseInt(v)
+          newGlyph.xoffset := parseInt(v)
         else if k = 'yoffset' then
-          tempGlyph.yoffset := parseInt(v)
+          newGlyph.yoffset := parseInt(v)
         else if k = 'xadvance' then
-          tempGlyph.xadvance := parseInt(v);
+          newGlyph.xadvance := parseInt(v);
       end;
 
-      { array of glyphs starts from 0, ends at 94 }
-      { Assuming glyph.id always starts from 32 }
-      if (tempGlyph.id - 32) in [low(fontGlyphs)..high(fontGlyphs)] then begin
-        fontGlyphs[tempGlyph.id - 32] := tempGlyph;
+      if newGlyph.id in [low(font^.glyphs)..high(font^.glyphs)] then begin
+        font^.glyphs[newGlyph.id] := newGlyph;
         inc(glyphCount)
       end;
     end;
@@ -710,8 +726,12 @@ begin
   close(f);
 
   { writeLog('Loaded ' + i32str(glyphCount) + ' glyphs'); }
+  {
+  bmfonts[fontHandle].status := AssetStatusReady;
+  bmfonts[fontHandle].errorCode := 0;
+  }
 
-  font.imgHandle := loadImage(font.filename)
+  font^.texHandle := LoadImage(textureFilename)
 end;
 
 
