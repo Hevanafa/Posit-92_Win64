@@ -21,12 +21,12 @@ procedure FlushLog; external 'env' name 'FlushLog';
 {$endif}
 
 {$ifdef Windows}
-procedure initLogger;
-procedure closeLogger;
+procedure InitLogger;
+procedure CloseLogger;
 
-procedure writeLogI32(const value: longint);
-procedure writeLogF32(const value: double);
-procedure writeWarn(const msg: string);
+procedure WriteLogI32(const value: longint);
+procedure WriteLogF32(const value: double);
+procedure WriteWarn(const msg: string);
 {$endif}
 
 procedure WriteLog(const msg: string);
@@ -58,7 +58,7 @@ end;
 {$endif}
 
 {$ifdef Windows}
-procedure initLogger;
+procedure InitLogger;
 begin
   assign(logFile, logFilename);
   {$I-}
@@ -72,7 +72,7 @@ begin
   end;
 end;
 
-procedure closeLogger;
+procedure CloseLogger;
 begin
   if logOpened then
     close(logFile);
@@ -88,7 +88,7 @@ begin
   flush(logFile)
 end;
 
-procedure writeLogI32(const value: longint);
+procedure WriteLogI32(const value: longint);
 begin
   textColor(lightMagenta);
   writeln(value);
@@ -98,7 +98,7 @@ begin
   flush(logFile)
 end;
 
-procedure writeLogF32(const value: double);
+procedure WriteLogF32(const value: double);
 begin
   textColor(lightMagenta);
   writeln(value);
@@ -108,7 +108,7 @@ begin
   flush(logFile)
 end;
 
-procedure writeWarn(const msg: string);
+procedure WriteWarn(const msg: string);
 begin
   textColor(yellow);
   writeln(msg);

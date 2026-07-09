@@ -46,7 +46,7 @@ begin
   initDeltaTime;
 
   InitSDL;
-  initLogger;
+  InitLogger;
 end;
 
 procedure afterInit;
@@ -74,7 +74,7 @@ begin
   freemem(getSurfacePtr);
 
   { Your cleanup code here (after setting `done` to true) }
-  closeLogger;
+  CloseLogger;
   CleanupSDL
 end;
 

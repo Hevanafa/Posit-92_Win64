@@ -195,7 +195,7 @@ begin
   end;
 
   if surface^.format^.BitsPerPixel <> 32 then begin
-    writeWarn('loadImage: Warning: ' + filename + ' is not 32 BPP!');
+    WriteWarn('loadImage: Warning: ' + filename + ' is not 32 BPP!');
     writeLog('loadImage: Convert it to 32 BPP then reload');
     SDL_FreeSurface(surface);
     loadImage := -1;
