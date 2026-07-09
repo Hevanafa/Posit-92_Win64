@@ -8,7 +8,7 @@ uses
   SysUtils, SDL2,
   Posit92,
   Keyboard, P92Mouse,
-  P92Tex, P92TexDraw, TexRef,
+  P92Tex, P92TexDraw, TexRef, P92Geometry,
   Logger, Timing, P92Panic, P92VGA,
   Assets;
 
