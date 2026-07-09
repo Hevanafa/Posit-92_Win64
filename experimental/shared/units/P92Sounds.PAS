@@ -1,10 +1,18 @@
-unit Sounds;
+{
+  Sounds unit
+  Part of Posit-92 game engine
+  By Hevanafa
+
+  This unit is specific to the Windows version
+}
+unit P92Sounds;
 
 {$Mode ObjFPC}
 {$H+}{$J-}
 
 interface
 
+{$ifdef Windows}
 uses SDL2Wrapper;
 
 type
@@ -18,10 +26,12 @@ procedure CleanupSounds;
 procedure LoadSound(const key: longint; const filename: string);
 procedure PlaySound(const key: longint);
 procedure SetSoundVolume(const key: longint; const volume: single);
+{$endif}
 
 
 implementation
 
+{$ifdef Windows}
 uses
   SysUtils,
   P92Conversions, P92Maths, P92Logger;
@@ -138,5 +148,6 @@ begin
   if (key < 0) or (key > high(soundList)) then exit;
   soundList[key].volume := clamp(volume, 0.0, 1.0)
 end;
+{$endif}
 
 end.
