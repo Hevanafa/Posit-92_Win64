@@ -107,7 +107,7 @@
       </Debugging>
     </Linking>
     <Other>
-      <CustomOptions Value="-dUSE_SDL2"/>
+      <CustomOptions Value="-dP92_SDL2"/>
     </Other>
   </CompilerOptions>
   <Debugging>

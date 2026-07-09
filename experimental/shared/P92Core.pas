@@ -36,6 +36,9 @@ uses
   P92Sounds, P92Timing,
   P92Keyboard, P92Mouse,
   P92TexDraw, P92VGA
+{$ifdef Windows}
+  , Posit92
+{$endif}
 {$ifdef P92_WASM}
   , P92WasmHost, P92WasmMemMgr, P92InteropBuf, P92Loading,
 {$endif}
@@ -73,11 +76,13 @@ begin
   GetCgaFontHandle := cgaFontHandle
 end;
 
+{$ifdef P92_WASM}
 function GetBootOptionBoolean(key: string): boolean;
 begin
   WriteInteropString(key);
   GetBootOptionBoolean := JsGetBootOptionBoolean
 end;
+{$endif}
 
 procedure InitEngine;
 begin
@@ -85,8 +90,11 @@ begin
   if DebugEngineRunStates then
     writelog('ersBoot');
 
+{$ifdef P92_WASM}
   InitHeapMgr;
   InitInteropBuffer;
+{$endif}
+
   InitDeltaTime;
   InitFPSCounter;
 
@@ -116,7 +124,17 @@ end;
 
 procedure P92Boot;
 begin
+{$ifdef P92_WASM}
   cgaFontHandle := RequestImage('assets/CGA8x8.png');
+{$endif}
+
+{$ifdef P92_SDL2}
+  initVideoMem(320, 200, getmem(320 * 200 * 4));
+  initDeltaTime;
+
+  InitSDL;
+  InitLogger;
+{$endif}
 end;
 
 procedure InitPreloadState;

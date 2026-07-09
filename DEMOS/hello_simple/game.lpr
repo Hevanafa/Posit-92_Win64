@@ -21,13 +21,13 @@ var
   { Game state variables }
   gameTime: double;
 
-procedure drawMouse;
+procedure DrawMouse;
 begin
   { spr(imgCursor, mouseX, mouseY) }
   HwSpr(hwCursor, mouseX, mouseY)
 end;
 
-procedure loadAssets;
+procedure OnPreload;
 begin
   { imgCursor := LoadImage('assets\images\cursor.png'); }
   hwCursor := HwLoadImage('assets\images\cursor.png');
@@ -41,27 +41,18 @@ begin
   { Load more assets here }
 end;
 
-procedure init;
-begin
-  initVideoMem(320, 200, getmem(320 * 200 * 4));
-  initDeltaTime;
-
-  InitSDL;
-  InitLogger;
-end;
-
-procedure afterInit;
+procedure OnReady;
 begin
   SetTitle('Posit-92 with SDL2');
 
-  loadAssets;
+  OnPreload;
   HideCursor;
 
   { Init your game state here }
   gameTime := 0.0
 end;
 
-procedure cleanup;
+procedure Cleanup;
 begin
   ShowCursor;
 
@@ -74,23 +65,23 @@ begin
 
   freemem(getSurfacePtr);
 
-  { Your cleanup code here (after setting `done` to true) }
+  { Your Cleanup code here (after setting `done` to true) }
   CloseLogger;
   CleanupSDL
 end;
 
-procedure update;
+procedure Update;
 begin
   UpdateSDL;
-  updateDeltaTime;
+  UpdateDeltaTime;
 
-  { Your update logic here }
+  { Your Update logic here }
   if IsKeyDown(SC_ESCAPE) then done := true;
 
   gameTime := gameTime + DeltaTime
 end;
 
-procedure draw;
+procedure Draw;
 begin
   { Begin software layer }
   cls($FF6495ED);
@@ -108,7 +99,7 @@ begin
 
   { Begin hardware layer }
 
-  drawMouse;
+  DrawMouse;
 
   VgaPresent
 end;
@@ -121,8 +112,9 @@ var
 {$R *.res}
 
 begin
-  init;
-  afterInit;
+  P92Run(@Init, @OnPreload, @OnReady);
+  Init;
+  OnReady;
 
   done := false;
 
@@ -134,14 +126,14 @@ begin
 
     if elapsed >= FrameTime then begin
       lastFrameTime := frameTimeNow - (elapsed mod FrameTime); { Carry over extra time }
-      update;
-      draw
+      Update;
+      Draw
     end;
 
     SDL_Delay(1)
   end;
 
-  cleanup
+  Cleanup
 end.
 
 

@@ -17,6 +17,8 @@ uses
 var
   done: boolean;
 
+procedure P92Run;
+
 procedure InitSDL(const aDisplayScale: smallint = 2);
 procedure UpdateSDL;
 procedure CleanupSDL;
@@ -44,7 +46,7 @@ uses
   SysUtils,
   P92Conversions, P92Logger,
   P92Keyboard, P92Mouse,
-  ImgRef, TexRef,
+  P92Tex, P92TexRef,
   P92Strings, P92VGA;
 
 var
@@ -54,6 +56,21 @@ var
   vgaTexture: PSDL_Texture;
 
   keyState: array[0..127] of boolean;  { use DOS scancode }
+
+type
+  TGenericCallback = procedure;
+
+procedure P92Run(
+  init: TGenericCallback;
+  OnPreload: TGenericCallback;
+  OnReady: TGenericCallback
+);
+begin
+  P92Boot;
+
+  OnPreload;
+  OnReady;
+end;
 
 procedure InitSDL(const aDisplayScale: smallint);
 begin
