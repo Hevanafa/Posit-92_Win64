@@ -6,7 +6,7 @@ program Game;
 
 uses
   SysUtils, SDL2,
-  P92Core,
+  P92Core, P92Fonts,
   P92Colour, P92FPS,
   P92Keyboard, P92Mouse, P92Sounds,
   P92Tex, P92TexDraw, P92TexRef,
@@ -21,10 +21,6 @@ procedure OnPreload;
 begin
   imgDosuEXE[0] := LoadImage('assets\images\dosu_1.png');
   imgDosuEXE[1] := LoadImage('assets\images\dosu_2.png');
-
-  LoadBMFont(
-    'assets\fonts\nokia_cellphone_fc_8.txt',
-    defaultFont, defaultFontGlyphs);
 
   { Load more assets here }
 end;

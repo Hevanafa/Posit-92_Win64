@@ -7,7 +7,7 @@ unit P92Core;
 interface
 
 {$ifdef Windows}
-uses BMFont, SDL2;
+uses P92BMFont, SDL2;
 {$endif}
 
 {$ifdef P92_WASM}
@@ -44,10 +44,6 @@ procedure P92Start(
   Draw: TCallback;
   OnCleanup: TCallback
 );
-
-procedure InitSDL(const aDisplayScale: smallint = 2);
-procedure UpdateSDL;
-procedure CleanupSDL;
 
 procedure SetTitle(const value: string);
 
@@ -436,7 +432,7 @@ begin
   P92AfterCleanup
 end;
 
-procedure InitSDL(const aDisplayScale: smallint);
+procedure InitSDL(const aDisplayScale: smallint = 2);
 begin
   if SDL_Init(SDL_INIT_VIDEO) <> 0 then begin
     writeln('SDL_Init failed!');

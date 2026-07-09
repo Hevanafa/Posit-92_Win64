@@ -18,7 +18,7 @@ function PrintCharColour(const ch: char; const x, y: integer; const colour: long
 
 implementation
 
-uses P92AssetRegistry;
+uses P92AssetRegistry, P92Core;
 
 var
   defaultFontHandle: longint;
@@ -27,7 +27,11 @@ procedure LoadDefaultFont;
 begin
 {$ifdef P92_WASM}
   defaultFontHandle := RequestBMFont('assets/fonts/nokia_cellphone_fc_8.txt')
-{$EndIf}
+{$endif}
+
+{$ifdef Windows}
+  defaultFontHandle := LoadBMFont('assets/fonts/nokia_cellphone_fc_8.txt')
+{$endif}
 end;
 
 procedure PrintDefault(const text: string; const x, y: integer);
