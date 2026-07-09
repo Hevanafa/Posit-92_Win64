@@ -33,6 +33,15 @@ procedure Print(const txt: string; const x, y: smallint);
 procedure PrintWrap(const txt: string; x, y, wrapWidth: smallint);
 
 {$ifdef Windows}
+type
+  TGenericCallback = procedure;
+
+procedure P92Start(
+  Init: TGenericCallback;
+  OnPreload: TGenericCallback;
+  OnReady: TGenericCallback
+);
+
 procedure InitSDL(const aDisplayScale: smallint = 2);
 procedure UpdateSDL;
 procedure CleanupSDL;
@@ -59,10 +68,11 @@ implementation
 uses
 {$ifdef Windows}
   SysUtils,
-  P92Conversions, P92AssetRegistry, P92Logger,
+  P92Fonts, P92Conversions, P92AssetRegistry, P92Logger,
   P92Keyboard, P92Mouse,
-  P92Tex, P92TexRef,
-  P92Strings, P92Timing, P92FPS, P92Sounds, P92VGA
+  P92Tex, P92TexDraw, P92TexRef,
+  P92Strings, P92Timing, P92FPS, P92Sounds,
+  P92VGA
 {$endif}
 {$ifdef P92_WASM}
   P92Fonts, P92AssetRegistry,
@@ -81,6 +91,10 @@ uses
   ;
 
 {$ifdef Windows}
+const
+  TargetFPS = 60;
+  FrameTime = 1000 div TargetFPS;
+
 var
   done: boolean;
 
@@ -91,8 +105,7 @@ var
 
   keyState: array[0..127] of boolean;  { use DOS scancode }
 
-type
-  TGenericCallback = procedure;
+  lastFrameTime, frameTimeNow, elapsed: longword; { in ms }
 {$endif}
 
 type
@@ -186,33 +199,41 @@ end;
 
 procedure InitPreloadState;
 begin
+{$ifdef P92_WASM}
+  FitCanvas;
+{$endif}
+
   engineRunState := ersPreload;
 
   if DebugEngineRunStates then
     writelog('ersPreload');
 
-  FitCanvas;
-
   if enableDefaultBMFont then
     LoadDefaultFont;
 
+{$ifdef P92_WASM}
   HostCallOnPreload
+{$endif}
 end;
 
 procedure InitReadyState;
 begin
+{$ifdef P92_WASM}
+  FitCanvas;
+{$endif}
+
   engineRunState := ersReady;
 
   if DebugEngineRunStates then
     writelog('ersReady');
 
-  FitCanvas;
-
 {$ifdef P92_IMMEDIATE_GUI}
   InitImmediateGUI;
 {$endif}
 
+{$ifdef P92_WASM}
   HostCallOnReady
+{$endif}
 end;
 
 procedure P92Update;
@@ -331,7 +352,7 @@ begin
 end;
 
 {$ifdef Windows}
-procedure P92Run(
+procedure P92Start(
   Init: TGenericCallback;
   OnPreload: TGenericCallback;
   OnReady: TGenericCallback
@@ -344,7 +365,25 @@ begin
   InitReadyState;
   OnReady;
 
-  { TODO: Game loop }
+  done := false;
+
+  { Game loop }
+  lastFrameTime := SDL_GetTicks;
+
+  while not done do begin
+    frameTimeNow := SDL_GetTicks;
+    elapsed := frameTimeNow - lastFrameTime;
+
+    if elapsed >= FrameTime then begin
+      lastFrameTime := frameTimeNow - (elapsed mod FrameTime); { Carry over extra time }
+      Update;
+      Draw
+    end;
+
+    SDL_Delay(1)
+  end;
+
+  Cleanup
 end;
 
 procedure InitSDL(const aDisplayScale: smallint);

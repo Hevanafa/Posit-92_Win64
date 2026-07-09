@@ -6,16 +6,12 @@ program Game;
 
 uses
   SysUtils, SDL2,
-  Posit92,
+  P92Core,
   P92Colour, P92FPS,
   P92Keyboard, P92Mouse, P92Sounds,
   P92Tex, P92TexDraw, P92TexRef,
   P92Logger, P92Timing, P92Panic, P92VGA,
   Assets;
-
-const
-  TargetFPS = 60;
-  FrameTime = 1000 div TargetFPS;
 
 var
   { Game state variables }
@@ -52,7 +48,7 @@ begin
   gameTime := 0.0
 end;
 
-procedure Cleanup;
+procedure OnCleanup;
 begin
   ShowCursor;
 
@@ -65,7 +61,7 @@ begin
 
   freemem(getSurfacePtr);
 
-  { Your Cleanup code here (after setting `done` to true) }
+  { Your OnCleanup code here (after setting `done` to true) }
   CloseLogger;
   CleanupSDL
 end;
@@ -105,35 +101,11 @@ begin
 end;
 
 
-var
-  { done: boolean; }  { moved to Posit92 unit }
-  lastFrameTime, frameTimeNow, elapsed: longword; { in ms }
-
 {$R *.res}
 
 begin
-  P92Run(@Init, @OnPreload, @OnReady);
-  Init;
-  OnReady;
+  P92Start(@Init, @OnPreload, @OnReady, @Update, @Draw, @OnCleanup);
 
-  done := false;
-
-  lastFrameTime := SDL_GetTicks;
-
-  while not done do begin
-    frameTimeNow := SDL_GetTicks;
-    elapsed := frameTimeNow - lastFrameTime;
-
-    if elapsed >= FrameTime then begin
-      lastFrameTime := frameTimeNow - (elapsed mod FrameTime); { Carry over extra time }
-      Update;
-      Draw
-    end;
-
-    SDL_Delay(1)
-  end;
-
-  Cleanup
 end.
 
 
