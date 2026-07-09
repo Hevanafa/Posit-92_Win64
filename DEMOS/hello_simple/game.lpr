@@ -9,7 +9,7 @@ uses
   Posit92,
   Keyboard, P92Mouse,
   P92Tex, P92TexDraw, TexRef, P92Geometry,
-  Logger, Timing, P92Panic, P92VGA,
+  P92Logger, P92Timing, P92Panic, P92VGA, P92Version,
   Assets;
 
 const
@@ -86,7 +86,7 @@ begin
   { Your update logic here }
   if IsKeyDown(SC_ESCAPE) then done := true;
 
-  gameTime := gameTime + dt
+  gameTime := gameTime + DeltaTime
 end;
 
 procedure draw;

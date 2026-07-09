@@ -3,20 +3,20 @@
   Hevanafa
 }
 
-unit Timing;
+unit P92Timing;
 
 {$Mode ObjFPC}
 {$H+}{$J-}
 
 interface
 
-var
-  dt, lastFrameTime, currentTime: double;
+function DeltaTime: double;
 
-{$ifdef WASM}
-function getTimer: double; external 'env' name 'getTimer';
-function getFullTimer: double; external 'env' name 'getFullTimer';
+{$ifdef P92_WASM}
+function GetTimer: double; external 'env' name 'GetTimer';
+function GetFullTimer: double; external 'env' name 'GetFullTimer';
 {$endif}
+
 {$ifdef Windows}
 procedure initTiming;
 function getMidnightOffset: double;
@@ -24,8 +24,8 @@ function getTimer: double;
 function getFullTimer: double;
 {$endif}
 
-procedure initDeltaTime;
-procedure updateDeltaTime;
+procedure InitDeltaTime;
+procedure UpdateDeltaTime;
 
 
 implementation
@@ -34,16 +34,24 @@ implementation
 uses SDL2Wrapper, SysUtils;
 {$endif}
 
-procedure initDeltaTime;
+var
+  dt, lastFrameTime, currentTime: double;
+
+function DeltaTime: double;
+begin
+  DeltaTime := dt
+end;
+
+procedure InitDeltaTime;
 begin
   dt := 0.0;
-  lastFrameTime := getTimer;
+  lastFrameTime := GetTimer;
   currentTime := lastFrameTime;
 end;
 
-procedure updateDeltaTime;
+procedure UpdateDeltaTime;
 begin
-  currentTime := getTimer;
+  currentTime := GetTimer;
   dt := currentTime - lastFrameTime;
   lastFrameTime := currentTime
 end;

@@ -5,12 +5,12 @@
   Contains only the version information
 }
 
-unit Version;
+unit P92Version;
 
 interface
 
 const
-  Posit92_Version = '0.1.6_experimental';
+  Posit92_Version = '0.2';
 
 implementation
 
