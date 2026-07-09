@@ -1,25 +1,27 @@
-unit Colour;
+unit P92Colour;
 
 {$Mode ObjFPC}
 {$H+}{$J-}
 
 interface
 
+{ h, s, v: [0.0, 1.0] }
 function HSVtoRGB(h, s, v: double): longword;
-function lerpColour(const colourA, colourB: longword; const perc: double): longword;
+function LerpColour(const colourA, colourB: longword; const perc: double): longword;
 
 
 implementation
 
-uses Maths;
+uses P92Maths;
 
-{ h, s, v: [0.0, 1.0] }
 function HSVtoRGB(h, s, v: double): longword;
 var
   r, g, b: byte;
   i: smallint;
   f, p, q, t: double;
 begin
+  r := 0; g := 0; b := 0;
+
   h := clamp(h, 0.0, 1.0);
   s := clamp(s, 0.0, 1.0);
   v := clamp(v, 0.0, 1.0);
@@ -55,10 +57,11 @@ begin
   HSVtoRGB := $FF000000 or (r shl 16) or (g shl 8) or b
 end;
 
-function lerpColour(const colourA, colourB: longword; const perc: double): longword;
+function LerpColour(const colourA, colourB: longword; const perc: double): longword;
 var
   a, r, g, b: byte;
 begin
+  { Basically start + perc * range }
   a := trunc((colourA shr 24 and $FF) + perc * ((colourB shr 24 and $FF) - (colourA shr 24 and $FF)));
   r := trunc((colourA shr 16 and $FF) + perc * ((colourB shr 16 and $FF) - (colourA shr 16 and $FF)));
   g := trunc((colourA shr 8 and $FF) + perc * ((colourB shr 8 and $FF) - (colourA shr 8 and $FF)));
