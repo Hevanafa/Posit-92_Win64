@@ -78,7 +78,7 @@ begin
     SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING,
     vgaWidth, vgaHeight);
 
-  hwSetRenderer(renderer)
+  HwSetRenderer(renderer)
 end;
 
 procedure SetTitle(const value: string);
@@ -345,7 +345,7 @@ begin
   SDL_FreeSurface(surface);
 
   SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
-  hwLoadImage := hwRegisterTexRef(tex, surface^.w, surface^.h);
+  hwLoadImage := HwRegisterTexRef(tex, surface^.w, surface^.h);
 
   { writelog(format('hwLoadImage %d: %s', [hwLoadImage, filename])) }
 end;

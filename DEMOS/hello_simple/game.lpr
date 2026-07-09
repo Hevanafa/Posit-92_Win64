@@ -9,7 +9,7 @@ uses
   Posit92,
   P92Keyboard, P92Mouse,
   P92Tex, P92TexDraw, TexRef, P92Geometry,
-  P92Logger, P92Timing, P92Panic, P92VGA, P92Version,
+  P92Logger, P92Timing, P92Panic, P92VGA,
   Assets;
 
 const
@@ -23,7 +23,7 @@ var
 procedure drawMouse;
 begin
   { spr(imgCursor, mouseX, mouseY) }
-  hwspr(hwCursor, mouseX, mouseY)
+  HwSpr(hwCursor, mouseX, mouseY)
 end;
 
 procedure loadAssets;
