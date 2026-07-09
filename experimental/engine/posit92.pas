@@ -43,7 +43,7 @@ implementation
 uses
   SysUtils,
   P92Conversions, P92Logger,
-  Keyboard, Mouse,
+  P92Keyboard, P92Mouse,
   ImgRef, TexRef,
   P92Strings, P92VGA;
 

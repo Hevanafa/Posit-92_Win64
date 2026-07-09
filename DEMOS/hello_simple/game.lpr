@@ -7,7 +7,7 @@ program Game;
 uses
   SysUtils, SDL2,
   Posit92,
-  Keyboard, P92Mouse,
+  P92Keyboard, P92Mouse,
   P92Tex, P92TexDraw, TexRef, P92Geometry,
   P92Logger, P92Timing, P92Panic, P92VGA, P92Version,
   Assets;

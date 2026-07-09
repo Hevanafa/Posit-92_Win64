@@ -34,7 +34,7 @@ procedure hwsprRegion(
 implementation
 
 uses
-  Panic;
+  P92Panic;
 
 const
   MaxTexRefs = 128;

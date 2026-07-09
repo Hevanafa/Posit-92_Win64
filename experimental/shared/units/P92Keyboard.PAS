@@ -1,10 +1,17 @@
-unit Keyboard;
+{
+  Keyboard unit
+  Part of Posit-92 game engine
+
+  This unit is specific to the Windows version
+}
+unit P92Keyboard;
 
 {$Mode ObjFPC}
 {$H+}{$J-}
 
 interface
 
+{$ifdef Windows}
 { SDL Scancodes }
 const
   SDL_SCANCODE_UNKNOWN = 0;
@@ -276,10 +283,12 @@ const
   SC_F12 = $58;
 
 function SDLToDOSScancode(const scancode: integer): integer;
+{$endif}
 
 
 implementation
 
+{$ifdef Windows}
 function SDLToDOSScancode(const scancode: integer): integer;
 begin
   SDLToDOSScancode := 0;
@@ -429,5 +438,7 @@ begin
     else SDLToDOSScancode := 0;
   end;
 end;
+
+{$endif}
 
 end.

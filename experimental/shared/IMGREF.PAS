@@ -58,7 +58,7 @@ procedure unsafeSprPset(const image: PImageRef; const x, y: smallint; const colo
 implementation
 
 uses
-  Conv, Logger, Maths, Panic,
+  P92Conversions, P92Logger, P92Maths, P92Panic,
 {$ifdef WASM}
   WasmHeap,
 {$endif}
