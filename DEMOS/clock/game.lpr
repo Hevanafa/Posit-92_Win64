@@ -5,12 +5,13 @@ program Game;
 {$J-}
 
 uses
-  SysUtils, DateUtils, Maths,
-  SDL2Wrapper, Posit92,
-  BMFont, FPS, Graphics,
-  Keyboard, Mouse, Logger,
-  ImgRef, ImgRefFast, SprEffects,
-  Timing, VGA,
+  SysUtils, DateUtils,
+  SDL2Wrapper,
+  P92Core, P92AssetRegistry, P92Fonts, P92Maths,
+  P92Graphics, P92BMFont,
+  P92Keyboard, P92Mouse, P92Logger,
+  P92Tex, P92TexDraw, p92texEffects,
+  P92Timing, P92FPS, P92VGA,
   Assets;
 
 const
@@ -25,19 +26,19 @@ var
   gameTime: double;
 
 
-procedure drawFPS;
+procedure DrawFPS;
 begin
   printDefault(format('FPS: %d', [getLastFPS]), vgaWidth - 50, 0);
 end;
 
-procedure drawMouse;
+procedure DrawMouse;
 begin
   { spr(imgCursor, mouseX, mouseY) }
   pset(mouseX, mouseY, Palette[1])
 end;
 
 { dotw: use DayOfTheWeek from DateUtils unit }
-function getDayName(const dotw: smallint): string;
+function GetDayName(const dotw: smallint): string;
 begin
   result := '';
 
@@ -52,11 +53,9 @@ begin
   end;
 end;
 
-procedure loadAssets;
+procedure OnPreload;
 begin
-  loadBMFont(
-    'assets\fonts\pico-8_regular_5.txt',
-    defaultFont, defaultFontGlyphs);
+  pico8Font := LoadBMFont('assets\fonts\pico-8_regular_5.txt');
 
   { Load more assets here }
 end;
@@ -69,46 +68,31 @@ begin
   initLogger;
 end;
 
-procedure afterInit;
+procedure OnReady;
 begin
+  HideCursor;
   setTitle('Posit-92 Clock');
 
-  loadAssets;
-  hideCursor;
-  initFPSCounter;
-
-  replaceColour(defaultFont.imgHandle, white, Palette[1]);
+  ReplaceColour(BorrowBMFontPtr(pico8Font)^.texHandle, white, Palette[1]);
 
   { Init your game state here }
   gameTime := 0.0
 end;
 
-procedure cleanup;
+procedure OnCleanup;
 begin
   showCursor;
-
   freeBMFont(defaultFont, defaultFontGlyphs, true);
-  freemem(getSurfacePtr);
-
-  { Your cleanup code here (after setting `done` to true) }
-  closeLogger;
-  cleanupSDL
 end;
 
-procedure update;
+procedure Update;
 begin
-  updateSDL;
-  updateDeltaTime;
+  if isKeyDown(SC_ESCAPE) then SignalDone;
 
-  incrementFPS;
-
-  { Your update logic here }
-  if isKeyDown(SC_ESCAPE) then done := true;
-
-  gameTime := gameTime + dt
+  gameTime := gameTime + DeltaTime;
 end;
 
-procedure draw;
+procedure Draw;
 var
   a: word;
   positNow: double;
@@ -134,8 +118,8 @@ begin
   printDefaultCentred(FormatDateTime('dd-mm-yyyy', now), vgaWidth div 2, vgaHeight * 3 div 4 - defaultFont.lineHeight - 2);
 
   dotw := DayOfTheWeek(now);
-  { testStr := format('Today is %s', [getDayName(dotw)]); }
-  printDefaultCentred(getDayName(dotw), vgaWidth div 2, vgaHeight * 3 div 4);
+  { testStr := format('Today is %s', [GetDayName(dotw)]); }
+  printDefaultCentred(GetDayName(dotw), vgaWidth div 2, vgaHeight * 3 div 4);
 
 
   positNow := getTimer;
@@ -165,42 +149,18 @@ begin
   y2 := sin(angle) * -10 + vgaHeight div 2;
   line(round(x1), round(y1), round(x2), round(y2), palette[1]);
 
-  drawFPS;
-  drawMouse;
+  DrawFPS;
+  DrawMouse;
 
   vgaUpload;
   vgaPresent
 end;
 
 
-var
-  { done: boolean; }  { moved to Posit92 unit }
-  lastFrameTime, frameTimeNow, elapsed: longword; { in ms }
-
 {$R *.res}
 
 begin
-  init;
-  afterInit;
-
-  done := false;
-
-  lastFrameTime := SDL_GetTicks;
-
-  while not done do begin
-    frameTimeNow := SDL_GetTicks;
-    elapsed := frameTimeNow - lastFrameTime;
-
-    if elapsed >= FrameTime then begin
-      lastFrameTime := frameTimeNow - (elapsed mod FrameTime);  { Carry over extra time }
-      update;
-      draw
-    end;
-
-    SDL_Delay(1)
-  end;
-
-  cleanup
+  P92Start(@OnPreload, @OnReady, @Update, @Draw, @OnCleanup);
 end.
 
 
