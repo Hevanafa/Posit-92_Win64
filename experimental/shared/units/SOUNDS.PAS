@@ -13,24 +13,24 @@ type
     volume: single;
   end;
 
-procedure initSounds;
-procedure cleanupSounds;
-procedure loadSound(const key: longint; const filename: string);
-procedure playSound(const key: longint);
-procedure setSoundVolume(const key: longint; const volume: single);
+procedure InitSounds;
+procedure CleanupSounds;
+procedure LoadSound(const key: longint; const filename: string);
+procedure PlaySound(const key: longint);
+procedure SetSoundVolume(const key: longint; const volume: single);
 
 
 implementation
 
 uses
   SysUtils,
-  Conv, Maths, Logger;
+  P92Conversions, P92Maths, P92Logger;
 
 var
   soundsInitialised: boolean;
   soundList: array[0..9] of TSoundData;
 
-procedure initSounds;
+procedure InitSounds;
 var
   a: longint;
 begin
@@ -54,7 +54,7 @@ begin
   soundsInitialised := true
 end;
 
-procedure cleanupSounds;
+procedure CleanupSounds;
 var
   a: longint;
 begin
@@ -69,7 +69,7 @@ begin
 end;
 
 {
-procedure loadSound(const key: longint; const filename: string);
+procedure LoadSound(const key: longint; const filename: string);
 begin
   writeLog('loadSound:');
   writeLogI32(key);
@@ -77,7 +77,7 @@ begin
 end;
 }
 
-procedure loadSound(const key: longint; const filename: string);
+procedure LoadSound(const key: longint; const filename: string);
 var
   strBuffer: array[0..255] of char;
   chunk: PMix_Chunk;
@@ -113,7 +113,7 @@ begin
   soundList[key].chunk := chunk
 end;
 
-procedure playSound(const key: longint);
+procedure PlaySound(const key: longint);
 var
   sdlVolume: integer;
 begin
@@ -132,7 +132,7 @@ begin
   Mix_PlayChannel(-1, soundList[key].chunk, 0)
 end;
 
-procedure setSoundVolume(const key: longint; const volume: single);
+procedure SetSoundVolume(const key: longint; const volume: single);
 begin
   if not soundsInitialised then exit;
   if (key < 0) or (key > high(soundList)) then exit;
