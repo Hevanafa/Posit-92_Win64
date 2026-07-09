@@ -34,12 +34,12 @@ procedure PrintWrap(const txt: string; x, y, wrapWidth: smallint);
 
 {$ifdef Windows}
 type
-  TGenericCallback = procedure;
+  TCallback = procedure;
 
 procedure P92Start(
-  Init: TGenericCallback;
-  OnPreload: TGenericCallback;
-  OnReady: TGenericCallback
+  Init: TCallback;
+  OnPreload: TCallback;
+  OnReady: TCallback
 );
 
 procedure InitSDL(const aDisplayScale: smallint = 2);
@@ -62,6 +62,7 @@ function HwLoadImage(const filename: string): longint;
 procedure VgaUpload;
 procedure VgaPresent;
 {$endif}
+
 
 implementation
 
@@ -238,6 +239,13 @@ end;
 
 procedure P92Update;
 begin
+{$ifdef Windows}
+    UpdateSDL;
+    UpdateDeltaTime;
+    IncrementFPS;
+{$endif}
+
+{$ifdef P92_WASM}
   if engineRunState = ersBoot then begin
     if AllAssetsReady then
       InitPreloadState;
@@ -253,7 +261,6 @@ begin
   else if engineRunState = ersReady then begin
     UpdateDeltaTime;
     IncrementFPS;
-
 {$ifdef P92_IMMEDIATE_GUI}
     ResetWidgetIndices;
 
@@ -272,6 +279,7 @@ begin
       end;
     end;
   end;
+{$endif}
 end;
 
 procedure P92Draw;
@@ -353,9 +361,12 @@ end;
 
 {$ifdef Windows}
 procedure P92Start(
-  Init: TGenericCallback;
-  OnPreload: TGenericCallback;
-  OnReady: TGenericCallback
+  Init: TCallback;
+  OnPreload: TCallback;
+  OnReady: TCallback;
+  Update: TCallback;
+  Draw: TCallback;
+  OnCleanup: TCallback
 );
 begin
   P92Boot;
@@ -375,15 +386,21 @@ begin
     elapsed := frameTimeNow - lastFrameTime;
 
     if elapsed >= FrameTime then begin
-      lastFrameTime := frameTimeNow - (elapsed mod FrameTime); { Carry over extra time }
+      P92Update;
+
+      { User loop }
       Update;
-      Draw
+      Draw;
+
+      P92AfterDraw;
+
+      lastFrameTime := frameTimeNow - (elapsed mod FrameTime) { Carry over extra time }
     end;
 
     SDL_Delay(1)
   end;
 
-  Cleanup
+  OnCleanup
 end;
 
 procedure InitSDL(const aDisplayScale: smallint);

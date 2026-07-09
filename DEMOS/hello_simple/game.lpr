@@ -68,9 +68,6 @@ end;
 
 procedure Update;
 begin
-  UpdateSDL;
-  UpdateDeltaTime;
-
   { Your Update logic here }
   if IsKeyDown(SC_ESCAPE) then done := true;
 
