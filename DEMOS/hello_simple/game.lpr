@@ -28,12 +28,12 @@ end;
 
 procedure loadAssets;
 begin
-  { imgCursor := loadImage('assets\images\cursor.png'); }
-  hwCursor := hwLoadImage('assets\images\cursor.png');
-  imgDosuEXE[0] := loadImage('assets\images\dosu_1.png');
-  imgDosuEXE[1] := loadImage('assets\images\dosu_2.png');
+  { imgCursor := LoadImage('assets\images\cursor.png'); }
+  hwCursor := HwLoadImage('assets\images\cursor.png');
+  imgDosuEXE[0] := LoadImage('assets\images\dosu_1.png');
+  imgDosuEXE[1] := LoadImage('assets\images\dosu_2.png');
 
-  loadBMFont(
+  LoadBMFont(
     'assets\fonts\nokia_cellphone_fc_8.txt',
     defaultFont, defaultFontGlyphs);
 
@@ -45,16 +45,16 @@ begin
   initVideoMem(320, 200, getmem(320 * 200 * 4));
   initDeltaTime;
 
-  initSDL;
+  InitSDL;
   initLogger;
 end;
 
 procedure afterInit;
 begin
-  setTitle('Posit-92 with SDL2');
+  SetTitle('Posit-92 with SDL2');
 
   loadAssets;
-  hideCursor;
+  HideCursor;
 
   { Init your game state here }
   gameTime := 0.0
@@ -62,7 +62,7 @@ end;
 
 procedure cleanup;
 begin
-  showCursor;
+  ShowCursor;
 
   freeImage(imgCursor);
   freeImage(imgDosuEXE[0]);
@@ -75,16 +75,16 @@ begin
 
   { Your cleanup code here (after setting `done` to true) }
   closeLogger;
-  cleanupSDL
+  CleanupSDL
 end;
 
 procedure update;
 begin
-  updateSDL;
+  UpdateSDL;
   updateDeltaTime;
 
   { Your update logic here }
-  if isKeyDown(SC_ESCAPE) then done := true;
+  if IsKeyDown(SC_ESCAPE) then done := true;
 
   gameTime := gameTime + dt
 end;
@@ -103,13 +103,13 @@ begin
 
   printDefault(format('Mouse: { %d, %d }', [mouseX, mouseY]), 10, 10);
 
-  vgaUpload;
+  VgaUpload;
 
   { Begin hardware layer }
 
   drawMouse;
 
-  vgaPresent
+  VgaPresent
 end;
 
 

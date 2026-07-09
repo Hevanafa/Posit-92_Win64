@@ -17,35 +17,35 @@ uses
 var
   done: boolean;
 
-procedure initSDL(const aDisplayScale: smallint = 2);
-procedure updateSDL;
-procedure cleanupSDL;
+procedure InitSDL(const aDisplayScale: smallint = 2);
+procedure UpdateSDL;
+procedure CleanupSDL;
 
-procedure setTitle(const value: string);
+procedure SetTitle(const value: string);
 
-procedure hideCursor;
-procedure showCursor;
+procedure HideCursor;
+procedure ShowCursor;
 
-function isKeyDown(const scancode: integer): boolean;
+function IsKeyDown(const scancode: integer): boolean;
 
-function loadImage(const filename: string): longint;
-procedure loadBMFont(const filename: string; var font: TBMFont; var fontGlyphs: array of TBMFontGlyph);
+function LoadImage(const filename: string): longint;
+procedure LoadBMFont(const filename: string; var font: TBMFont; var fontGlyphs: array of TBMFontGlyph);
 
-function hwLoadImage(const filename: string): longint;
+function HwLoadImage(const filename: string): longint;
 
 { Uploads the pixel data to the GPU }
-procedure vgaUpload;
-procedure vgaPresent;
+procedure VgaUpload;
+procedure VgaPresent;
 
 
 implementation
 
 uses
   SysUtils,
-  Conv, Logger,
+  P92Conversions, P92Logger,
   Keyboard, Mouse,
   ImgRef, TexRef,
-  UStrings, VGA;
+  P92Strings, P92VGA;
 
 var
   displayScale: smallint;
@@ -55,7 +55,7 @@ var
 
   keyState: array[0..127] of boolean;  { use DOS scancode }
 
-procedure initSDL(const aDisplayScale: smallint);
+procedure InitSDL(const aDisplayScale: smallint);
 begin
   if SDL_Init(SDL_INIT_VIDEO) <> 0 then begin
     writeln('SDL_Init failed!');
@@ -81,13 +81,13 @@ begin
   hwSetRenderer(renderer)
 end;
 
-procedure setTitle(const value: string);
+procedure SetTitle(const value: string);
 begin
   SDL_SetWindowTitle(window, @value[1])
 end;
 
 
-procedure updateSDL;
+procedure UpdateSDL;
 var
   event: TSDL_Event;
   keyEvent: PSDL_KeyboardEvent;
@@ -151,7 +151,7 @@ begin
   end;
 end;
 
-procedure cleanupSDL;
+procedure CleanupSDL;
 begin
   { Important: Destroy objects in reverse order }
   SDL_DestroyRenderer(renderer);
@@ -160,22 +160,22 @@ begin
 end;
 
 
-procedure hideCursor;
+procedure HideCursor;
 begin
   SDL_ShowCursor(SDL_DISABLE)
 end;
 
-procedure showCursor;
+procedure ShowCursor;
 begin
   SDL_ShowCursor(SDL_ENABLE)
 end;
 
-function isKeyDown(const scancode: integer): boolean;
+function IsKeyDown(const scancode: integer): boolean;
 begin
   isKeyDown := keyState[scancode]
 end;
 
-function loadImage(const filename: string): longint;
+function LoadImage(const filename: string): longint;
 var
   strBuffer: array[0..255] of char;
   surface: PSDL_Surface;
@@ -214,7 +214,7 @@ begin
 end;
 
 { 32 to 126: 0 to 94 }
-procedure loadBMFont(const filename: string; var font: TBMFont; var fontGlyphs: array of TBMFontGlyph);
+procedure LoadBMFont(const filename: string; var font: TBMFont; var fontGlyphs: array of TBMFontGlyph);
 var
   f: text;
   txtLine: string;
@@ -325,7 +325,7 @@ begin
 end;
 
 
-function hwLoadImage(const filename: string): longint;
+function HwLoadImage(const filename: string): longint;
 var
   surface: PSDL_Surface;
   tex: PSDL_Texture;
@@ -350,7 +350,7 @@ begin
   { writelog(format('hwLoadImage %d: %s', [hwLoadImage, filename])) }
 end;
 
-procedure vgaUpload;
+procedure VgaUpload;
 begin
   { SDL_SetRenderDrawColor(renderer, $ed, $95, $64, $ff);
   SDL_RenderClear(renderer); }
@@ -360,7 +360,7 @@ begin
   SDL_RenderCopy(renderer, vgaTexture, nil, nil)
 end;
 
-procedure vgaPresent;
+procedure VgaPresent;
 begin
   SDL_RenderPresent(renderer)
 end;
