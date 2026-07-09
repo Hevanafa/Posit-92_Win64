@@ -29,7 +29,7 @@ procedure ShowCursor;
 function IsKeyDown(const scancode: integer): boolean;
 
 function LoadImage(const filename: string): longint;
-procedure LoadBMFont(const filename: string; var font: TBMFont; var fontGlyphs: array of TBMFontGlyph);
+procedure LoadBMFont(const filename: string; var font: TBMFontLegacy; var fontGlyphs: array of TBMFontGlyph);
 
 function HwLoadImage(const filename: string): longint;
 
@@ -214,7 +214,7 @@ begin
 end;
 
 { 32 to 126: 0 to 94 }
-procedure LoadBMFont(const filename: string; var font: TBMFont; var fontGlyphs: array of TBMFontGlyph);
+procedure LoadBMFont(const filename: string; var font: TBMFontLegacy; var fontGlyphs: array of TBMFontGlyph);
 var
   f: text;
   txtLine: string;

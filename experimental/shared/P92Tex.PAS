@@ -121,7 +121,7 @@ begin
   WasmFreeMem(textures[texHandle].texture.pixelData);
 {$endif}
 {$ifdef Windows}
-  FreeMem(imageRefs[imgHandle].dataPtr);
+  FreeMem(textures[texHandle].texture.pixelData);
 {$endif}
 
   textures[texHandle].texture.width := 0;

@@ -20,8 +20,8 @@ type
     xadvance: smallint;
   end;
 
-  PBMFont = ^TBMFont;
-  TBMFont = record
+  PBMFontLegacy = ^TBMFontLegacy;
+  TBMFontLegacy = record
     face: string[15];  { 16 bytes ShortString }
     filename: string[63];  { 64 bytes }
     lineHeight: word;  { 2 bytes }
@@ -31,48 +31,48 @@ type
 
 { This procedure creates a new ImgRef instance }
 procedure cloneBMFont(
-  const srcFont: TBMFont; const srcFontGlyphs: array of TBMFontGlyph;
-  var destFont: TBMFont; var destFontGlyphs: array of TBMFontGlyph);
+  const srcFont: TBMFontLegacy; const srcFontGlyphs: array of TBMFontGlyph;
+  var destFont: TBMFontLegacy; var destFontGlyphs: array of TBMFontGlyph);
 
 procedure freeBMFont(
-  var font: TBMFont;
+  var font: TBMFontLegacy;
   var fontGlyphs: array of TBMFontGlyph;
   const freeImgHandle: boolean);
 
 procedure printBMFont(
-  const font: TBMFont;
+  const font: TBMFontLegacy;
   const fontGlyphs: array of TBMFontGlyph;
   const text: string;
   const x, y: smallint);
 
 function measureBMFont(
-  const font: TBMFont;
+  const font: TBMFontLegacy;
   const glyphs: array of TBMFontGlyph;
   const text: string): smallint;
 
 function printBMFontCharColour(
-  const font: TBMFont;
+  const font: TBMFontLegacy;
   const fontGlyphs: array of TBMFontGlyph;
   const ch: char;
   const x, y: smallint;
   const colour: longword): word;
 
 procedure printBMFontColour(
-  const font: TBMFont;
+  const font: TBMFontLegacy;
   const fontGlyphs: array of TBMFontGlyph;
   const text: string;
   const x, y: smallint;
   const colour: longword);
 
 function printBMFontCharToDest(
-  const font: TBMFont;
+  const font: TBMFontLegacy;
   const fontGlyphs: array of TBMFontGlyph;
   const destHandle: longint;
   const ch: char;
   const x, y: smallint): smallint;
 
 procedure printBMFontToDest(
-  const font: TBMFont;
+  const font: TBMFontLegacy;
   const fontGlyphs: array of TBMFontGlyph;
   const destHandle: longint;
   const text: string;
@@ -82,12 +82,12 @@ procedure printBMFontToDest(
 implementation
 
 uses
-  Conv, Logger,
+  P92Conversions, P92Logger,
   P92Tex, P92TexDraw;
 
 { Returns glyph.xadvance }
 function printBMFontChar(
-  const font: TBMFont;
+  const font: TBMFontLegacy;
   const fontGlyphs: array of TBMFontGlyph;
   const ch: char;
   const x, y: smallint): smallint;
@@ -116,8 +116,8 @@ begin
 end;
 
 procedure cloneBMFont(
-  const srcFont: TBMFont; const srcFontGlyphs: array of TBMFontGlyph;
-  var destFont: TBMFont; var destFontGlyphs: array of TBMFontGlyph);
+  const srcFont: TBMFontLegacy; const srcFontGlyphs: array of TBMFontGlyph;
+  var destFont: TBMFontLegacy; var destFontGlyphs: array of TBMFontGlyph);
 var
   a: word;
 begin
@@ -126,26 +126,26 @@ begin
   for a:=0 to high(srcFontGlyphs) do
     destFontGlyphs[a] := srcFontGlyphs[a];
 
-  destFont.imgHandle := copyImage(srcFont.imgHandle)
+  destFont.imgHandle := CopyTexture(srcFont.imgHandle)
 end;
 
 procedure freeBMFont(
-  var font: TBMFont;
+  var font: TBMFontLegacy;
   var fontGlyphs: array of TBMFontGlyph;
   const freeImgHandle: boolean);
 var
   a: Word;
 begin
   if freeImgHandle then
-    freeImage(font.imgHandle);
+    FreeTexture(font.imgHandle);
 
-  fillchar(font, sizeof(TBMFont), 0);
+  fillchar(font, sizeof(TBMFontLegacy), 0);
   for a:=0 to high(fontGlyphs) do
     fillchar(fontGlyphs[a], sizeof(TBMFontGlyph), 0);
 end;
 
 procedure printBMFont(
-  const font: TBMFont;
+  const font: TBMFontLegacy;
   const fontGlyphs: array of TBMFontGlyph;
   const text: string;
   const x, y: smallint);
@@ -169,7 +169,7 @@ end;
 
 
 function measureBMFont(
-  const font: TBMFont;
+  const font: TBMFontLegacy;
   const glyphs: array of TBMFontGlyph;
   const text: string): smallint;
 var
@@ -196,7 +196,7 @@ end;
 
 { Returns xadvance for the next char }
 function printBMFontCharColour(
-  const font: TBMFont;
+  const font: TBMFontLegacy;
   const fontGlyphs: array of TBMFontGlyph;
   const ch: char;
   const x, y: smallint;
@@ -226,7 +226,7 @@ begin
 end;
 
 procedure printBMFontColour(
-  const font: TBMFont;
+  const font: TBMFontLegacy;
   const fontGlyphs: array of TBMFontGlyph;
   const text: string;
   const x, y: smallint;
@@ -253,7 +253,7 @@ end;
 
 
 function printBMFontCharToDest(
-  const font: TBMFont;
+  const font: TBMFontLegacy;
   const fontGlyphs: array of TBMFontGlyph;
   const destHandle: longint;
   const ch: char;
@@ -265,7 +265,7 @@ var
 begin
   printBMFontCharToDest := 0;
 
-  if not isImageSet(destHandle) then exit;
+  if not IsTextureSet(destHandle) then exit;
 
   charcode := ord(ch);
 
@@ -288,7 +288,7 @@ begin
 end;
 
 procedure printBMFontToDest(
-  const font: TBMFont;
+  const font: TBMFontLegacy;
   const fontGlyphs: array of TBMFontGlyph;
   const destHandle: longint;
   const text: string;

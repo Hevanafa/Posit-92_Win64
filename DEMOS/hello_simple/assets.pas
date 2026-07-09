@@ -10,7 +10,7 @@ uses BMFont;
 
 var
   { for use in loadBMFont }
-  defaultFont: TBMFont;
+  defaultFont: TBMFontLegacy;
   defaultFontGlyphs: array[32..126] of TBMFontGlyph;
 
   imgCursor: longint;

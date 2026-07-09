@@ -64,12 +64,12 @@ procedure cleanup;
 begin
   ShowCursor;
 
-  freeImage(imgCursor);
-  freeImage(imgDosuEXE[0]);
-  freeImage(imgDosuEXE[1]);
-  freeImage(imgFullFont);
+  FreeTexture(imgCursor);
+  FreeTexture(imgDosuEXE[0]);
+  FreeTexture(imgDosuEXE[1]);
+  FreeTexture(imgFullFont);
 
-  freeImage(defaultFont.imgHandle);
+  FreeTexture(defaultFont.imgHandle);
 
   freemem(getSurfacePtr);
 
