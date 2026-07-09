@@ -7,10 +7,9 @@ program Game;
 uses
   SysUtils, SDL2,
   P92Core, P92Fonts,
-  P92Colour, P92FPS,
-  P92Keyboard, P92Mouse, P92Sounds,
-  P92Tex, P92TexDraw, P92TexRef,
-  P92Logger, P92Timing, P92Panic, P92VGA,
+  P92Keyboard, P92Mouse,
+  P92Tex, P92TexDraw, P92Sounds,
+  P92Logger, P92Timing, P92VGA,
   Assets;
 
 var
@@ -44,7 +43,6 @@ end;
 
 procedure Update;
 begin
-  { Your Update logic here }
   if IsKeyDown(SC_ESCAPE) then SignalDone;
 
   gameTime := gameTime + DeltaTime
@@ -52,7 +50,6 @@ end;
 
 procedure Draw;
 begin
-  { Begin software layer }
   cls($FF6495ED);
 
   if (trunc(gameTime * 4) and 1) > 0 then
@@ -60,9 +57,9 @@ begin
   else
     spr(imgDosuEXE[0], 148, 88);
 
-  printDefaultCentred('Hello world!', vgaWidth div 2, 120);
+  PrintDefaultCentred('Hello world!', vgaWidth div 2, 120);
 
-  printDefault(format('Mouse: { %d, %d }', [mouseX, mouseY]), 10, 10);
+  PrintDefault(format('Mouse: { %d, %d }', [mouseX, mouseY]), 10, 10);
 end;
 
 
@@ -70,7 +67,5 @@ end;
 
 begin
   P92Start(@OnPreload, @OnReady, @Update, @Draw, @OnCleanup);
-
 end.
-
 

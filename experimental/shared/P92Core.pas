@@ -52,7 +52,7 @@ procedure ShowCursor;
 
 function IsKeyDown(const scancode: integer): boolean;
 
-function LoadImage(const filename: string): ttexturehandle;
+function LoadImage(const filename: string): TTextureHandle;
 function LoadBMFont(const filename: string): TBMFontHandle;
 
 function HwLoadImage(const filename: string): longint;
