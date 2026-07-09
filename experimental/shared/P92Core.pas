@@ -7,7 +7,7 @@ unit P92Core;
 interface
 
 {$ifdef Windows}
-uses P92BMFont, SDL2;
+uses SDL2, P92Tex, P92BMFont;
 {$endif}
 
 {$ifdef P92_WASM}
@@ -52,8 +52,8 @@ procedure ShowCursor;
 
 function IsKeyDown(const scancode: integer): boolean;
 
-function LoadImage(const filename: string): longint;
-procedure LoadBMFont(const filename: string; var font: TBMFontLegacy; var fontGlyphs: array of TBMFontGlyph);
+function LoadImage(const filename: string): ttexturehandle;
+function LoadBMFont(const filename: string): TBMFontHandle;
 
 function HwLoadImage(const filename: string): longint;
 
@@ -70,7 +70,7 @@ uses
   SysUtils, SDL2_Image,
   P92Fonts, P92Conversions, P92AssetRegistry, P92Logger,
   P92Keyboard, P92Mouse,
-  P92Tex, P92TexDraw, P92TexRef,
+  P92TexDraw, P92TexRef,
   P92Strings, P92Timing, P92FPS, P92Sounds,
   P92VGA
 {$endif}
@@ -130,6 +130,12 @@ var
   { Screenshot feature }
   lastF2: boolean;
   enableScreenshotHotkey: boolean;
+
+{$ifdef Windows}
+procedure InitSDL(const aDisplayScale: smallint = 2); forward;
+procedure UpdateSDL; forward;
+procedure CleanupSDL; forward;
+{$endif}
 
 function GetCgaFontHandle: longint;
 begin
@@ -432,7 +438,7 @@ begin
   P92AfterCleanup
 end;
 
-procedure InitSDL(const aDisplayScale: smallint = 2);
+procedure InitSDL(const aDisplayScale: smallint);
 begin
   if SDL_Init(SDL_INIT_VIDEO) <> 0 then begin
     writeln('SDL_Init failed!');
@@ -552,7 +558,7 @@ begin
   isKeyDown := keyState[scancode]
 end;
 
-function LoadImage(const filename: string): longint;
+function LoadImage(const filename: string): TTextureHandle;
 var
   strBuffer: array[0..255] of char;
   surface: PSDL_Surface;
@@ -591,8 +597,10 @@ begin
 end;
 
 { 32 to 126: 0 to 94 }
-procedure LoadBMFont(const filename: string; var font: TBMFontLegacy; var fontGlyphs: array of TBMFontGlyph);
+function LoadBMFont(const filename: string): TBMFontHandle;
 var
+  fontHandle: TBMFontHandle;
+  font: PBMFont;
   f: text;
   txtLine: string;
   a: word;
@@ -602,6 +610,9 @@ var
   tempGlyph: TBMFontGlyph;
   glyphCount: word;
 begin
+  fontHandle := FindUnusedBMFontHandle;
+  font := BorrowBMFontPtr(fontHandle);
+
   assign(f, filename);
   {$I-} reset(f); {$I+}
 
@@ -624,12 +635,12 @@ begin
 
         { writeln('info ', k); }
 
-        if k = 'face' then
-          font.face := replaceAll(v, '"', '')
-        else if k = 'spacing' then begin
+        { if k = 'face' then
+          font^.face := replaceAll(v, '"', '')
+        else} if k = 'spacing' then begin
           split(v, ',', pair);
-          font.spacing[0] := parseInt(pair[0]);
-          font.spacing[1] := parseInt(pair[1]);
+          font^.spacing[0] := parseInt(pair[0]);
+          font^.spacing[1] := parseInt(pair[1]);
         end;
       end;
 
@@ -641,8 +652,9 @@ begin
       for a:=0 to high(pairs) do begin
         split(pairs[a], '=', pair);
         k := pair[0]; v := pair[1];
+
         if k = 'lineHeight' then
-          font.lineHeight := parseInt(v);
+          font^.lineHeight := parseInt(v);
       end;
 
     end else if startsWith(txtLine, 'page') then begin
@@ -651,8 +663,9 @@ begin
       for a:=0 to high(pairs) do begin
         split(pairs[a], '=', pair);
         k := pair[0]; v := pair[1];
+
         if k = 'file' then
-          font.filename := replaceAll(v, '"', '');
+          font^.filename := replaceAll(v, '"', '');
       end;
 
     end else if startsWith(txtLine, 'char') and not startsWith(txtLine, 'chars') then begin

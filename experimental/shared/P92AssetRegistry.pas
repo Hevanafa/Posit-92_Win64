@@ -57,6 +57,8 @@ function AllAssetsReady: boolean;
 procedure InitAssetRegistry;
 function FindUnusedTextureHandle: TTextureHandle;
 
+function FindUnusedBMFontHandle: TBMFontHandle;
+
 {$ifdef P92_WASM}
 procedure JsRequestImage(texHandle: longint); external 'env' name 'JsRequestImage';
 function RequestImage(const path: string): TTextureHandle;
