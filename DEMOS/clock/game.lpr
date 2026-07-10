@@ -55,6 +55,7 @@ end;
 
 procedure OnPreload;
 begin
+  { TODO: Remove this }
   pico8Font := LoadBMFont('assets\fonts\pico-8_regular_5.txt');
 
   { Load more assets here }
@@ -106,7 +107,7 @@ begin
   end;
 
   { printDefault(format('%.2d:%.2d:%.2d', [trunc(h), trunc(m), trunc(s)]), 10, 10); }
-  printDefaultCentred(
+  PrintDefaultCentred(
     FormatDateTime('dd-mm-yyyy', now),
     vgaWidth div 2,
     vgaHeight * 3 div 4 - BorrowBMFontPtr(pico8Font)^.lineHeight - 2);
@@ -159,6 +160,9 @@ begin
     width := 128;
     height := 128;
     sdlScale := 3;
+
+    enableDefaultFont := false;
+    defaultFontPath := 'assets\fonts\pico-8_regular_5.txt';
   end;
 
   appConfig.OnPreload := @OnPreload;

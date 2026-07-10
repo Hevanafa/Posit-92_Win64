@@ -30,7 +30,7 @@ begin
 {$endif}
 
 {$ifdef Windows}
-  defaultFontHandle := LoadBMFont('assets/fonts/nokia_cellphone_fc_8.txt')
+  defaultFontHandle := LoadBMFont(bootConfig.defaultFontPath)
 {$endif}
 end;
 

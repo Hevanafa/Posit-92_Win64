@@ -10,6 +10,7 @@ interface
 uses SDL2, P92Tex, P92BMFont;
 {$endif}
 
+{$ifdef P92_SDL2}
 type
   TCallback = procedure;
 
@@ -19,7 +20,9 @@ type
     height: smallint;
     sdlScale: smallint;
 
-    enableDefaultBMFont: boolean;
+    enableDefaultFont: boolean;
+    defaultFontPath: string;
+
     enableScreenshotHotkey: boolean;
 
     OnPreload: TCallback;
@@ -28,6 +31,10 @@ type
     Draw: TCallback;
     OnCleanup: TCallback;
   end;
+
+var
+  bootConfig: TP92AppConfig;
+{$endif}
 
 {$ifdef P92_WASM}
 function GetBootOptionBoolean(key: string): boolean;
@@ -107,8 +114,6 @@ const
   FrameTime = 1000 div TargetFPS;
 
 var
-  bootConfig: TP92AppConfig;
-
   window: PSDL_Window;
   renderer: PSDL_Renderer;
   vgaTexture: PSDL_Texture;
@@ -230,15 +235,14 @@ begin
   if DebugEngineRunStates then
     writelog('ersPreload');
 
-  if enableDefaultBMFont then
-    LoadDefaultFont;
-
 {$ifdef Windows}
   { imgCursor := LoadImage('assets\images\cursor.png'); }
   hwCursor := HwLoadImage('assets\images\cursor.png');
   LoadDefaultFont;
 {$endif}
+
 {$ifdef P92_WASM}
+  LoadDefaultFont;
   HostCallOnPreload
 {$endif}
 end;
@@ -426,6 +430,10 @@ begin
     width := 320;
     height := 200;
     sdlScale := 2;
+
+    enableDefaultFont := true;
+    defaultFontPath := 'assets/fonts/nokia_cellphone_fc_8.txt';
+
     enableScreenshotHotkey := true;
   end;
 
@@ -435,7 +443,7 @@ end;
 procedure P92Start(const appConfig: TP92AppConfig);
 begin
   bootConfig := appConfig;
-  enableDefaultBMFont := appConfig.enableDefaultBMFont;
+  enableDefaultBMFont := appConfig.enableDefaultFont;
   enableScreenshotHotkey := appConfig.enableScreenshotHotkey;
 
   P92Boot;
