@@ -16,6 +16,7 @@ interface
 uses SDL2Wrapper;
 
 type
+  TP92SoundHandle = type longint;
   TSoundData = record
     chunk: PMix_Chunk;
     volume: single;
@@ -23,9 +24,11 @@ type
 
 procedure InitSounds;
 procedure CleanupSounds;
-procedure LoadSound(const key: longint; const filename: string);
-procedure PlaySound(const key: longint);
-procedure SetSoundVolume(const key: longint; const volume: single);
+
+function FindUnusedSoundHandle: TP92SoundHandle;
+function LoadSound(const filename: string): TP92SoundHandle;
+procedure PlaySound(const sndHandle: longint);
+procedure SetSoundVolume(const sndHandle: longint; const volume: single);
 {$endif}
 
 
@@ -38,7 +41,7 @@ uses
 
 var
   soundsInitialised: boolean;
-  soundList: array[0..9] of TSoundData;
+  soundList: array[1..255] of TSoundData;
 
 procedure InitSounds;
 var
@@ -78,20 +81,28 @@ begin
   soundsInitialised := false
 end;
 
-{
-procedure LoadSound(const key: longint; const filename: string);
-begin
-  writeLog('loadSound:');
-  writeLogI32(key);
-  writeLog(filename);
-end;
-}
 
-procedure LoadSound(const key: longint; const filename: string);
+function FindUnusedSoundHandle: TP92SoundHandle;
 var
+  a: longint;
+begin
+  for a:=1 to high(soundList) do
+    if soundList[a].chunk = nil then begin
+      FindUnusedSoundHandle := a;
+      exit
+    end;
+
+  FindUnusedSoundHandle := -1
+end;
+
+function LoadSound(const filename: string): TP92SoundHandle;
+var
+  sndHandle: TP92SoundHandle;
   strBuffer: array[0..255] of char;
   chunk: PMix_Chunk;
 begin
+  sndHandle := FindUnusedSoundHandle;
+
 {
   writeLog('loadSound:');
   writeLogI32(key);
@@ -123,30 +134,30 @@ begin
   soundList[key].chunk := chunk
 end;
 
-procedure PlaySound(const key: longint);
+procedure PlaySound(const sndHandle: longint);
 var
   sdlVolume: integer;
 begin
   if not soundsInitialised then exit;
-  if (key < 0) or (key > high(soundList)) then exit;
-  if soundList[key].chunk = nil then begin
+  if (sndHandle < 0) or (sndHandle > high(soundList)) then exit;
+  if soundList[sndHandle].chunk = nil then begin
     writeWarn('Warning: Attempting to play a nil sound');
     exit
   end;
 
-  sdlVolume := round(soundList[key].volume * 128);
-  Mix_VolumeChunk(soundList[key].chunk, sdlVolume);
+  sdlVolume := round(soundList[sndHandle].volume * 128);
+  Mix_VolumeChunk(soundList[sndHandle].chunk, sdlVolume);
 
   { -1: any available channel
     0: no looping }
-  Mix_PlayChannel(-1, soundList[key].chunk, 0)
+  Mix_PlayChannel(-1, soundList[sndHandle].chunk, 0)
 end;
 
-procedure SetSoundVolume(const key: longint; const volume: single);
+procedure SetSoundVolume(const sndHandle: longint; const volume: single);
 begin
   if not soundsInitialised then exit;
-  if (key < 0) or (key > high(soundList)) then exit;
-  soundList[key].volume := clamp(volume, 0.0, 1.0)
+  if (sndHandle < 0) or (sndHandle > high(soundList)) then exit;
+  soundList[sndHandle].volume := clamp(volume, 0.0, 1.0)
 end;
 {$endif}
 
