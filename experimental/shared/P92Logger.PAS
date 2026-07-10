@@ -78,7 +78,7 @@ begin
     close(logFile);
 end;
 
-procedure writeLog(const msg: string);
+procedure WriteLog(const msg: string);
 begin
   textColor(white);
   writeln(msg);
