@@ -18,6 +18,8 @@ type
     width: smallint;
     height: smallint;
     sdlScale: smallint;
+
+    enableDefaultBMFont: boolean;
     enableScreenshotHotkey: boolean;
 
     OnPreload: TCallback;
@@ -141,7 +143,7 @@ var
   enableScreenshotHotkey: boolean;
 
 {$ifdef Windows}
-procedure InitSDL(const aDisplayScale: smallint = 2); forward;
+procedure InitSDL; forward;
 procedure UpdateSDL; forward;
 procedure CleanupSDL; forward;
 {$endif}
@@ -206,7 +208,10 @@ begin
 {$endif}
 
 {$ifdef P92_SDL2}
-  InitVideoMem(320, 200, getmem(320 * 200 * 4));
+  InitVideoMem(
+    bootConfig.width, bootConfig.height,
+    getmem(bootConfig.width * bootConfig.height * 4));
+
   InitDeltaTime;
 
   InitSDL;
@@ -429,6 +434,10 @@ end;
 
 procedure P92Start(const appConfig: TP92AppConfig);
 begin
+  bootConfig := appConfig;
+  enableDefaultBMFont := appConfig.enableDefaultBMFont;
+  enableScreenshotHotkey := appConfig.enableScreenshotHotkey;
+
   P92Boot;
 
   InitPreloadState;
@@ -472,19 +481,17 @@ begin
   P92Shutdown
 end;
 
-procedure InitSDL(const aDisplayScale: smallint);
+procedure InitSDL;
 begin
   if SDL_Init(SDL_INIT_VIDEO) <> 0 then begin
     writeln('SDL_Init failed!');
     halt(1)
   end;
 
-  displayScale := aDisplayScale;
-
   window := SDL_CreateWindow(
     'SDL2 Window',
     SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-    vgaWidth * displayScale, vgaHeight * displayScale,
+    vgaWidth * bootConfig.sdlScale, vgaHeight * bootConfig.sdlScale,
     SDL_WINDOW_SHOWN);
 
   renderer := SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
