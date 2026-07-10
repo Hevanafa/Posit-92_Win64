@@ -47,6 +47,9 @@
             </Debugging>
             <LinkSmart Value="True"/>
           </Linking>
+          <Other>
+            <CustomOptions Value="-dP92_SDL2"/>
+          </Other>
         </CompilerOptions>
       </Item>
     </BuildModes>
@@ -103,6 +106,9 @@
         <UseExternalDbgSyms Value="True"/>
       </Debugging>
     </Linking>
+    <Other>
+      <CustomOptions Value="-dP92_SDL2"/>
+    </Other>
   </CompilerOptions>
   <Debugging>
     <Exceptions>

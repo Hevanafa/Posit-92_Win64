@@ -5,15 +5,12 @@ program Game;
 {$J-}
 
 uses
-  SDL2, Posit92, Sounds,
-  Keyboard, Mouse,
-  Logger, ImgRef, ImgRefFast,
-  Timing, VGA,
+  SDL2, P92Core, P92Sounds,
+  P92Keyboard, P92Mouse,
+  P92Logger,
+  P92Tex, P92TexDraw,
+  P92Timing, P92VGA,
   Assets;
-
-const
-  TargetFPS = 60;
-  FrameTime = 16;
 
 var
   lastSpacebar: boolean;
@@ -23,89 +20,59 @@ var
   gameTime: double;
 
 
-procedure drawMouse;
+procedure DrawMouse;
 begin
   spr(imgCursor, mouseX, mouseY)
 end;
 
-procedure playRandomSFX;
+procedure PlayRandomSFX;
 begin
   playSound(1 + random(SfxSlip))
 end;
 
 
-procedure loadAssets;
+procedure OnPreload;
 begin
-  imgCursor := loadImage('assets\images\cursor.png');
-  imgDosuEXE[0] := loadImage('assets\images\dosu_1.png');
-  imgDosuEXE[1] := loadImage('assets\images\dosu_2.png');
-  imgFullFont := loadImage('assets\fonts\nokia_cellphone_fc_8_0.png');
+  imgCursor := LoadImage('assets\images\cursor.png');
+  imgDosuEXE[0] := LoadImage('assets\images\dosu_1.png');
+  imgDosuEXE[1] := LoadImage('assets\images\dosu_2.png');
+  imgFullFont := LoadImage('assets\fonts\nokia_cellphone_fc_8_0.png');
 
-  loadBMFont(
-    'assets\fonts\nokia_cellphone_fc_8.txt',
-    defaultFont, defaultFontGlyphs);
-
-  loadSound(SfxBwonk, 'assets\sfx\bwonk.ogg');
-  loadSound(SfxBite, 'assets\sfx\bite.ogg');
-  loadSound(SfxBonk, 'assets\sfx\bonk.ogg');
-  loadSound(SfxStrum, 'assets\sfx\strum.ogg');
-  loadSound(SfxSlip, 'assets\sfx\slip.ogg');
+  LoadSound(SfxBwonk, 'assets\sfx\bwonk.ogg');
+  LoadSound(SfxBite, 'assets\sfx\bite.ogg');
+  LoadSound(SfxBonk, 'assets\sfx\bonk.ogg');
+  LoadSound(SfxStrum, 'assets\sfx\strum.ogg');
+  LoadSound(SfxSlip, 'assets\sfx\slip.ogg');
 
   { Load more assets here }
 end;
 
-procedure init;
+procedure OnReady;
 begin
-  initVideoMem(320, 200, getmem(320 * 200 * 4));
-  initDeltaTime;
-  initSDL;
-
-  initLogger;
-  initSounds;
-end;
-
-procedure afterInit;
-begin
-  setTitle('Posit-92 with SDL2');
-
-  loadAssets;
   hideCursor;
 
   { Init your game state here }
   gameTime := 0.0
 end;
 
-procedure cleanup;
+procedure OnCleanup;
 begin
-  cleanupSounds;
-  showCursor;
+  CleanupSounds;
+  ShowCursor;
 
-  freeImage(imgCursor);
-  freeImage(imgDosuEXE[0]);
-  freeImage(imgDosuEXE[1]);
-  freeImage(imgFullFont);
-
-  freeImage(defaultFont.imgHandle);
-
-  freemem(getSurfacePtr);
-
-  { Your cleanup code here (after setting `done` to true) }
-  closeLogger;
-  cleanupSDL
+  FreeTexture(imgCursor);
+  FreeTexture(imgDosuEXE[0]);
+  FreeTexture(imgDosuEXE[1]);
 end;
 
-procedure update;
+procedure Update;
 begin
-  updateSDL;
-  updateDeltaTime;
-
-  { Your update logic here }
-  if isKeyDown(SC_ESCAPE) then done := true;
+  if isKeyDown(SC_ESCAPE) then SignalDone;
 
   if lastSpacebar <> isKeyDown(SC_SPACE) then begin
     lastSpacebar := isKeyDown(SC_SPACE);
 
-    if lastSpacebar then playRandomSFX;
+    if lastSpacebar then PlayRandomSFX;
   end;
 
   if lastD1 <> isKeyDown(SC_1) then begin
@@ -133,10 +100,10 @@ begin
     if lastD5 then playSound(5);
   end;
 
-  gameTime := gameTime + dt
+  gameTime := gameTime + DeltaTime
 end;
 
-procedure draw;
+procedure Draw;
 var
   s: string;
   w: word;
@@ -155,42 +122,27 @@ begin
   s := 'Spacebar - Play a random sound';
   w := measureDefault(s);
   printDefault(s, (vgaWidth - w) div 2, 130);
-
-  drawMouse;
-
-  vgaUpload;
-  vgaPresent
 end;
 
 
-var
-  { done: boolean; }  { moved to Posit92 unit }
-  lastFrameTime, frameTimeNow, elapsed: longword; { in ms }
-
 {$R *.res}
 
+var
+  appConfig: TP92AppConfig;
 begin
-  init;
-  afterInit;
+  appConfig := DefaultP92AppConfig;
 
-  done := false;
-
-  lastFrameTime := SDL_GetTicks;
-
-  while not done do begin
-    frameTimeNow := SDL_GetTicks;
-    elapsed := frameTimeNow - lastFrameTime;
-
-    if elapsed >= FrameTime then begin
-      lastFrameTime := frameTimeNow - (elapsed mod FrameTime); { Carry over extra time }
-      update;
-      draw
-    end;
-
-    SDL_Delay(1)
+  with appConfig do begin
+    windowTitle := 'Posit-92 with SDL2';
   end;
 
-  cleanup
+  appConfig.OnPreload := @OnPreload;
+  appConfig.OnReady := @OnReady;
+  appConfig.Update := @Update;
+  appConfig.Draw := @Draw;
+  appConfig.OnCleanup := @OnCleanup;
+
+  P92Start(appConfig)
 end.
 
 

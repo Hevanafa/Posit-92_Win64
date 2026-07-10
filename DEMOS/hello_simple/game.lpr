@@ -63,6 +63,7 @@ end;
 
 
 {$R *.res}
+
 var
   appConfig: TP92AppConfig;
 begin
