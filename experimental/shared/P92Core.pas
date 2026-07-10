@@ -15,16 +15,20 @@ type
   TCallback = procedure;
 
   TP92AppConfig = record
+    { Window }
     windowTitle: string;
     width: smallint;
     height: smallint;
     sdlScale: smallint;
 
+    { Default font }
     enableDefaultFont: boolean;
     defaultFontPath: string;
 
+    { Features }
     enableScreenshotHotkey: boolean;
 
+    { Callbacks }
     OnPreload: TCallback;
     OnReady: TCallback;
     Update: TCallback;
@@ -447,6 +451,11 @@ begin
   bootConfig := appConfig;
   enableDefaultBMFont := appConfig.enableDefaultFont;
   enableScreenshotHotkey := appConfig.enableScreenshotHotkey;
+
+  if not assigned(appConfig.Update) then
+    PanicHalt('Update callback is required');
+  if not assigned(appConfig.Draw) then
+    PanicHalt('Draw callback is required');
 
   P92Boot;
 
