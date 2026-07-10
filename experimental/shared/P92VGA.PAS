@@ -64,7 +64,7 @@ uses
 {$endif}
 {$ifdef P92_SDL2}
 uses
-  Logger;
+  P92Logger;
 {$endif}
 
 var

@@ -33,7 +33,7 @@ end;
 {$endif}
 
 {$ifdef P92_SDL2}
-uses Logger, Windows;
+uses P92Logger, Windows;
 
 procedure PanicHalt(const msg: string);
 var
