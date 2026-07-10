@@ -4,16 +4,12 @@ unit Assets;
 
 interface
 
-const
-  SfxBwonk = 1;
-  SfxBite = 2;
-  SfxBonk = 3;
-  SfxStrum = 4;
-  SfxSlip = 5;
+uses P92Sounds;
 
 var
   imgCursor: longint;
   imgDosuEXE: array[0..1] of longint;
+  sfxBwonk, sfxBite, sfxBonk, sfxStrum, sfxSlip: TP92SoundHandle;
 
 
 implementation

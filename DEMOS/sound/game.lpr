@@ -28,7 +28,7 @@ end;
 
 procedure PlayRandomSFX;
 begin
-  playSound(1 + random(SfxSlip))
+  playSound(1 + random(5))
 end;
 
 
@@ -40,11 +40,11 @@ begin
   imgDosuEXE[0] := LoadImage('assets\images\dosu_1.png');
   imgDosuEXE[1] := LoadImage('assets\images\dosu_2.png');
 
-  LoadSound(SfxBwonk, 'assets\sfx\bwonk.ogg');
-  LoadSound(SfxBite, 'assets\sfx\bite.ogg');
-  LoadSound(SfxBonk, 'assets\sfx\bonk.ogg');
-  LoadSound(SfxStrum, 'assets\sfx\strum.ogg');
-  LoadSound(SfxSlip, 'assets\sfx\slip.ogg');
+  sfxBwonk := LoadSound('assets\sfx\bwonk.ogg');
+  sfxBite := LoadSound('assets\sfx\bite.ogg');
+  sfxBonk := LoadSound('assets\sfx\bonk.ogg');
+  sfxStrum := LoadSound('assets\sfx\strum.ogg');
+  sfxSlip := LoadSound('assets\sfx\slip.ogg');
 
   { Load more assets here }
 end;

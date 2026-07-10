@@ -58,7 +58,7 @@ begin
     exit
   end;
 
-  for a:=0 to high(soundList) do begin
+  for a:=1 to high(soundList) do begin
     soundList[a].chunk := nil;
     soundList[a].volume := 1.0
   end;
@@ -73,7 +73,7 @@ var
 begin
   if not soundsInitialised then exit;
 
-  for a:=0 to high(soundList) do
+  for a := 1 to high(soundList) do
     if soundList[a].chunk <> nil then
       Mix_FreeChunk(soundList[a].chunk);
 
@@ -111,11 +111,6 @@ begin
 
   if not soundsInitialised then exit;
 
-  if (key < 0) or (key > high(soundList)) then begin
-    writeLog('loadSound: Invalid sound key ' + i32str(key));
-    exit
-  end;
-
   fillchar(strBuffer, length(strBuffer), #0);
   strpcopy(strBuffer, filename);
   chunk := Mix_LoadWAV(strBuffer);
@@ -125,13 +120,13 @@ begin
     exit
   end;
 
-  if soundList[key].chunk <> nil then begin
-    writeLog('loadSound: Warning: Possible duplicate sound key ' + i32str(key));
-    Mix_FreeChunk(soundList[key].chunk);
+  if soundList[sndHandle].chunk <> nil then begin
+    writeLog('loadSound: Warning: Possibly duplicate sound key ' + i32str(sndHandle));
+    Mix_FreeChunk(soundList[sndHandle].chunk);
     exit
   end;
 
-  soundList[key].chunk := chunk
+  soundList[sndHandle].chunk := chunk
 end;
 
 procedure PlaySound(const sndHandle: longint);
