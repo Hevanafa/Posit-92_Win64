@@ -10,6 +10,21 @@ interface
 uses SDL2, P92Tex, P92BMFont;
 {$endif}
 
+type
+  TCallback = procedure;
+
+  TP92AppConfig = record
+    windowTitle: string;
+    sdlScale: smallint;
+    enableScreenshotHotkey: boolean;
+
+    OnPreload: TCallback;
+    OnReady: TCallback;
+    Update: TCallback;
+    Draw: TCallback;
+    OnCleanup: TCallback;
+  end;
+
 {$ifdef P92_WASM}
 function GetBootOptionBoolean(key: string): boolean;
 function JsGetBootOptionBoolean: boolean; external 'env' name 'JsGetBootOptionBoolean';
@@ -33,17 +48,8 @@ procedure Print(const txt: string; const x, y: smallint);
 procedure PrintWrap(const txt: string; x, y, wrapWidth: smallint);
 
 {$ifdef Windows}
-type
-  TCallback = procedure;
-
 procedure SignalDone;
-procedure P92Start(
-  OnPreload: TCallback;
-  OnReady: TCallback;
-  Update: TCallback;
-  Draw: TCallback;
-  OnCleanup: TCallback
-);
+procedure P92Start(appConfig: TP92AppConfig);
 
 procedure SetTitle(const value: string);
 

@@ -152,16 +152,14 @@ begin
   y2 := sin(angle) * -10 + vgaHeight div 2;
   line(round(x1), round(y1), round(x2), round(y2), palette[1]);
 
-  DrawFPS;
-  DrawMouse;
-
-  vgaUpload;
-  vgaPresent
+  DrawFPS
 end;
 
 
 {$R *.res}
 
+var
+  appConfig: TP92AppConfig;
 begin
   P92Start(@OnPreload, @OnReady, @Update, @Draw, @OnCleanup);
 end.
