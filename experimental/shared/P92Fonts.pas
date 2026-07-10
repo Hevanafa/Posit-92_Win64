@@ -8,6 +8,7 @@ interface
 uses P92BMFont;
 
 procedure LoadDefaultFont;
+function GetDefaultFontHandle: TBMFontHandle;
 
 procedure PrintDefault(const text: string; const x, y: integer);
 procedure PrintDefaultCentred(const text: string; const cx, y: integer);
@@ -21,7 +22,12 @@ implementation
 uses P92AssetRegistry, P92Core;
 
 var
-  defaultFontHandle: longint;
+  defaultFontHandle: TBMFontHandle;
+
+function GetDefaultFontHandle: TBMFontHandle;
+begin
+  GetDefaultFontHandle := defaultFontHandle
+end;
 
 procedure LoadDefaultFont;
 begin

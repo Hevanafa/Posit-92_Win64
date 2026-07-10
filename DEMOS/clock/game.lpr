@@ -53,28 +53,14 @@ begin
   end;
 end;
 
-procedure OnPreload;
-begin
-  { TODO: Remove this }
-  pico8Font := LoadBMFont('assets\fonts\pico-8_regular_5.txt');
-
-  { Load more assets here }
-end;
-
 procedure OnReady;
 begin
   HideCursor;
 
-  ReplaceColour(BorrowBMFontPtr(pico8Font)^.texHandle, white, Palette[1]);
+  ReplaceColour(BorrowBMFontPtr(GetDefaultFontHandle)^.texHandle, white, Palette[1]);
 
   { Init your game state here }
   gameTime := 0.0
-end;
-
-procedure OnCleanup;
-begin
-  showCursor;
-  freeBMFont(pico8Font)
 end;
 
 procedure Update;
@@ -86,6 +72,8 @@ end;
 
 procedure Draw;
 var
+  font: PBMFont;
+
   a: word;
   positNow: double;
   h, m, s: double;
@@ -94,6 +82,8 @@ var
 
   dotw: smallint;
 begin
+  font := BorrowBMFontPtr(GetDefaultFontHandle);
+
   cls(palette[0]);
 
   for a:=0 to 11 do begin
@@ -110,7 +100,7 @@ begin
   PrintDefaultCentred(
     FormatDateTime('dd-mm-yyyy', now),
     vgaWidth div 2,
-    vgaHeight * 3 div 4 - BorrowBMFontPtr(pico8Font)^.lineHeight - 2);
+    vgaHeight * 3 div 4 - font^.lineHeight - 2);
 
   dotw := DayOfTheWeek(now);
   { testStr := format('Today is %s', [GetDayName(dotw)]); }
@@ -165,11 +155,9 @@ begin
     defaultFontPath := 'assets\fonts\pico-8_regular_5.txt';
   end;
 
-  appConfig.OnPreload := @OnPreload;
   appConfig.OnReady := @OnReady;
   appConfig.Update := @Update;
   appConfig.Draw := @Draw;
-  appConfig.OnCleanup := @OnCleanup;
 
   P92Start(appConfig)
 end.

@@ -425,6 +425,8 @@ function DefaultP92AppConfig: TP92AppConfig;
 var
   newConfig: TP92AppConfig;
 begin
+  newConfig := default(TP92AppConfig);
+
   with newConfig do begin
     windowTitle := 'Posit-92 + SDL2 on Windows';
     width := 320;
@@ -490,14 +492,19 @@ begin
 end;
 
 procedure InitSDL;
+var
+  windowTitle: AnsiString;
 begin
   if SDL_Init(SDL_INIT_VIDEO) <> 0 then begin
     writeln('SDL_Init failed!');
     halt(1)
   end;
 
+  { this converts the ShortString to AnsiString }
+  windowTitle := bootConfig.windowTitle;
+
   window := SDL_CreateWindow(
-    'SDL2 Window',
+    PAnsiChar(windowTitle),
     SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
     vgaWidth * bootConfig.sdlScale, vgaHeight * bootConfig.sdlScale,
     SDL_WINDOW_SHOWN);
