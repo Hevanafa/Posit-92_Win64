@@ -13,20 +13,17 @@ unit P92Sounds;
 interface
 
 {$ifdef P92_SDL2}
-uses SDL2Wrapper;
+uses SDL2_Mixer, P92AssetRegistry;
 
+{ Used in asset registry }
 type
-  TP92SoundHandle = type longint;
-  TSoundData = record
-    chunk: PMix_Chunk;
-    volume: single;
-  end;
+  TSoundHandle = type longint;
 
 procedure InitSounds;
 procedure CleanupSounds;
 
-function FindUnusedSoundHandle: TP92SoundHandle;
-function LoadSound(const filename: string): TP92SoundHandle;
+function FindUnusedSoundHandle: TSoundHandle;
+function LoadSound(const filename: string): TSoundHandle;
 procedure PlaySound(const sndHandle: longint);
 procedure SetSoundVolume(const sndHandle: longint; const volume: single);
 {$endif}
@@ -41,7 +38,6 @@ uses
 
 var
   soundsInitialised: boolean;
-  soundList: array[1..255] of TSoundData;
 
 procedure InitSounds;
 var
@@ -58,9 +54,9 @@ begin
     exit
   end;
 
-  for a:=1 to high(soundList) do begin
-    soundList[a].chunk := nil;
-    soundList[a].volume := 1.0
+  for a:=1 to high(sounds) do begin
+    sounds[a].chunk := nil;
+    sounds[a].volume := 1.0
   end;
 
   writeLog('initSounds end');
@@ -73,21 +69,21 @@ var
 begin
   if not soundsInitialised then exit;
 
-  for a := 1 to high(soundList) do
-    if soundList[a].chunk <> nil then
-      Mix_FreeChunk(soundList[a].chunk);
+  for a := 1 to high(sounds) do
+    if sounds[a].chunk <> nil then
+      Mix_FreeChunk(sounds[a].chunk);
 
   Mix_CloseAudio;
   soundsInitialised := false
 end;
 
 
-function FindUnusedSoundHandle: TP92SoundHandle;
+function FindUnusedSoundHandle: TSoundHandle;
 var
   a: longint;
 begin
-  for a:=1 to high(soundList) do
-    if soundList[a].chunk = nil then begin
+  for a:=1 to high(sounds) do
+    if sounds[a].chunk = nil then begin
       FindUnusedSoundHandle := a;
       exit
     end;
@@ -95,9 +91,9 @@ begin
   FindUnusedSoundHandle := -1
 end;
 
-function LoadSound(const filename: string): TP92SoundHandle;
+function LoadSound(const filename: string): TSoundHandle;
 var
-  sndHandle: TP92SoundHandle;
+  sndHandle: TSoundHandle;
   strBuffer: array[0..255] of char;
   chunk: PMix_Chunk;
 begin
@@ -111,6 +107,8 @@ begin
 
   if not soundsInitialised then exit;
 
+  LoadSound := sndHandle;
+
   fillchar(strBuffer, length(strBuffer), #0);
   strpcopy(strBuffer, filename);
   chunk := Mix_LoadWAV(strBuffer);
@@ -120,13 +118,13 @@ begin
     exit
   end;
 
-  if soundList[sndHandle].chunk <> nil then begin
+  if sounds[sndHandle].chunk <> nil then begin
     writeLog('loadSound: Warning: Possibly duplicate sound key ' + i32str(sndHandle));
-    Mix_FreeChunk(soundList[sndHandle].chunk);
+    Mix_FreeChunk(sounds[sndHandle].chunk);
     exit
   end;
 
-  soundList[sndHandle].chunk := chunk
+  sounds[sndHandle].chunk := chunk
 end;
 
 procedure PlaySound(const sndHandle: longint);
@@ -134,25 +132,27 @@ var
   sdlVolume: integer;
 begin
   if not soundsInitialised then exit;
-  if (sndHandle < 0) or (sndHandle > high(soundList)) then exit;
-  if soundList[sndHandle].chunk = nil then begin
+  if (sndHandle < 1) or (sndHandle > high(sounds)) then exit;
+
+  if sounds[sndHandle].chunk = nil then begin
     writeWarn('Warning: Attempting to play a nil sound');
     exit
   end;
 
-  sdlVolume := round(soundList[sndHandle].volume * 128);
-  Mix_VolumeChunk(soundList[sndHandle].chunk, sdlVolume);
+  sdlVolume := round(sounds[sndHandle].volume * 128);
+  Mix_VolumeChunk(sounds[sndHandle].chunk, sdlVolume);
 
   { -1: any available channel
     0: no looping }
-  Mix_PlayChannel(-1, soundList[sndHandle].chunk, 0)
+  Mix_PlayChannel(-1, sounds[sndHandle].chunk, 0)
 end;
 
 procedure SetSoundVolume(const sndHandle: longint; const volume: single);
 begin
   if not soundsInitialised then exit;
-  if (sndHandle < 0) or (sndHandle > high(soundList)) then exit;
-  soundList[sndHandle].volume := clamp(volume, 0.0, 1.0)
+  if (sndHandle < 1) or (sndHandle > high(sounds)) then exit;
+
+  sounds[sndHandle].volume := clamp(volume, 0.0, 1.0)
 end;
 {$endif}
 

@@ -4,12 +4,11 @@ unit Assets;
 
 interface
 
-uses P92Sounds;
+uses P92Sounds, P92Tex;
 
 var
-  imgCursor: longint;
-  imgDosuEXE: array[0..1] of longint;
-  sfxBwonk, sfxBite, sfxBonk, sfxStrum, sfxSlip: TP92SoundHandle;
+  imgDosuEXE: array[0..1] of TTextureHandle;
+  sfxBwonk, sfxBite, sfxBonk, sfxStrum, sfxSlip: TSoundHandle;
 
 
 implementation

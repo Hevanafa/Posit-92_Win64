@@ -5,7 +5,13 @@ unit P92AssetRegistry;
 
 interface
 
+{$ifdef P92_WASM}
 uses P92BMFont, P92Tex;
+{$endif}
+{$ifdef P92_SDL2}
+uses SDL2_Mixer, P92BMFont, P92Tex;
+{$endif}
+
 
 type
   TAssetStatus = (
@@ -36,12 +42,21 @@ type
     errorCode: smallint;
   end;
 
+{$ifdef P92_WASM}
   TSoundEntry = record
     status: TAssetStatus;
     errorCode: smallint;
   end;
+{$endif}
 
-  TSoundHandle = type longint;
+{$ifdef P92_SDL2}
+  TSoundEntry = record
+    chunk: PMix_Chunk;
+    volume: single;
+    status: TAssetStatus;
+    errorCode: smallint;
+  end;
+{$endif}
 
 var
   textures: array[1..255] of TSoftwareTexEntry;

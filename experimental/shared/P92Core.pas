@@ -171,6 +171,7 @@ end;
 procedure InitEngine;
 begin
   engineRunState := ersBoot;
+
   if DebugEngineRunStates then
     writelog('ersBoot');
 
@@ -272,9 +273,9 @@ end;
 procedure P92Update;
 begin
 {$ifdef P92_SDL2}
-    UpdateSDL;
-    UpdateDeltaTime;
-    IncrementFPS;
+  UpdateSDL;
+  UpdateDeltaTime;
+  IncrementFPS;
 {$endif}
 
 {$ifdef P92_WASM}

@@ -21,11 +21,6 @@ var
   gameTime: double;
 
 
-procedure DrawMouse;
-begin
-  spr(imgCursor, mouseX, mouseY)
-end;
-
 procedure PlayRandomSFX;
 begin
   playSound(1 + random(5))
@@ -36,7 +31,6 @@ procedure OnPreload;
 begin
   InitSounds;
 
-  imgCursor := LoadImage('assets\images\cursor.png');
   imgDosuEXE[0] := LoadImage('assets\images\dosu_1.png');
   imgDosuEXE[1] := LoadImage('assets\images\dosu_2.png');
 
@@ -62,7 +56,6 @@ begin
   CleanupSounds;
   ShowCursor;
 
-  FreeTexture(imgCursor);
   FreeTexture(imgDosuEXE[0]);
   FreeTexture(imgDosuEXE[1]);
 end;
