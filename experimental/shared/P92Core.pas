@@ -15,6 +15,8 @@ type
 
   TP92AppConfig = record
     windowTitle: string;
+    width: smallint;
+    height: smallint;
     sdlScale: smallint;
     enableScreenshotHotkey: boolean;
 
@@ -203,8 +205,8 @@ begin
 {$endif}
 
 {$ifdef P92_SDL2}
-  initVideoMem(320, 200, getmem(320 * 200 * 4));
-  initDeltaTime;
+  InitVideoMem(320, 200, getmem(320 * 200 * 4));
+  InitDeltaTime;
 
   InitSDL;
   InitLogger;
@@ -413,9 +415,14 @@ function DefaultP92AppConfig: TP92AppConfig;
 var
   newConfig: TP92AppConfig;
 begin
-  newConfig.windowTitle := 'Posit-92 + SDL2 on Windows';
-  newConfig.sdlScale := 2;
-  newConfig.enableScreenshotHotkey := true;
+  with newConfig do begin
+    windowTitle := 'Posit-92 + SDL2 on Windows';
+    width := 320;
+    height := 200;
+    sdlScale := 2;
+    enableScreenshotHotkey := true;
+  end;
+
   DefaultP92AppConfig := newConfig
 end;
 
