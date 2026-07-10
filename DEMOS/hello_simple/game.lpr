@@ -18,8 +18,8 @@ var
 
 procedure OnPreload;
 begin
-  imgDosuEXE[0] := LoadImage('assets\images\dosu_1.png');
-  imgDosuEXE[1] := LoadImage('assets\images\dosu_2.png');
+  imgSpecimenP92[0] := LoadImage('assets\images\specimen_p-92_1.png');
+  imgSpecimenP92[1] := LoadImage('assets\images\specimen_p-92_2.png');
 
   { Load more assets here }
 end;
@@ -36,8 +36,8 @@ procedure OnCleanup;
 begin
   ShowCursor;
 
-  FreeTexture(imgDosuEXE[0]);
-  FreeTexture(imgDosuEXE[1]);
+  FreeTexture(imgSpecimenP92[0]);
+  FreeTexture(imgSpecimenP92[1]);
 end;
 
 procedure Update;
@@ -52,9 +52,9 @@ begin
   cls($FF6495ED);
 
   if (trunc(gameTime * 4) and 1) > 0 then
-    spr(imgDosuEXE[1], 148, 88)
+    spr(imgSpecimenP92[1], 148, 88)
   else
-    spr(imgDosuEXE[0], 148, 88);
+    spr(imgSpecimenP92[0], 148, 88);
 
   PrintDefaultCentred('Hello world!', vgaWidth div 2, 120);
 
