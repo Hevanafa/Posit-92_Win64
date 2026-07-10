@@ -29,8 +29,6 @@ type
     pixelData: PByte;
   end;
 
-  TTextureHandle = type longint;
-
 const
   { SprFlips enum }
   SprFlipNone = 0;

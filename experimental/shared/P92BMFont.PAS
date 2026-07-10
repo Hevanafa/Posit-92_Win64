@@ -11,6 +11,8 @@ unit P92BMFont;
 
 interface
 
+uses P92AssetRegistry;
+
 type
   PBMFontGlyph = ^TBMFontGlyph;
   TBMFontGlyph = record
@@ -36,9 +38,6 @@ type
     spacing: array[0..1] of byte;
     glyphs: array[0..255] of TBMFontGlyph;
   end;
-
-  { Used in asset registry }
-  TBMFontHandle = type longint;
 
 
 { This procedure creates a new ImgRef instance }

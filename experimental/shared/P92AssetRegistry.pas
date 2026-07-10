@@ -52,11 +52,18 @@ type
 {$ifdef P92_SDL2}
   TSoundEntry = record
     chunk: PMix_Chunk;
+    { 0.0 .. 1.0 }
     volume: single;
     status: TAssetStatus;
     errorCode: smallint;
   end;
 {$endif}
+
+type
+  TTextureHandle = type longint;
+  TBMFontHandle = type longint;
+  TSoundHandle = type longint;
+
 
 var
   textures: array[1..255] of TSoftwareTexEntry;
@@ -70,9 +77,10 @@ function AllAssetsReady: boolean;
 {$endif}
 
 procedure InitAssetRegistry;
-function FindUnusedTextureHandle: TTextureHandle;
 
+function FindUnusedTextureHandle: TTextureHandle;
 function FindUnusedBMFontHandle: TBMFontHandle;
+function FindUnusedSoundHandle: TSoundHandle;
 
 {$ifdef P92_WASM}
 procedure JsRequestImage(texHandle: longint); external 'env' name 'JsRequestImage';
@@ -106,6 +114,10 @@ procedure PascalBMFontFailed(bmfontHandle: longint; errorCode: smallint); public
 
 procedure PascalSoundLoaded(sndHandle: longint); public name 'PascalSoundLoaded';
 procedure PascalSoundFailed(sndHandle: longint; errorCode: smallint); public name 'PascalSoundFailed';
+{$endif}
+
+{$ifdef P92_SDL2}
+function LoadSound(const filename: string): TSoundHandle;
 {$endif}
 
 
@@ -210,7 +222,7 @@ begin
   FindUnusedBMFontHandle := -1
 end;
 
-function FindUnusedSoundHandle: longint;
+function FindUnusedSoundHandle: TSoundHandle;
 var
   a: longint;
 begin
@@ -327,6 +339,47 @@ begin
   JsRequestSound(sndHandle);
 
   RequestSound := sndHandle
+end;
+{$endif}
+
+{$ifdef P92_SDL2}
+function LoadSound(const filename: string): TSoundHandle;
+var
+  sndHandle: TSoundHandle;
+  strBuffer: array[0..255] of char;
+  chunk: PMix_Chunk;
+begin
+  sndHandle := FindUnusedSoundHandle;
+
+{
+  writeLog('loadSound:');
+  writeLogI32(key);
+  writeLog(filename);
+}
+
+  if not soundsInitialised then exit;
+
+  LoadSound := sndHandle;
+
+  fillchar(strBuffer, length(strBuffer), #0);
+  strpcopy(strBuffer, filename);
+  chunk := Mix_LoadWAV(strBuffer);
+
+  if chunk = nil then begin
+    writeLog('loadSound: Failed to load ' + filename);
+    exit
+  end;
+
+  if sounds[sndHandle].chunk <> nil then begin
+    writeLog('loadSound: Warning: Possibly duplicate sound key ' + i32str(sndHandle));
+    Mix_FreeChunk(sounds[sndHandle].chunk);
+    exit
+  end;
+
+  sounds[sndHandle].status := AssetStatusReady;
+  sounds[sndHandle].errorCode := 0;
+  sounds[sndHandle].chunk := chunk;
+  sounds[sndHandle].volume := 1.0;
 end;
 {$endif}
 
