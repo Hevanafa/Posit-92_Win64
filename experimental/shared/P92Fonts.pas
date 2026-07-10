@@ -35,7 +35,7 @@ begin
   defaultFontHandle := RequestBMFont('assets/fonts/nokia_cellphone_fc_8.txt')
 {$endif}
 
-{$ifdef Windows}
+{$ifdef P92_SDL2}
   defaultFontHandle := LoadBMFont(bootConfig.defaultFontPath)
 {$endif}
 end;

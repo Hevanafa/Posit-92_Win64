@@ -24,28 +24,23 @@ implementation
 
 {$ifdef P92_WASM}
 uses P92VGA;
-{$endif}
-{$ifdef Windows}
-uses Logger, Windows;
-{$endif}
-
-
-{$ifdef Windows}
-procedure panicHalt(const msg: string);
-var
-  s: string;
-  p: pchar;
-begin
-  s := 'PANIC: ' + msg + #0;
-  MessageBox(0, PChar(@s[1]), 'Panic', MB_OK or MB_ICONERROR);
-  halt(1)
-end;
-
-{$else}
 
 procedure PanicHalt(const msg: string);
 begin
   JsPanicHalt(@msg[1], length(msg));
+  halt(1)
+end;
+{$endif}
+
+{$ifdef P92_SDL2}
+uses Logger, Windows;
+
+procedure PanicHalt(const msg: string);
+var
+  s: string;
+begin
+  s := 'PANIC: ' + msg + #0;
+  MessageBox(0, PChar(@s[1]), 'Panic', MB_OK or MB_ICONERROR);
   halt(1)
 end;
 {$endif}

@@ -120,7 +120,7 @@ begin
 {$ifdef P92_WASM}
   WasmFreeMem(textures[texHandle].texture.pixelData);
 {$endif}
-{$ifdef Windows}
+{$ifdef P92_SDL2}
   FreeMem(textures[texHandle].texture.pixelData);
 {$endif}
 

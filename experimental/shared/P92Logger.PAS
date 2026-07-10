@@ -20,7 +20,7 @@ procedure WriteLogF32(const value: double); external 'env' name 'WriteLogF32';
 procedure FlushLog; external 'env' name 'FlushLog';
 {$endif}
 
-{$ifdef Windows}
+{$ifdef P92_SDL2}
 procedure InitLogger;
 procedure CloseLogger;
 
@@ -38,7 +38,7 @@ implementation
 uses P92InteropBuf;
 {$endif}
 
-{$ifdef Windows}
+{$ifdef P92_SDL2}
 uses CRT;
 
 const
@@ -57,7 +57,7 @@ begin
 end;
 {$endif}
 
-{$ifdef Windows}
+{$ifdef P92_SDL2}
 procedure InitLogger;
 begin
   assign(logFile, logFilename);

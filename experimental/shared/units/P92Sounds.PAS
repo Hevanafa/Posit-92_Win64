@@ -12,7 +12,7 @@ unit P92Sounds;
 
 interface
 
-{$ifdef Windows}
+{$ifdef P92_SDL2}
 uses SDL2Wrapper;
 
 type
@@ -31,7 +31,7 @@ procedure SetSoundVolume(const key: longint; const volume: single);
 
 implementation
 
-{$ifdef Windows}
+{$ifdef P92_SDL2}
 uses
   SysUtils,
   P92Conversions, P92Maths, P92Logger;

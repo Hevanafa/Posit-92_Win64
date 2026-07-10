@@ -62,7 +62,7 @@ uses
   P92Logger,
   P92WasmHeap;
 {$endif}
-{$ifdef Windows}
+{$ifdef P92_SDL2}
 uses
   Logger;
 {$endif}

@@ -11,7 +11,7 @@ unit P92Keyboard;
 
 interface
 
-{$ifdef Windows}
+{$ifdef P92_SDL2}
 { SDL Scancodes }
 const
   SDL_SCANCODE_UNKNOWN = 0;
@@ -288,7 +288,7 @@ function SDLToDOSScancode(const scancode: integer): integer;
 
 implementation
 
-{$ifdef Windows}
+{$ifdef P92_SDL2}
 function SDLToDOSScancode(const scancode: integer): integer;
 begin
   SDLToDOSScancode := 0;

@@ -6,11 +6,9 @@ unit P92Core;
 
 interface
 
-{$ifdef Windows}
-uses SDL2, P92Tex, P92BMFont;
-{$endif}
-
 {$ifdef P92_SDL2}
+uses SDL2, P92Tex, P92BMFont;
+
 type
   TCallback = procedure;
 
@@ -62,7 +60,7 @@ procedure PrintChar(const c: char; const x, y: smallint);
 procedure Print(const txt: string; const x, y: smallint);
 procedure PrintWrap(const txt: string; x, y, wrapWidth: smallint);
 
-{$ifdef Windows}
+{$ifdef P92_SDL2}
 function DefaultP92AppConfig: TP92AppConfig;
 procedure P92Start(const appConfig: TP92AppConfig);
 
@@ -88,7 +86,7 @@ procedure VgaPresent;
 implementation
 
 uses
-{$ifdef Windows}
+{$ifdef P92_SDL2}
   SysUtils, SDL2_Image,
   P92Fonts, P92Conversions, P92AssetRegistry, P92Logger,
   P92Keyboard, P92Mouse,
@@ -112,7 +110,7 @@ uses
 {$endif}
   ;
 
-{$ifdef Windows}
+{$ifdef P92_SDL2}
 const
   TargetFPS = 60;
   FrameTime = 1000 div TargetFPS;
@@ -151,7 +149,7 @@ var
   lastF2: boolean;
   enableScreenshotHotkey: boolean;
 
-{$ifdef Windows}
+{$ifdef P92_SDL2}
 procedure InitSDL; forward;
 procedure UpdateSDL; forward;
 procedure CleanupSDL; forward;
@@ -239,7 +237,7 @@ begin
   if DebugEngineRunStates then
     writelog('ersPreload');
 
-{$ifdef Windows}
+{$ifdef P92_SDL2}
   { imgCursor := LoadImage('assets\images\cursor.png'); }
   hwCursor := HwLoadImage('assets\images\cursor.png');
   LoadDefaultFont;
@@ -273,7 +271,7 @@ end;
 
 procedure P92Update;
 begin
-{$ifdef Windows}
+{$ifdef P92_SDL2}
     UpdateSDL;
     UpdateDeltaTime;
     IncrementFPS;
@@ -403,7 +401,7 @@ begin
   end;
 end;
 
-{$ifdef Windows}
+{$ifdef P92_SDL2}
 procedure SignalDone;
 begin
   done := true
