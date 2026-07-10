@@ -11,7 +11,7 @@ unit P92BMFont;
 
 interface
 
-uses P92AssetRegistry;
+uses P92AssetHandles;
 
 type
   PBMFontGlyph = ^TBMFontGlyph;

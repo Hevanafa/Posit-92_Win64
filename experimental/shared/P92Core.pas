@@ -7,7 +7,7 @@ unit P92Core;
 interface
 
 {$ifdef P92_SDL2}
-uses SDL2, P92Tex, P92BMFont;
+uses SDL2, P92AssetHandles, P92Tex, P92BMFont;
 
 type
   TCallback = procedure;

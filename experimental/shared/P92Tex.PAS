@@ -20,6 +20,8 @@ unit P92Tex;
 
 interface
 
+uses P92AssetHandles;
+
 type
   PSoftwareTex = ^TSoftwareTex;
   TSoftwareTex = record

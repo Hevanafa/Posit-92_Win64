@@ -4,7 +4,7 @@ unit Assets;
 
 interface
 
-uses P92Sounds, P92Tex;
+uses P92AssetHandles;
 
 var
   imgDosuEXE: array[0..1] of TTextureHandle;

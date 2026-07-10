@@ -5,7 +5,7 @@ unit P92Fonts;
 
 interface
 
-uses P92BMFont;
+uses P92AssetHandles;
 
 procedure LoadDefaultFont;
 function GetDefaultFontHandle: TBMFontHandle;
@@ -19,7 +19,7 @@ function PrintCharColour(const ch: char; const x, y: integer; const colour: long
 
 implementation
 
-uses P92AssetRegistry, P92Core;
+uses P92AssetRegistry, P92BMFont, P92Core;
 
 var
   defaultFontHandle: TBMFontHandle;

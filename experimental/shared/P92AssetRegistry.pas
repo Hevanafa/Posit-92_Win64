@@ -9,7 +9,7 @@ interface
 uses P92BMFont, P92Tex;
 {$endif}
 {$ifdef P92_SDL2}
-uses SDL2_Mixer, P92BMFont, P92Tex;
+uses SDL2_Mixer, P92AssetHandles, P92BMFont, P92Tex;
 {$endif}
 
 
@@ -58,11 +58,6 @@ type
     errorCode: smallint;
   end;
 {$endif}
-
-type
-  TTextureHandle = type longint;
-  TBMFontHandle = type longint;
-  TSoundHandle = type longint;
 
 
 var
@@ -357,7 +352,8 @@ begin
   writeLog(filename);
 }
 
-  if not soundsInitialised then exit;
+  { Assuming that SDL2 mixer is always initialised }
+  { if not soundsInitialised then exit; }
 
   LoadSound := sndHandle;
 
