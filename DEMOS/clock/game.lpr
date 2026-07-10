@@ -60,18 +60,9 @@ begin
   { Load more assets here }
 end;
 
-procedure init;
-begin
-  initVideoMem(128, 128, getmem(128 * 128 * 4));
-  initDeltaTime;
-  initSDL(3);
-  initLogger;
-end;
-
 procedure OnReady;
 begin
   HideCursor;
-  setTitle('Posit-92 Clock');
 
   ReplaceColour(BorrowBMFontPtr(pico8Font)^.texHandle, white, Palette[1]);
 
@@ -161,7 +152,22 @@ end;
 var
   appConfig: TP92AppConfig;
 begin
-  P92Start(@OnPreload, @OnReady, @Update, @Draw, @OnCleanup);
+  appConfig := DefaultP92AppConfig;
+
+  with appConfig do begin
+    windowTitle := 'Posit-92 Clock';
+    width := 128;
+    height := 128;
+    sdlScale := 3;
+  end;
+
+  appConfig.OnPreload := @OnPreload;
+  appConfig.OnReady := @OnReady;
+  appConfig.Update := @Update;
+  appConfig.Draw := @Draw;
+  appConfig.OnCleanup := @OnCleanup;
+
+  P92Start(appConfig)
 end.
 
 

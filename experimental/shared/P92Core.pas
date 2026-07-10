@@ -50,11 +50,12 @@ procedure Print(const txt: string; const x, y: smallint);
 procedure PrintWrap(const txt: string; x, y, wrapWidth: smallint);
 
 {$ifdef Windows}
-procedure SignalDone;
+function DefaultP92AppConfig: TP92AppConfig;
 procedure P92Start(const appConfig: TP92AppConfig);
 
 procedure SetTitle(const value: string);
 
+procedure SignalDone;
 procedure HideCursor;
 procedure ShowCursor;
 
