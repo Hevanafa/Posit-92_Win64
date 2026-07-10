@@ -5,7 +5,8 @@ program Game;
 {$J-}
 
 uses
-  SDL2, P92Core, P92Sounds,
+  SDL2,
+  P92Core, P92Fonts, P92Sounds,
   P92Keyboard, P92Mouse,
   P92Logger,
   P92Tex, P92TexDraw,
@@ -33,10 +34,11 @@ end;
 
 procedure OnPreload;
 begin
+  InitSounds;
+
   imgCursor := LoadImage('assets\images\cursor.png');
   imgDosuEXE[0] := LoadImage('assets\images\dosu_1.png');
   imgDosuEXE[1] := LoadImage('assets\images\dosu_2.png');
-  imgFullFont := LoadImage('assets\fonts\nokia_cellphone_fc_8_0.png');
 
   LoadSound(SfxBwonk, 'assets\sfx\bwonk.ogg');
   LoadSound(SfxBite, 'assets\sfx\bite.ogg');
