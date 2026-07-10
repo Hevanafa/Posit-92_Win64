@@ -105,13 +105,13 @@ const
   FrameTime = 1000 div TargetFPS;
 
 var
-  done: boolean;
+  bootConfig: TP92AppConfig;
 
-  displayScale: smallint;
   window: PSDL_Window;
   renderer: PSDL_Renderer;
   vgaTexture: PSDL_Texture;
 
+  done: boolean;
   keyState: array[0..127] of boolean;  { use DOS scancode }
 
   lastFrameTime, frameTimeNow, elapsed: longword; { in ms }
