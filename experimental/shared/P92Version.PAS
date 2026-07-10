@@ -1,9 +1,13 @@
 {
-  Version unit - Part of Posit-92 game engine
+  Version unit
+  Part of Posit-92 game engine
   Hevanafa
 
   Contains only the version information
 }
+
+{$Mode ObjFPC}
+{$H+}{$J-}
 
 unit P92Version;
 
