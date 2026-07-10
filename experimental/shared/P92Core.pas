@@ -49,7 +49,7 @@ procedure PrintWrap(const txt: string; x, y, wrapWidth: smallint);
 
 {$ifdef Windows}
 procedure SignalDone;
-procedure P92Start(appConfig: TP92AppConfig);
+procedure P92Start(const appConfig: TP92AppConfig);
 
 procedure SetTitle(const value: string);
 
@@ -409,33 +409,29 @@ begin
 end;
 
 
-procedure NormaliseAppConfig(var appConfig: TP92AppConfig);
+function DefaultP92AppConfig: TP92AppConfig;
+var
+  newConfig: TP92AppConfig;
 begin
-  if not assigned(appConfig.windowTitle) then
-    appConfig.windowTitle := 'Posit-92 + SDL2 on Windows';
-
-  if not assigned(appConfig.sdlScale) then
-    appConfig.sdlScale := 2;
-
-  if appConfig.sdlScale < 1 then
-    appConfig.sdlScale := 1;
-
-  if not assigned(appConfig.enableScreenshotHotkey) then
-    appConfig.enableScreenshotHotkey := true;
+  newConfig.windowTitle := 'Posit-92 + SDL2 on Windows';
+  newConfig.sdlScale := 2;
+  newConfig.enableScreenshotHotkey := true;
+  DefaultP92AppConfig := newConfig
 end;
 
-procedure P92Start(appConfig: TP92AppConfig);
+procedure P92Start(const appConfig: TP92AppConfig);
 begin
-  NormaliseAppConfig(appConfig);
-
   P92Boot;
 
   InitPreloadState;
 
   if Assigned(appConfig.OnPreload) then
     appConfig.OnPreload;
+
   InitReadyState;
-  OnReady;
+
+  if Assigned(appConfig.OnReady) then
+    appConfig.OnReady;
 
   done := false;
 
@@ -450,8 +446,8 @@ begin
       P92Update;
 
       { User loop }
-      Update;
-      Draw;
+      appConfig.Update;
+      appConfig.Draw;
 
       P92AfterDraw;
 
@@ -461,7 +457,8 @@ begin
     SDL_Delay(1)
   end;
 
-  OnCleanup;
+  if Assigned(appConfig.OnCleanup) then
+    appConfig.OnCleanup;
 
   P92Cleanup;
   P92Shutdown
