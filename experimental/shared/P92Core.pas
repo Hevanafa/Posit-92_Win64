@@ -408,18 +408,32 @@ begin
   CleanupSDL
 end;
 
-procedure P92Start(
-  OnPreload: TCallback;
-  OnReady: TCallback;
-  Update: TCallback;
-  Draw: TCallback;
-  OnCleanup: TCallback
-);
+
+procedure NormaliseAppConfig(var appConfig: TP92AppConfig);
 begin
+  if not assigned(appConfig.windowTitle) then
+    appConfig.windowTitle := 'Posit-92 + SDL2 on Windows';
+
+  if not assigned(appConfig.sdlScale) then
+    appConfig.sdlScale := 2;
+
+  if appConfig.sdlScale < 1 then
+    appConfig.sdlScale := 1;
+
+  if not assigned(appConfig.enableScreenshotHotkey) then
+    appConfig.enableScreenshotHotkey := true;
+end;
+
+procedure P92Start(appConfig: TP92AppConfig);
+begin
+  NormaliseAppConfig(appConfig);
+
   P92Boot;
 
   InitPreloadState;
-  OnPreload;
+
+  if Assigned(appConfig.OnPreload) then
+    appConfig.OnPreload;
   InitReadyState;
   OnReady;
 
