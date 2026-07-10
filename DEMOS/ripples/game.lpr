@@ -6,10 +6,11 @@ program Game;
 
 uses
   SysUtils,
-  SDL2Wrapper, Posit92,
-  Keyboard, Mouse, Logger,
-  ImgRef, ImgRefFast,
-  Colour, Graphics, Timing, VGA,
+  P92Core, P92Fonts,
+  P92Keyboard, P92Mouse,
+  P92Logger,
+  P92Tex, P92TexDraw,
+  P92Colour, P92Graphics, P92Timing, P92VGA,
   Assets;
 
 type
@@ -94,65 +95,39 @@ begin
 end;
 
 
-procedure loadAssets;
+procedure OnPreload;
 begin
   imgCursor := loadImage('assets\images\cursor.png');
   imgDosuEXE[0] := loadImage('assets\images\dosu_1.png');
   imgDosuEXE[1] := loadImage('assets\images\dosu_2.png');
 
-  loadBMFont(
-    'assets\fonts\nokia_cellphone_fc_8.txt',
-    defaultFont, defaultFontGlyphs);
-
   { Load more assets here }
 end;
 
-procedure init;
+procedure OnReady;
 begin
-  initVideoMem(320, 200, getmem(320 * 200 * 4));
-  initDeltaTime;
-  initSDL;
-  initLogger;
-end;
-
-procedure afterInit;
-begin
-  setTitle('Ripple Demo');
-
-  loadAssets;
-  hideCursor;
+  HideCursor;
+  SetTitle('Ripple Demo');
 
   { Init your game state here }
   gameTime := 0.0
 end;
 
-procedure cleanup;
+procedure OnCleanup;
 begin
   showCursor;
 
-  freeImage(imgCursor);
-  freeImage(imgDosuEXE[0]);
-  freeImage(imgDosuEXE[1]);
-  freeImage(imgFullFont);
-
-  freeImage(defaultFont.imgHandle);
-
-  freemem(getSurfacePtr);
-
-  { Your cleanup code here (after setting `done` to true) }
-  closeLogger;
-  cleanupSDL
+  FreeTexture(imgCursor);
+  FreeTexture(imgDosuEXE[0]);
+  FreeTexture(imgDosuEXE[1]);
 end;
 
-procedure update;
+procedure Update;
 var
   a: word;
 begin
-  updateSDL;
-  updateDeltaTime;
-
-  { Your update logic here }
-  if isKeyDown(SC_ESCAPE) then done := true;
+  { Your Update logic here }
+  if isKeyDown(SC_ESCAPE) then SignalDone;
 
   if getTimer >= nextRippleTick then begin
     nextRippleTick := getTimer + random / 4.0;
@@ -162,16 +137,16 @@ begin
   for a:=0 to high(ripples) do begin
     if not ripples[a].alive then continue;
 
-    ripples[a].radius := ripples[a].radius + dt * 48.0;
-    ripples[a].opacity := ripples[a].opacity - dt;
+    ripples[a].radius := ripples[a].radius + DeltaTime * 48.0;
+    ripples[a].opacity := ripples[a].opacity - DeltaTime;
 
     if ripples[a].opacity < 0 then ripples[a].alive := false;
   end;
 
-  gameTime := gameTime + dt
+  gameTime := gameTime + DeltaTime;
 end;
 
-procedure draw;
+procedure Draw;
 var
   a: word;
   s: string;
@@ -207,42 +182,23 @@ begin
   s := format('%.2d:%.2d', [h, m]);
   w := measureDefault(s);
   printDefault(s, (vgaWidth - w) div 2, 130);
-
-  drawMouse;
-
-  vgaUpload;
-  vgaPresent
 end;
 
 
-var
-  { done: boolean; }  { moved to Posit92 unit }
-  lastFrameTime, frameTimeNow, elapsed: longword; { in ms }
-
 {$R *.res}
 
+var
+  appConfig: TP92AppConfig;
 begin
-  init;
-  afterInit;
+  appConfig := DefaultP92AppConfig;
 
-  done := false;
+  appConfig.OnPreload := @OnPreload;
+  appConfig.OnReady := @OnReady;
+  appConfig.Update := @Update;
+  appConfig.Draw := @Draw;
+  appConfig.OnCleanup := @OnCleanup;
 
-  lastFrameTime := SDL_GetTicks;
-
-  while not done do begin
-    frameTimeNow := SDL_GetTicks;
-    elapsed := frameTimeNow - lastFrameTime;
-
-    if elapsed >= FrameTime then begin
-      lastFrameTime := frameTimeNow - (elapsed mod FrameTime); { Carry over extra time }
-      update;
-      draw
-    end;
-
-    SDL_Delay(1)
-  end;
-
-  cleanup
+  P92Start(appConfig)
 end.
 
 
