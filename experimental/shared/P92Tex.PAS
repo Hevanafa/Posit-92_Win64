@@ -124,6 +124,9 @@ begin
   FreeMem(textures[texHandle].texture.pixelData);
 {$endif}
 
+  textures[texHandle].status := AssetStatusEmpty;
+  textures[texHandle].errorCode := 0;
+
   textures[texHandle].texture.width := 0;
   textures[texHandle].texture.height := 0;
   textures[texHandle].texture.allocSize := 0;
