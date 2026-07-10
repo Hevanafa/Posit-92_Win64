@@ -27,7 +27,6 @@ end;
 procedure OnReady;
 begin
   HideCursor;
-  SetTitle('Posit-92 with SDL2');
 
   { Init your game state here }
   gameTime := 0.0
@@ -64,8 +63,21 @@ end;
 
 
 {$R *.res}
-
+var
+  appConfig: TP92AppConfig;
 begin
-  P92Start(@OnPreload, @OnReady, @Update, @Draw, @OnCleanup);
+  appConfig := DefaultP92AppConfig;
+
+  with appConfig do begin
+    windowTitle := 'Posit-92 with SDL2';
+  end;
+
+  appConfig.OnPreload := @OnPreload;
+  appConfig.OnReady := @OnReady;
+  appConfig.Update := @Update;
+  appConfig.Draw := @Draw;
+  appConfig.OnCleanup := @OnCleanup;
+
+  P92Start(appConfig)
 end.
 

@@ -94,7 +94,7 @@ uses
   P92Keyboard, P92Mouse,
   P92TexDraw, P92TexRef,
   P92Strings, P92Timing, P92FPS, P92Sounds,
-  P92VGA
+  P92Panic, P92VGA
 {$endif}
 {$ifdef P92_WASM}
   P92Fonts, P92AssetRegistry,
