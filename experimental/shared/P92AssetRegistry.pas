@@ -132,14 +132,16 @@ uses
 {$endif}
   ;
 
+{$ifdef P92_WASM}
 const
   BMFontBufferCapacity = 32767;
 
 var
-  assetReadyCount, assetTotalCount: longword;
-
   bmfontBuffer: array[0..BMFontBufferCapacity - 1] of byte;
   bmfontBufferLen: smallint;
+
+var
+  assetReadyCount, assetTotalCount: longword;
 
 function GetAssetReadyCount: longword;
 begin
@@ -170,13 +172,16 @@ procedure SetAssetTotalCount(value: longint);
 begin
   assetTotalCount := value
 end;
+{$endif}
 
 procedure InitAssetRegistry;
 var
   a: word;
 begin
+{$ifdef P92_WASM}
   assetReadyCount := 0;
   assetTotalCount := 0;
+{$endif}
 
   for a:=1 to high(textures) do begin
     textures[a] := default(TSoftwareTexEntry);
@@ -193,8 +198,10 @@ begin
     sounds[a].status := AssetStatusEmpty;
   end;
 
+{$ifdef P92_WASM}
   fillchar(bmfontBuffer, sizeof(bmfontBuffer), 0);
   bmfontBufferLen := 0;
+{$endif}
 end;
 
 function FindUnusedTextureHandle: TTextureHandle;
@@ -576,6 +583,7 @@ begin
 end;
 {$endif}
 
+{$ifdef P92_WASM}
 { Report asset state to Pascal }
 
 procedure PascalImageLoaded(texHandle: TTextureHandle; w, h: smallint; pixelData: pointer);
@@ -600,6 +608,7 @@ begin
   textures[texHandle].status := AssetStatusFailed;
   textures[texHandle].errorCode := errorCode;
 end;
+{$endif}
 
 { Used to help debug BMFont glyphs }
 {
