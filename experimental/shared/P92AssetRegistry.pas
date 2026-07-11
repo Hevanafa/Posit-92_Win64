@@ -10,9 +10,8 @@ interface
 uses P92BMFont, P92Tex;
 {$endif}
 {$ifdef P92_SDL2}
-uses SDL2_Mixer, P92AssetHandles, P92BMFont, P92Tex;
+uses SDL2_Mixer, P92CoreSDL2, P92AssetHandles, P92BMFont, P92Tex;
 {$endif}
-
 
 type
   TAssetStatus = (
@@ -124,7 +123,7 @@ implementation
 
 uses
   SysUtils,
-  P92Conversions, P92Logger, P92Panic, P92Strings
+  P92Conversions, P92Logger, P92Panic, P92Strings, P92TexRef
 {$ifdef P92_WASM}
   , P92InteropBuf
 {$endif}

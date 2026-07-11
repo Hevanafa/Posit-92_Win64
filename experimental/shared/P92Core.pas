@@ -83,7 +83,8 @@ implementation
 uses
 {$ifdef P92_SDL2}
   SysUtils, SDL2_Image,
-  P92Fonts, P92Conversions, P92AssetRegistry, P92Logger,
+  P92AssetRegistry, P92CoreSDL2,
+  P92Fonts, P92Conversions, P92Logger,
   P92Keyboard, P92Mouse,
   P92TexDraw, P92TexRef,
   P92Strings, P92Timing, P92FPS, P92Sounds,
@@ -111,10 +112,6 @@ const
   FrameTime = 1000 div TargetFPS;
 
 var
-  window: PSDL_Window;
-  renderer: PSDL_Renderer;
-  vgaTexture: PSDL_Texture;
-
   done: boolean;
   keyState: array[0..127] of boolean;  { use DOS scancode }
 
