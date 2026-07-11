@@ -235,7 +235,6 @@ begin
 {$ifdef P92_IMMEDIATE_GUI}
   InitImmediateGUI;
 {$endif}
-
 {$ifdef P92_WASM}
   HostCallOnReady
 {$endif}
@@ -243,12 +242,6 @@ end;
 
 procedure P92Update;
 begin
-{$ifdef P92_SDL2}
-  HandleSDLEvents;
-  UpdateDeltaTime;
-  IncrementFPS;
-{$endif}
-
 {$ifdef P92_WASM}
   if engineRunState = ersBoot then begin
     if AllAssetsReady then
@@ -284,19 +277,26 @@ begin
     end;
   end;
 {$endif}
+{$ifdef P92_SDL2}
+  HandleSDLEvents;
+  UpdateDeltaTime;
+  IncrementFPS;
+{$endif}
 end;
 
+{$ifdef P92_SDL2}
 procedure DrawMouse;
 begin
   { spr(imgCursor, mouseX, mouseY) }
   HwSpr(hwCursor, mouseX, mouseY)
 end;
+{$endif}
 
 procedure P92Draw;
 begin
+{$ifdef P92_WASM}
   cls($FF000000);
 
-{$ifdef P92_WASM}
   if engineRunState = ersPreload then
     RenderLoadingScreen;
 {$endif}
@@ -308,10 +308,15 @@ begin
   ResetActiveWidget;
 {$endif}
 
+{$ifdef P92_WASM}
+  VgaUpload;
+  VgaPresent;
+{$endif}
 {$ifdef P92_WEBGL}
   VgaUpload;
   WebGLPresent;
-{$else}
+{$endif}
+{$ifdef P92_SDL2}
   VgaUpload;
   { Begin hardware layer }
   DrawMouse;
@@ -466,8 +471,6 @@ begin
   P92Cleanup;
   P92Shutdown
 end;
-
-
 {$endif}
 
 end.
