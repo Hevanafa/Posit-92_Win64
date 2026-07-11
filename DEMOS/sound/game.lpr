@@ -29,8 +29,6 @@ end;
 
 procedure OnPreload;
 begin
-  InitSounds;
-
   imgDosuEXE[0] := LoadImage('assets\images\dosu_1.png');
   imgDosuEXE[1] := LoadImage('assets\images\dosu_2.png');
 

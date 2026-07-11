@@ -4,11 +4,11 @@ interface
 
 uses SDL2;
 
-const
-  TargetFPS = 60;
-  FrameTime = 1000 div TargetFPS;
-
 var
+  TargetFPS: smallint;
+  { in ms }
+  FrameTime: longword;
+
   done: boolean;
 
   window: PSDL_Window;

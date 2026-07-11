@@ -22,6 +22,7 @@ type
     defaultFontPath: string;
 
     { Features }
+    fps: smallint;
     enableScreenshotHotkey: boolean;
 
     { Callbacks }
@@ -149,6 +150,20 @@ begin
   InitAssetRegistry;
   InitSounds;
 
+{$ifdef P92_SDL2}
+  InitVideoMem(
+    bootConfig.width, bootConfig.height,
+    getmem(bootConfig.width * bootConfig.height * 4));
+
+  TargetFPS := bootConfig.fps;
+  FrameTime := 1000 div TargetFPS;
+
+  InitDeltaTime;
+
+  InitSDL;
+  InitLogger;
+{$endif}
+
 {$ifdef P92_WEBGL}
   SetupWebGLViewport;
   SetupWebGLShaders;
@@ -179,14 +194,7 @@ begin
 {$endif}
 
 {$ifdef P92_SDL2}
-  InitVideoMem(
-    bootConfig.width, bootConfig.height,
-    getmem(bootConfig.width * bootConfig.height * 4));
-
-  InitDeltaTime;
-
-  InitSDL;
-  InitLogger;
+  cgaFontHandle := LoadImage('assets/CGA8x8.png');
 {$endif}
 end;
 
@@ -397,6 +405,7 @@ begin
     enableDefaultFont := true;
     defaultFontPath := 'assets/fonts/nokia_cellphone_fc_8.txt';
 
+    fps := 60;
     enableScreenshotHotkey := true;
   end;
 
@@ -414,6 +423,7 @@ begin
   if not assigned(appConfig.Draw) then
     PanicHalt('Draw callback is required');
 
+  InitEngine;
   P92Boot;
 
   InitPreloadState;
