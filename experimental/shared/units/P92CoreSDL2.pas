@@ -5,6 +5,7 @@ unit P92CoreSDL2;
 
 interface
 
+{$ifdef P92_SDL2}
 uses SDL2;
 
 var
@@ -29,12 +30,14 @@ procedure HideCursor;
 procedure ShowCursor;
 
 procedure InitSDL;
-procedure UpdateSDL;
+procedure HandleSDLEvents;
 procedure CleanupSDL;
+{$endif}
 
 
 implementation
 
+{$ifdef P92_SDL2}
 uses
   P92Core,
   P92Keyboard, P92Mouse,
@@ -90,7 +93,7 @@ begin
 end;
 
 
-procedure UpdateSDL;
+procedure HandleSDLEvents;
 var
   event: TSDL_Event;
   keyEvent: PSDL_KeyboardEvent;
@@ -161,5 +164,6 @@ begin
   SDL_DestroyWindow(window);
   SDL_Quit
 end;
+{$endif}
 
 end.

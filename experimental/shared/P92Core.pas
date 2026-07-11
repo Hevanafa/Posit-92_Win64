@@ -244,7 +244,7 @@ end;
 procedure P92Update;
 begin
 {$ifdef P92_SDL2}
-  UpdateSDL;
+  HandleSDLEvents;
   UpdateDeltaTime;
   IncrementFPS;
 {$endif}
