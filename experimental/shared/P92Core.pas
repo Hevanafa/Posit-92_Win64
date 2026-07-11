@@ -132,7 +132,17 @@ begin
 end;
 {$endif}
 
-procedure InitEngine;
+procedure SetCGAFontHandle(value: longint);
+begin
+  cgaFontHandle := value
+end;
+
+function IsEngineReady: boolean;
+begin
+  IsEngineReady := engineRunState = ersReady
+end;
+
+procedure P92Boot;
 begin
   engineRunState := ersBoot;
 
@@ -173,24 +183,12 @@ begin
   enableDefaultBMFont := GetBootOptionBoolean('defaultFont');
   enableScreenshotHotkey := GetBootOptionBoolean('enableScreenshotHotkey');
 {$endif}
-end;
 
-procedure SetCGAFontHandle(value: longint);
-begin
-  cgaFontHandle := value
-end;
+{ Request boot font }
 
-function IsEngineReady: boolean;
-begin
-  IsEngineReady := engineRunState = ersReady
-end;
-
-procedure P92Boot;
-begin
 {$ifdef P92_WASM}
   cgaFontHandle := RequestImage('assets/CGA8x8.png');
 {$endif}
-
 {$ifdef P92_SDL2}
   cgaFontHandle := LoadImage('assets/CGA8x8.png');
 {$endif}
@@ -426,7 +424,6 @@ begin
   if not assigned(appConfig.Draw) then
     PanicHalt('Draw callback is required');
 
-  InitEngine;
   P92Boot;
 
   InitPreloadState;
