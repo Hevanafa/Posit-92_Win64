@@ -63,10 +63,6 @@ procedure PrintWrap(const txt: string; x, y, wrapWidth: smallint);
 {$ifdef P92_SDL2}
 function DefaultP92AppConfig: TP92AppConfig;
 procedure P92Start(const appConfig: TP92AppConfig);
-
-{ Uploads the pixel data to the GPU }
-procedure VgaUpload;
-procedure VgaPresent;
 {$endif}
 
 
@@ -464,20 +460,6 @@ begin
 end;
 
 
-procedure VgaUpload;
-begin
-  { SDL_SetRenderDrawColor(renderer, $ed, $95, $64, $ff);
-  SDL_RenderClear(renderer); }
-
-  SDL_SetTextureBlendMode(vgaTexture, SDL_BLENDMODE_BLEND);
-  SDL_UpdateTexture(vgaTexture, nil, getSurfacePtr, vgaWidth * 4); { pitch = width * 4 bytes }
-  SDL_RenderCopy(renderer, vgaTexture, nil, nil)
-end;
-
-procedure VgaPresent;
-begin
-  SDL_RenderPresent(renderer)
-end;
 {$endif}
 
 end.

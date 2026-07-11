@@ -13,6 +13,7 @@ var
 
   window: PSDL_Window;
   renderer: PSDL_Renderer;
+  { texture obtained by copying the software surface }
   vgaTexture: PSDL_Texture;
 
   { FPS stuff }
