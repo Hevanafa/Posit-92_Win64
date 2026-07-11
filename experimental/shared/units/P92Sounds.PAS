@@ -97,7 +97,7 @@ begin
   if not soundsInitialised then exit;
   if (sndHandle < 1) or (sndHandle > high(sounds)) then exit;
 
-  sounds[sndHandle].volume := clamp(volume, 0.0, 1.0)
+  sounds[sndHandle].volume := Clamp(volume, 0.0, 1.0)
 end;
 {$endif}
 
