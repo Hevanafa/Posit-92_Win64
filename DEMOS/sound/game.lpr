@@ -6,7 +6,7 @@ program Game;
 
 uses
   SDL2,
-  P92Core, P92Fonts, P92AssetRegistry,
+  P92Core, P92CoreSDL2, P92Fonts, P92AssetRegistry,
   P92Keyboard, P92Mouse,
   P92Logger,
   P92Tex, P92TexDraw,

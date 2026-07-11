@@ -64,12 +64,6 @@ procedure PrintWrap(const txt: string; x, y, wrapWidth: smallint);
 function DefaultP92AppConfig: TP92AppConfig;
 procedure P92Start(const appConfig: TP92AppConfig);
 
-procedure SetTitle(const value: string);
-
-procedure SignalDone;
-procedure HideCursor;
-procedure ShowCursor;
-
 { Uploads the pixel data to the GPU }
 procedure VgaUpload;
 procedure VgaPresent;
@@ -110,8 +104,6 @@ const
   FrameTime = 1000 div TargetFPS;
 
 var
-  done: boolean;
-
   lastFrameTime, frameTimeNow, elapsed: longword; { in ms }
 
   hwCursor: longint;
@@ -392,11 +384,6 @@ begin
 end;
 
 {$ifdef P92_SDL2}
-procedure SignalDone;
-begin
-  done := true
-end;
-
 procedure P92Cleanup;
 begin
   { TODO: free both the imgCursor and the default font }
@@ -517,11 +504,6 @@ begin
   HwSetRenderer(renderer)
 end;
 
-procedure SetTitle(const value: string);
-begin
-  SDL_SetWindowTitle(window, @value[1])
-end;
-
 
 procedure UpdateSDL;
 var
@@ -593,17 +575,6 @@ begin
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
   SDL_Quit
-end;
-
-
-procedure HideCursor;
-begin
-  SDL_ShowCursor(SDL_DISABLE)
-end;
-
-procedure ShowCursor;
-begin
-  SDL_ShowCursor(SDL_ENABLE)
 end;
 
 
