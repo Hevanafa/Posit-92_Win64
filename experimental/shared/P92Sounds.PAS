@@ -64,9 +64,7 @@ uses
 {$endif}
 
 var
-{$ifdef P92_SDL2}
   soundsInitialised: boolean;
-{$endif}
 {
   As for music playback, Pascal mainly only needs to know about:
   - music position
@@ -74,6 +72,8 @@ var
   - is the music playing?
 }
 
+{ Not yet supported in SDL2 mode }
+{$ifdef P92_WASM}
   currentMusicHandle: longint;
   isMusicPlaying: boolean;
   musicRepeat: boolean;
@@ -81,6 +81,7 @@ var
 
   { in seconds }
   musicPauseTime: double;
+{$endif}
 
 {$ifdef P92_WASM}
 { initialises the audioContext }
@@ -109,6 +110,8 @@ var
   a: word;
 begin
 {$ifdef P92_WASM}
+  soundsInitialised := false;
+
   for a:=1 to high(sounds) do begin
     sounds[a] := default(TSoundEntry);
     sounds[a].volume := 1.0
@@ -121,6 +124,7 @@ begin
   musicPauseTime := 0.0;
 
   JsInitAudio;
+  soundsInitialised := true;
 {$endif}
 {$ifdef P92_SDL2}
   soundsInitialised := false;
@@ -148,13 +152,13 @@ procedure PlaySound(const sndHandle: longint);
 var
   sdlVolume: integer;
 begin
+  if not soundsInitialised then exit;
+  if (sndHandle < 1) or (sndHandle > high(sounds)) then exit;
+
 {$ifdef P92_WASM}
   JsPlaySound(sndHandle)
 {$endif}
 {$ifdef P92_SDL2}
-  if not soundsInitialised then exit;
-  if (sndHandle < 1) or (sndHandle > high(sounds)) then exit;
-
   if sounds[sndHandle].chunk = nil then begin
     writeWarn('Warning: Attempting to play a nil sound');
     exit
@@ -171,6 +175,7 @@ end;
 
 function GetSoundVolume(const sndHandle: longint): single;
 begin
+  if not soundsInitialised then exit;
   if (sndHandle < low(sounds)) or (sndHandle > high(sounds)) then
     PanicHaltDisplay('Invalid sndHandle: ' + I32Str(sndHandle));
 
@@ -179,10 +184,12 @@ end;
 
 procedure SetSoundVolume(const sndHandle: longint; volume: single);
 begin
-  volume := clamp(volume, 0.0, 1.0);
-  sounds[sndHandle].volume := volume
-end;
+  if not soundsInitialised then exit;
+  if (sndHandle < low(sounds)) or (sndHandle > high(sounds)) then
+    exit;
 
+  sounds[sndHandle].volume := Clamp(volume, 0.0, 1.0)
+end;
 
 {$ifdef P92_WASM}
 { Music playback }
@@ -337,16 +344,6 @@ begin
   Mix_CloseAudio;
   soundsInitialised := false
 end;
-
-
-procedure SetSoundVolume(const sndHandle: longint; volume: single);
-begin
-  if not soundsInitialised then exit;
-  if (sndHandle < 1) or (sndHandle > high(sounds)) then exit;
-
-  sounds[sndHandle].volume := Clamp(volume, 0.0, 1.0)
-end;
 {$endif}
-
 
 end.
