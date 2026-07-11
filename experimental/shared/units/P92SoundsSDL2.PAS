@@ -5,7 +5,7 @@
 
   This unit is specific to the Windows version
 }
-unit P92Sounds;
+unit P92SoundsSDL2;
 
 {$Mode ObjFPC}
 {$H+}{$J-}
