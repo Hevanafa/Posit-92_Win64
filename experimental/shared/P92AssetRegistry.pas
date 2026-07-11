@@ -1,7 +1,8 @@
 unit P92AssetRegistry;
 
 {$Mode ObjFPC}
-{$H+}{$J-}
+{$H-}  { Use ShortStrings }
+{$J-}  { Don't allow assignments to typed consts }
 
 interface
 
@@ -112,6 +113,9 @@ procedure PascalSoundFailed(sndHandle: longint; errorCode: smallint); public nam
 {$endif}
 
 {$ifdef P92_SDL2}
+function LoadImage(const filename: string): TTextureHandle;
+function LoadBMFont(const filename: string): TBMFontHandle;
+function HwLoadImage(const filename: string): longint;
 function LoadSound(const filename: string): TSoundHandle;
 {$endif}
 
@@ -123,6 +127,9 @@ uses
   P92Conversions, P92Logger, P92Panic, P92Strings
 {$ifdef P92_WASM}
   , P92InteropBuf
+{$endif}
+{$ifdef P92_SDL2}
+  , SDL2, sdl2_image
 {$endif}
   ;
 
@@ -338,6 +345,197 @@ end;
 {$endif}
 
 {$ifdef P92_SDL2}
+function LoadImage(const filename: string): TTextureHandle;
+var
+  strBuffer: array[0..255] of char;
+  surface: PSDL_Surface;
+  texHandle: TTextureHandle;
+  texture: PSoftwareTex;
+  src, dest: PByte;
+begin
+  { writeLog('loadImage ' + filename); }
+
+  strpcopy(strBuffer, filename);
+  surface := IMG_Load(strBuffer);
+
+  if surface = nil then begin
+    writeLog('loadImage: Failed to load ' + filename);
+    loadImage := -1;
+    exit
+  end;
+
+  if surface^.format^.BitsPerPixel <> 32 then begin
+    WriteWarn('loadImage: Warning: ' + filename + ' is not 32 BPP!');
+    writeLog('loadImage: Convert it to 32 BPP then reload');
+    SDL_FreeSurface(surface);
+    loadImage := -1;
+    exit
+  end;
+
+  texHandle := NewTexture(surface^.w, surface^.h);
+  texture := BorrowTexturePtr(texHandle);
+
+  src := PByte(surface^.pixels);
+  dest := texture^.pixelData;
+  move(src^, dest^, surface^.w * surface^.h * 4);
+
+  SDL_FreeSurface(surface);
+  loadImage := texHandle
+end;
+
+{ 32 to 126: 0 to 94 }
+function LoadBMFont(const filename: string): TBMFontHandle;
+var
+  fontHandle: TBMFontHandle;
+  font: PBMFont;
+
+  f: text;
+  textureFilename: string;
+  txtLine: string;
+  a: word;
+  pairs: array[0..15] of string;
+  pair: array[0..1] of string;
+  k, v: string;
+  newGlyph: TBMFontGlyph;
+  glyphCount: word;
+begin
+  fontHandle := FindUnusedBMFontHandle;
+
+  bmfonts[fontHandle].status := AssetStatusLoading;
+  bmfonts[fontHandle].errorCode := 0;
+
+  LoadBMFont := fontHandle;
+  font := BorrowBMFontPtr(fontHandle);
+
+  assign(f, filename);
+  {$I-} reset(f); {$I+}
+
+  if IOResult <> 0 then begin
+    writeLog('Failed to open BMFont file: ' + filename);
+    exit
+  end;
+
+  glyphCount := 0;
+
+  while not eof(f) do begin
+    readln(f, txtLine);
+
+    if startsWith(txtLine, 'info') then begin
+      split(txtLine, ' ', pairs);
+
+      for a:=0 to high(pairs) do begin
+        split(pairs[a], '=', pair);
+        k := pair[0]; v := pair[1];
+
+        { writeln('info ', k); }
+
+        { if k = 'face' then
+          font^.face := replaceAll(v, '"', '')
+        else} if k = 'spacing' then begin
+          split(v, ',', pair);
+          font^.spacing[0] := parseInt(pair[0]);
+          font^.spacing[1] := parseInt(pair[1]);
+        end;
+      end;
+
+      { writeLog('font.face:' + font.face) }
+
+    end else if startsWith(txtLine, 'common') then begin
+      split(txtLine, ' ', pairs);
+
+      for a:=0 to high(pairs) do begin
+        split(pairs[a], '=', pair);
+        k := pair[0]; v := pair[1];
+
+        if k = 'lineHeight' then
+          font^.lineHeight := parseInt(v);
+      end;
+
+    end else if startsWith(txtLine, 'page') then begin
+      split(txtLine, ' ', pairs);
+
+      for a:=0 to high(pairs) do begin
+        split(pairs[a], '=', pair);
+        k := pair[0]; v := pair[1];
+
+        if k = 'file' then
+          textureFilename := replaceAll(v, '"', '');
+      end;
+
+    end else if startsWith(txtLine, 'char') and not startsWith(txtLine, 'chars') then begin
+      while contains(txtLine, '  ') do
+        txtLine := replaceAll(txtLine, '  ', ' ');
+
+      newGlyph := default(TBMFontGlyph);
+
+      { Parse the whole line first, then copy the record to the list of font glyphs }
+      split(txtLine, ' ', pairs);
+
+      for a:=0 to high(pairs) do begin
+        split(pairs[a], '=', pair);
+        k := pair[0]; v := pair[1];
+
+        { case-of can't be used with strings in Mode TP }
+        if k = 'id' then
+          newGlyph.id := parseInt(v)
+        else if k = 'x' then
+          newGlyph.x := parseInt(v)
+        else if k = 'y' then
+          newGlyph.y := parseInt(v)
+        else if k = 'width' then
+          newGlyph.width := parseInt(v)
+        else if k = 'height' then
+          newGlyph.height := parseInt(v)
+        else if k = 'xoffset' then
+          newGlyph.xoffset := parseInt(v)
+        else if k = 'yoffset' then
+          newGlyph.yoffset := parseInt(v)
+        else if k = 'xadvance' then
+          newGlyph.xadvance := parseInt(v);
+      end;
+
+      if newGlyph.id in [low(font^.glyphs)..high(font^.glyphs)] then begin
+        font^.glyphs[newGlyph.id] := newGlyph;
+        inc(glyphCount)
+      end;
+    end;
+  end;
+
+  close(f);
+
+  { writeLog('Loaded ' + i32str(glyphCount) + ' glyphs'); }
+  bmfonts[fontHandle].status := AssetStatusReady;
+  bmfonts[fontHandle].errorCode := 0;
+
+  font^.texHandle := LoadImage(textureFilename)
+end;
+
+function HwLoadImage(const filename: string): longint;
+var
+  surface: PSDL_Surface;
+  tex: PSDL_Texture;
+begin
+  surface := IMG_Load(pchar(ansistring(filename)));
+  if surface = nil then begin
+    writelog('IMG_Load failed: ' + SDL_GetError);
+    exit(-1)
+  end;
+
+  tex := SDL_CreateTextureFromSurface(renderer, surface);
+  if tex = nil then begin
+    writelog('CreateTexture failed: ' + SDL_GetError);
+    exit(-1)
+  end;
+
+  SDL_FreeSurface(surface);
+
+  SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
+  hwLoadImage := HwRegisterTexRef(tex, surface^.w, surface^.h);
+
+  { writelog(format('hwLoadImage %d: %s', [hwLoadImage, filename])) }
+end;
+
+
 function LoadSound(const filename: string): TSoundHandle;
 var
   sndHandle: TSoundHandle;
