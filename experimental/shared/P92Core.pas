@@ -143,13 +143,6 @@ begin
   InitHeapMgr;
   InitInteropBuffer;
 {$endif}
-
-  InitDeltaTime;
-  InitFPSCounter;
-
-  InitAssetRegistry;
-  InitSounds;
-
 {$ifdef P92_SDL2}
   InitVideoMem(
     bootConfig.width, bootConfig.height,
@@ -157,16 +150,21 @@ begin
 
   TargetFPS := bootConfig.fps;
   FrameTime := 1000 div TargetFPS;
+{$endif}
 
   InitDeltaTime;
+  InitFPSCounter;
 
-  InitSDL;
-  InitLogger;
-{$endif}
+  InitAssetRegistry;
+  InitSounds;
 
 {$ifdef P92_WEBGL}
   SetupWebGLViewport;
   SetupWebGLShaders;
+{$endif}
+{$ifdef P92_SDL2}
+  InitSDL;
+  InitLogger;
 {$endif}
 
 {$ifdef P92_WASM}
