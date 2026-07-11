@@ -70,8 +70,6 @@ procedure SignalDone;
 procedure HideCursor;
 procedure ShowCursor;
 
-function IsKeyDown(const scancode: integer): boolean;
-
 { Uploads the pixel data to the GPU }
 procedure VgaUpload;
 procedure VgaPresent;
@@ -113,7 +111,6 @@ const
 
 var
   done: boolean;
-  keyState: array[0..127] of boolean;  { use DOS scancode }
 
   lastFrameTime, frameTimeNow, elapsed: longword; { in ms }
 
@@ -607,11 +604,6 @@ end;
 procedure ShowCursor;
 begin
   SDL_ShowCursor(SDL_ENABLE)
-end;
-
-function IsKeyDown(const scancode: integer): boolean;
-begin
-  isKeyDown := keyState[scancode]
 end;
 
 

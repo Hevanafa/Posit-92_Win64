@@ -12,6 +12,10 @@ unit P92Keyboard;
 interface
 
 {$ifdef P92_SDL2}
+
+var
+  keyState: array[0..127] of boolean;  { use DOS scancode }
+
 { SDL Scancodes }
 const
   SDL_SCANCODE_UNKNOWN = 0;
@@ -282,6 +286,7 @@ const
   SC_F11 = $57;
   SC_F12 = $58;
 
+function IsKeyDown(const scancode: integer): boolean;
 function SDLToDOSScancode(const scancode: integer): integer;
 {$endif}
 
@@ -289,6 +294,11 @@ function SDLToDOSScancode(const scancode: integer): integer;
 implementation
 
 {$ifdef P92_SDL2}
+function IsKeyDown(const scancode: integer): boolean;
+begin
+  isKeyDown := keyState[scancode]
+end;
+
 function SDLToDOSScancode(const scancode: integer): integer;
 begin
   SDLToDOSScancode := 0;
