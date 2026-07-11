@@ -10,7 +10,7 @@ uses
   P92Logger,
   P92Tex, P92TexDraw,
   P92Timing, P92VGA,
-  P92SoundsSDL2, Assets;
+  P92Sounds, Assets;
 
 var
   lastSpacebar: boolean;
