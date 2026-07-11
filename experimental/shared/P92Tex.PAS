@@ -11,7 +11,8 @@
 unit P92Tex;
 
 {$Mode ObjFPC}
-{$H+}{$J-}
+{$H-}  { Use ShortStrings }
+{$J-}  { Don't allow assignments to typed consts }
 {$Notes OFF}
 {$B-}  { Enable boolean short-circuiting }
 {$R-}  { Turn off range checks }

@@ -9,7 +9,8 @@
 unit P92TexDraw;
 
 {$Mode ObjFPC}
-{$H+}{$J-}
+{$H-}  { Use ShortStrings }
+{$J-}  { Don't allow assignments to typed consts }
 {$B-}  { Enable boolean short-circuiting }
 {$R-}  { Turn off range checks }
 {$Q-}  { Turn off overflow checks }

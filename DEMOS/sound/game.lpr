@@ -1,8 +1,7 @@
 program Game;
 
 {$Mode ObjFPC}
-{$H+}
-{$J-}
+{$H+}{$J-}
 
 uses
   SDL2,

@@ -2,7 +2,7 @@ unit P92Core;
 
 {$Mode ObjFPC}
 {$H-}  { Use ShortStrings }
-{$J+}  { Don't allow assignments to typed consts }
+{$J-}  { Don't allow assignments to typed consts }
 
 interface
 

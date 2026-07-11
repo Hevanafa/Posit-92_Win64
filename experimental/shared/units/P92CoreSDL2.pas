@@ -1,5 +1,8 @@
 unit P92CoreSDL2;
 
+{$Mode ObjFPC}
+{$H-}{$J-}
+
 interface
 
 uses SDL2;
