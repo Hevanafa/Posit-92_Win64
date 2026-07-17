@@ -7,10 +7,10 @@ unit P92AssetRegistry;
 interface
 
 {$ifdef P92_WASM}
-uses P92BMFont, P92Tex;
+uses P92AssetHandles, P92BMFont, P92Tex;
 {$endif}
 {$ifdef P92_SDL2}
-uses SDL2_Mixer, P92CoreSDL2, P92AssetHandles, P92BMFont, P92Tex;
+uses SDL2_Mixer, P92CoreSDL2, P92BMFont, P92Tex;
 {$endif}
 
 type
@@ -28,13 +28,6 @@ type
     errorCode: smallint;
   end;
 
-  TBMFontLegacyEntry = record
-    fontPtr: PBMFontLegacy;
-    glyphsPtr: PBMFontGlyph;
-    status: TAssetStatus;
-    errorCode: smallint;
-  end;
-
   PBMFontEntry = ^TBMFontEntry;
   TBMFontEntry = record
     font: TBMFont;
@@ -44,6 +37,7 @@ type
 
 {$ifdef P92_WASM}
   TSoundEntry = record
+    volume: single;
     status: TAssetStatus;
     errorCode: smallint;
   end;
@@ -121,16 +115,13 @@ function LoadSound(const filename: string): TSoundHandle;
 
 implementation
 
-uses
-  SysUtils,
-  P92Conversions, P92Logger, P92Panic, P92Strings, P92TexRef
 {$ifdef P92_WASM}
-  , P92InteropBuf
+uses
+  P92Conversions, P92Logger, P92Panic, P92Strings, P92InteropBuf;
 {$endif}
 {$ifdef P92_SDL2}
-  , SDL2, sdl2_image
+uses SysUtils, SDL2, SDL2_Image, P92TexRef;
 {$endif}
-  ;
 
 {$ifdef P92_WASM}
 const
@@ -196,6 +187,7 @@ begin
   for a:=1 to high(sounds) do begin
     sounds[a] := default(TSoundEntry);
     sounds[a].status := AssetStatusEmpty;
+    sounds[a].volume := 1.0
   end;
 
 {$ifdef P92_WASM}
@@ -302,6 +294,8 @@ begin
   if handle < 0 then
     PanicHalt('RequestBMFont: BMFont handles are full!');
 
+  bmfonts[handle].status := AssetStatusLoading;
+  bmfonts[handle].errorCode := 0;
   RequestBMFont := handle;
 
   WriteInteropString(path);
@@ -340,8 +334,8 @@ begin
   if sndHandle < 0 then
     PanicHalt('RequestSound: Sound handles are full!');
 
-  sounds[sndHandle] := default(TSoundEntry);
   sounds[sndHandle].status := AssetStatusLoading;
+  sounds[sndHandle].errorCode := 0;
 
   WriteInteropString(path);
   JsRequestSound(sndHandle);
@@ -746,8 +740,6 @@ procedure PascalBMFontLoaded(bmfontHandle: longint);
 var
   line: string;
   lineStart: smallint;
-  lineLen: longint;
-
   byteIdx: longint;
 begin
   bmfonts[bmfontHandle].status := AssetStatusReady;

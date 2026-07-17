@@ -15,6 +15,8 @@ interface
 uses P92AssetHandles;
 
 type
+  TByteRange = 0..255;
+
   PBMFontGlyph = ^TBMFontGlyph;
   TBMFontGlyph = record
     id: word;
@@ -23,34 +25,16 @@ type
     xadvance: smallint;
   end;
 
-  PBMFontLegacy = ^TBMFontLegacy;
-  TBMFontLegacy = record
-    face: string[15];  { 16 bytes ShortString }
-    filename: string[63];  { 64 bytes }
-    lineHeight: word;  { 2 bytes }
-    spacing: array[0..1] of byte; { x, y }
-    texHandle: longint;  { 84th byte }
-  end;
-
   PBMFont = ^TBMFont;
   TBMFont = record
     texHandle: longint;
     lineHeight: smallint;
     spacing: array[0..1] of byte;
-    glyphs: array[0..255] of TBMFontGlyph;
+    glyphs: array[TByteRange] of TBMFontGlyph;
   end;
 
 
-{ This procedure creates a new ImgRef instance }
-procedure CloneBMFontLegacy(
-  const srcFont: TBMFontLegacy; const srcFontGlyphs: array of TBMFontGlyph;
-  var destFont: TBMFontLegacy; var destFontGlyphs: array of TBMFontGlyph);
-
-procedure FreeBMFontLegacy(
-  var font: TBMFontLegacy;
-  var fontGlyphs: array of TBMFontGlyph;
-  const freeImgHandle: boolean);
-
+function CloneBMFont(const srcFontHandle: TBMFontHandle): TBMFontHandle;
 procedure FreeBMFont(const fontHandle: TBMFontHandle);
 
 procedure PrintBMFont(
@@ -75,15 +59,13 @@ procedure PrintBMFontColour(
   const colour: longword);
 
 function PrintBMFontCharToDest(
-  const font: TBMFontLegacy;
-  const fontGlyphs: array of TBMFontGlyph;
+  const fontHandle: TBMFontHandle;
   const destHandle: longint;
   const ch: char;
   const x, y: smallint): smallint;
 
 procedure PrintBMFontToDest(
-  const font: TBMFontLegacy;
-  const fontGlyphs: array of TBMFontGlyph;
+  const fontHandle: TBMFontHandle;
   const destHandle: longint;
   const text: string;
   const x, y: smallint);
@@ -92,7 +74,7 @@ procedure PrintBMFontToDest(
 implementation
 
 uses
-  P92Conversions, P92Logger, P92AssetRegistry,
+  P92Conversions, P92Logger, P92AssetRegistry, P92PanicDisplay,
   P92Tex, P92TexDraw;
 
 { Returns glyph.xadvance }
@@ -125,33 +107,19 @@ begin
     PrintBMFontChar := 0;
 end;
 
-procedure CloneBMFontLegacy(
-  const srcFont: TBMFontLegacy; const srcFontGlyphs: array of TBMFontGlyph;
-  var destFont: TBMFontLegacy; var destFontGlyphs: array of TBMFontGlyph);
+function CloneBMFont(const srcFontHandle: TBMFontHandle): TBMFontHandle;
 var
-  a: word;
+  destFontHandle: TBMFontHandle;
 begin
-  destFont := srcFont;
+  destFontHandle := FindUnusedBMFontHandle;
 
-  for a:=0 to high(srcFontGlyphs) do
-    destFontGlyphs[a] := srcFontGlyphs[a];
+  if destFontHandle < 0 then
+    PanicHaltDisplay('BMFont handles are full!');
 
-  destFont.texHandle := CopyTexture(srcFont.texHandle)
-end;
+  bmfonts[destFontHandle] := bmfonts[srcFontHandle];
+  bmfonts[destFontHandle].font.texHandle := CopyTexture(bmfonts[srcFontHandle].font.texHandle);
 
-procedure FreeBMFontLegacy(
-  var font: TBMFontLegacy;
-  var fontGlyphs: array of TBMFontGlyph;
-  const freeImgHandle: boolean);
-var
-  a: Word;
-begin
-  if freeImgHandle then
-    FreeTexture(font.texHandle);
-
-  fillchar(font, sizeof(TBMFontLegacy), 0);
-  for a:=0 to high(fontGlyphs) do
-    fillchar(fontGlyphs[a], sizeof(TBMFontGlyph), 0);
+  CloneBMFont := destFontHandle
 end;
 
 procedure FreeBMFont(const fontHandle: TBMFontHandle);
@@ -279,17 +247,18 @@ end;
 
 
 function PrintBMFontCharToDest(
-  const font: TBMFontLegacy;
-  const fontGlyphs: array of TBMFontGlyph;
+  const fontHandle: TBMFontHandle;
   const destHandle: longint;
   const ch: char;
   const x, y: smallint): smallint;
 var
+  fontPtr: PBMFont;
   charcode: byte;
   glyphIdx: smallint;
   glyph: TBMFontGlyph;
 begin
   PrintBMFontCharToDest := 0;
+  fontPtr := BorrowBMFontPtr(fontHandle);
 
   if not IsTextureSet(destHandle) then exit;
 
@@ -297,11 +266,11 @@ begin
 
   glyphIdx := charcode;
 
-  if (glyphIdx in [low(fontGlyphs)..high(fontGlyphs)]) then begin
-    glyph := fontGlyphs[glyphIdx];
+  if (glyphIdx in [low(fontPtr^.glyphs)..high(fontPtr^.glyphs)]) then begin
+    glyph := fontPtr^.glyphs[glyphIdx];
 
     SprRegionToDest(
-      font.texHandle,
+      fontPtr^.texHandle,
       destHandle,
       glyph.x, glyph.y,
       glyph.width, glyph.height,
@@ -313,8 +282,7 @@ begin
 end;
 
 procedure PrintBMFontToDest(
-  const font: TBMFontLegacy;
-  const fontGlyphs: array of TBMFontGlyph;
+  const fontHandle: TBMFontHandle;
   const destHandle: longint;
   const text: string;
   const x, y: smallint);
@@ -327,10 +295,10 @@ begin
 
   for a:=1 to length(text) do begin
     ch := text[a];
-    step := PrintBMFontCharToDest(font, fontGlyphs, destHandle, ch, x + left, y);
+    step := PrintBMFontCharToDest(fontHandle, destHandle, ch, x + left, y);
 
     if a < length(text) then
-      inc(left, step + font.spacing[0])
+      inc(left, step + BorrowBMFontPtr(fontHandle)^.spacing[0])
     else
       inc(left, step);
   end;

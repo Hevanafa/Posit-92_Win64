@@ -41,7 +41,6 @@ var
 function GetBootOptionBoolean(key: string): boolean;
 function JsGetBootOptionBoolean: boolean; external 'env' name 'JsGetBootOptionBoolean';
 
-procedure InitEngine; public name 'InitEngine';
 function GetCgaFontHandle: longint;
 procedure SetCGAFontHandle(value: longint);
 
@@ -83,7 +82,7 @@ uses
   P92FPS, P92Logger,
   P92Sounds, P92Timing,
   P92Keyboard, P92Mouse,
-  P92TexDraw, P92VGA, P92WasmHost, P92WasmMemMgr, P92InteropBuf, P92Loading,
+  P92TexDraw, P92VGA, P92WasmHost, P92WasmMemMgr, P92InteropBuf, P92Loading
 {$endif}
 {$ifdef P92_IMMEDIATE_GUI}
   , P92ImmediateGUI
@@ -144,15 +143,16 @@ end;
 
 procedure P92Boot;
 begin
+{$ifdef P92_WASM}
+  InitHeapMgr;
+  InitInteropBuffer;
+{$endif}
+
   engineRunState := ersBoot;
 
   if DebugEngineRunStates then
     writelog('ersBoot');
 
-{$ifdef P92_WASM}
-  InitHeapMgr;
-  InitInteropBuffer;
-{$endif}
 {$ifdef P92_SDL2}
   InitVideoMem(
     bootConfig.width, bootConfig.height,
@@ -187,10 +187,10 @@ begin
 { Request boot font }
 
 {$ifdef P92_WASM}
-  cgaFontHandle := RequestImage('assets/CGA8x8.png');
+  SetCGAFontHandle(RequestImage('assets/CGA8x8.png'));
 {$endif}
 {$ifdef P92_SDL2}
-  cgaFontHandle := LoadImage('assets/CGA8x8.png');
+  SetCGAFontHandle(LoadImage('assets/CGA8x8.png'));
 {$endif}
 end;
 
