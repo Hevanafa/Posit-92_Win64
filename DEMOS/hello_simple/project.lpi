@@ -81,7 +81,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="..\..\experimental\engine;..\..\experimental\shared\units;..\..\experimental\shared;..\..\experimental\shared\sdl2"/>
+      <OtherUnitFiles Value="..\..\experimental\shared\sdl2;..\..\experimental\shared\units;..\..\experimental\shared"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>
