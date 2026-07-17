@@ -151,7 +151,8 @@ begin
     height := 128;
     sdlScale := 3;
 
-    enableDefaultFont := false;
+    fps := 20;
+
     defaultFontPath := 'assets\fonts\pico-8_regular_5.txt';
   end;
 
