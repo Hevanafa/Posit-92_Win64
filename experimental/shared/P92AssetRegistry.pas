@@ -10,7 +10,9 @@ interface
 uses P92AssetHandles, P92BMFont, P92Tex;
 {$endif}
 {$ifdef P92_SDL2}
-uses SDL2_Mixer, P92CoreSDL2, P92BMFont, P92Tex;
+uses
+  SDL2_Mixer,
+  P92CoreSDL2, P92AssetHandles, P92BMFont, P92Tex;
 {$endif}
 
 type
@@ -120,7 +122,9 @@ uses
   P92Conversions, P92Logger, P92Panic, P92Strings, P92InteropBuf;
 {$endif}
 {$ifdef P92_SDL2}
-uses SysUtils, SDL2, SDL2_Image, P92TexRef;
+uses
+  SysUtils, SDL2, SDL2_Image,
+  P92Conversions, P92Logger, P92TexRef, P92Strings, P92Panic;
 {$endif}
 
 {$ifdef P92_WASM}

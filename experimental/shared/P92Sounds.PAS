@@ -181,8 +181,11 @@ begin
 
   sounds[sndHandle].volume := Clamp(volume, 0.0, 1.0);
 
+{ Music playback is not yet implemented in Windows version }
+{$ifdef P92_WASM}
   if sndHandle = currentMusicHandle then
     JsSetMusicVolume(sounds[sndHandle].volume);
+{$endif}
 end;
 
 {$ifdef P92_WASM}
