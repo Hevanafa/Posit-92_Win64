@@ -143,15 +143,29 @@ end;
 
 procedure P92Boot;
 begin
-{$ifdef P92_WASM}
-  InitHeapMgr;
-  InitInteropBuffer;
-{$endif}
-
   engineRunState := ersBoot;
 
   if DebugEngineRunStates then
     writelog('ersBoot');
+
+{$ifdef P92_WASM}
+  InitHeapMgr;
+  InitInteropBuffer;
+
+  InitDeltaTime;
+  InitFPSCounter;
+  InitAssetRegistry;
+  InitSounds;
+
+  { Read boot options }
+
+  enableDefaultBMFont := GetBootOptionBoolean('defaultFont');
+  enableScreenshotHotkey := GetBootOptionBoolean('enableScreenshotHotkey');
+{$endif}
+{$ifdef P92_WEBGL}
+  SetupWebGLViewport;
+  SetupWebGLShaders;
+{$endif}
 
 {$ifdef P92_SDL2}
   InitVideoMem(
@@ -160,28 +174,14 @@ begin
 
   TargetFPS := bootConfig.fps;
   FrameTime := 1000 div TargetFPS;
-{$endif}
 
   InitDeltaTime;
   InitFPSCounter;
-
   InitAssetRegistry;
   InitSounds;
 
-{$ifdef P92_WEBGL}
-  SetupWebGLViewport;
-  SetupWebGLShaders;
-{$endif}
-{$ifdef P92_SDL2}
   InitSDL;
   InitLogger;
-{$endif}
-
-{$ifdef P92_WASM}
-  { Read boot options }
-
-  enableDefaultBMFont := GetBootOptionBoolean('defaultFont');
-  enableScreenshotHotkey := GetBootOptionBoolean('enableScreenshotHotkey');
 {$endif}
 
 { Request boot font }
