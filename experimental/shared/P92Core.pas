@@ -190,7 +190,7 @@ begin
   SetCGAFontHandle(RequestImage('assets/CGA8x8.png'));
 {$endif}
 {$ifdef P92_SDL2}
-  SetCGAFontHandle(LoadImage('assets/CGA8x8.png'));
+  SetCGAFontHandle(RequestImage('assets/CGA8x8.png'));
 {$endif}
 end;
 
@@ -206,8 +206,8 @@ begin
     writelog('ersPreload');
 
 {$ifdef P92_SDL2}
-  { imgCursor := LoadImage('assets\images\cursor.png'); }
-  hwCursor := HwLoadImage('assets\images\cursor.png');
+  { imgCursor := RequestImage('assets\images\cursor.png'); }
+  hwCursor := HwRequestImage('assets\images\cursor.png');
 
   if enableDefaultBMFont then
     LoadDefaultFont;

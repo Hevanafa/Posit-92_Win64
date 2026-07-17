@@ -22,20 +22,20 @@ var
 
 procedure PlayRandomSFX;
 begin
-  playSound(1 + random(5))
+  PlaySound(1 + random(5))
 end;
 
 
 procedure OnPreload;
 begin
-  imgDosuEXE[0] := LoadImage('assets\images\dosu_1.png');
-  imgDosuEXE[1] := LoadImage('assets\images\dosu_2.png');
+  imgDosuEXE[0] := RequestImage('assets\images\dosu_1.png');
+  imgDosuEXE[1] := RequestImage('assets\images\dosu_2.png');
 
-  sfxBwonk := LoadSound('assets\sfx\bwonk.ogg');
-  sfxBite := LoadSound('assets\sfx\bite.ogg');
-  sfxBonk := LoadSound('assets\sfx\bonk.ogg');
-  sfxStrum := LoadSound('assets\sfx\strum.ogg');
-  sfxSlip := LoadSound('assets\sfx\slip.ogg');
+  sfxBwonk := RequestSound('assets\sfx\bwonk.ogg');
+  sfxBite := RequestSound('assets\sfx\bite.ogg');
+  sfxBonk := RequestSound('assets\sfx\bonk.ogg');
+  sfxStrum := RequestSound('assets\sfx\strum.ogg');
+  sfxSlip := RequestSound('assets\sfx\slip.ogg');
 
   { Load more assets here }
 end;
