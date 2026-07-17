@@ -57,8 +57,7 @@ procedure OnReady;
 begin
   HideCursor;
 
-  { TODO: Enable this }
-  { ReplaceColour(BorrowBMFontPtr(GetDefaultFontHandle)^.texHandle, white, Palette[1]); }
+  ReplaceColour(BorrowBMFontPtr(GetDefaultFontHandle)^.texHandle, white, Palette[1]);
 
   { Init your game state here }
   gameTime := 0.0
@@ -150,8 +149,7 @@ begin
 
     fps := 20;
 
-    enableDefaultFont := false;
-    { defaultFontPath := 'assets\fonts\pico-8_regular_5.txt'; }
+    defaultFontPath := 'assets\fonts\pico-8_regular_5.txt';
   end;
 
   appConfig.OnReady := @OnReady;
