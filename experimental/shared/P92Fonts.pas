@@ -43,20 +43,19 @@ begin
 {$endif}
 end;
 
-function AssertWarnDefaultFont: boolean;
+function EnsureDefaultFont: boolean;
 begin
-  AssertWarnDefaultFont := true;
+  EnsureDefaultFont := defaultFontHandle > 0;
 
-  if (defaultFontHandle < 1) and not shownWarning then begin
-    AssertWarnDefaultFont := false;
-    WriteWarn('No usable default font');
+  if not EnsureDefaultFont and not shownWarning then begin
+    WriteWarn('Default font is unavailable (either disabled or not loaded)');
     shownWarning := true
   end;
 end;
 
 procedure PrintDefault(const text: string; const x, y: integer);
 begin
-  if not AssertWarnDefaultFont then exit;
+  if not EnsureDefaultFont then exit;
 
   PrintBMFont(defaultFontHandle, text, x, y)
 end;
@@ -65,7 +64,7 @@ procedure PrintDefaultCentred(const text: string; const cx, y: integer);
 var
   w: word;
 begin
-  if not AssertWarnDefaultFont then exit;
+  if not EnsureDefaultFont then exit;
 
   w := MeasureDefault(text);
   PrintDefault(text, cx - w div 2, y)
@@ -73,7 +72,7 @@ end;
 
 function MeasureDefault(const text: string): word;
 begin
-  if not AssertWarnDefaultFont then exit;
+  if not EnsureDefaultFont then exit;
 
   MeasureDefault := MeasureBMFont(defaultFontHandle, text)
 end;
@@ -81,7 +80,7 @@ end;
 { Returns the width of the glyph }
 function PrintCharColour(const ch: char; const x, y: integer; const colour: longword): word;
 begin
-  if not AssertWarnDefaultFont then exit;
+  if not EnsureDefaultFont then exit;
 
   PrintCharColour := PrintBMFontCharColour(
     defaultFontHandle, ch, x, y, colour)
