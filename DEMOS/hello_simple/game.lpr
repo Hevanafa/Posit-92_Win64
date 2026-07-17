@@ -6,7 +6,7 @@ program Game;
 
 uses
   SysUtils, SDL2,
-  P92Core, P92Fonts,
+  P92Core, P92CoreSDL2, P92Fonts, P92AssetRegistry,
   P92Keyboard, P92Mouse,
   P92Tex, P92TexDraw, P92Sounds,
   P92Logger, P92Timing, P92VGA,
@@ -18,8 +18,8 @@ var
 
 procedure OnPreload;
 begin
-  imgSpecimenP92[0] := LoadImage('assets\images\specimen_p-92_1.png');
-  imgSpecimenP92[1] := LoadImage('assets\images\specimen_p-92_2.png');
+  imgSpecimenP92[0] := RequestImage('assets\images\specimen_p-92_1.png');
+  imgSpecimenP92[1] := RequestImage('assets\images\specimen_p-92_2.png');
 
   { Load more assets here }
 end;
@@ -56,9 +56,7 @@ begin
   else
     spr(imgSpecimenP92[0], 148, 88);
 
-  PrintDefaultCentred('Hello world!', vgaWidth div 2, 120);
-
-  PrintDefault(format('Mouse: { %d, %d }', [mouseX, mouseY]), 10, 10);
+  PrintDefaultCentred('Hello world!', vgaWidth div 2, 120)
 end;
 
 

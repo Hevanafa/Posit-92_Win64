@@ -6,7 +6,7 @@ program Game;
 
 uses
   SysUtils,
-  P92Core, P92Fonts,
+  P92Core, P92CoreSDL2, P92Fonts, P92AssetRegistry,
   P92Keyboard, P92Mouse,
   P92Logger,
   P92Tex, P92TexDraw,
@@ -30,7 +30,7 @@ var
   { Game state variables }
   gameTime: double;
 
-  ripples: array[0..9] of TRipple;
+  ripples: array[0..19] of TRipple;
   nextRippleTick: double;
 
 
@@ -97,9 +97,9 @@ end;
 
 procedure OnPreload;
 begin
-  imgCursor := loadImage('assets\images\cursor.png');
-  imgDosuEXE[0] := loadImage('assets\images\dosu_1.png');
-  imgDosuEXE[1] := loadImage('assets\images\dosu_2.png');
+  imgCursor := RequestImage('assets\images\cursor.png');
+  imgDosuEXE[0] := RequestImage('assets\images\dosu_1.png');
+  imgDosuEXE[1] := RequestImage('assets\images\dosu_2.png');
 
   { Load more assets here }
 end;
@@ -130,7 +130,7 @@ begin
   if isKeyDown(SC_ESCAPE) then SignalDone;
 
   if getTimer >= nextRippleTick then begin
-    nextRippleTick := getTimer + random / 4.0;
+    nextRippleTick := getTimer + random / 8.0;
     spawnRipple(random(vgaWidth), Random(vgaHeight))
   end;
 
@@ -188,17 +188,17 @@ end;
 {$R *.res}
 
 var
-  appConfig: TP92AppConfig;
+  conf: TP92AppConfig;
 begin
-  appConfig := DefaultP92AppConfig;
+  conf := DefaultP92AppConfig;
 
-  appConfig.OnPreload := @OnPreload;
-  appConfig.OnReady := @OnReady;
-  appConfig.Update := @Update;
-  appConfig.Draw := @Draw;
-  appConfig.OnCleanup := @OnCleanup;
+  conf.OnPreload := @OnPreload;
+  conf.OnReady := @OnReady;
+  conf.Update := @Update;
+  conf.Draw := @Draw;
+  conf.OnCleanup := @OnCleanup;
 
-  P92Start(appConfig)
+  P92Start(conf)
 end.
 
 
