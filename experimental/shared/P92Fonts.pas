@@ -72,7 +72,10 @@ end;
 
 function MeasureDefault(const text: string): word;
 begin
-  if not EnsureDefaultFont then exit;
+  if not EnsureDefaultFont then begin
+    MeasureDefault := 0;
+    exit
+  end;
 
   MeasureDefault := MeasureBMFont(defaultFontHandle, text)
 end;
@@ -80,7 +83,10 @@ end;
 { Returns the width of the glyph }
 function PrintCharColour(const ch: char; const x, y: integer; const colour: longword): word;
 begin
-  if not EnsureDefaultFont then exit;
+  if not EnsureDefaultFont then begin
+    PrintCharColour := 0;
+    exit
+  end;
 
   PrintCharColour := PrintBMFontCharColour(
     defaultFontHandle, ch, x, y, colour)
