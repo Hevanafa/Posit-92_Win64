@@ -57,7 +57,8 @@ procedure OnReady;
 begin
   HideCursor;
 
-  ReplaceColour(BorrowBMFontPtr(GetDefaultFontHandle)^.texHandle, white, Palette[1]);
+  { TODO: Enable this }
+  { ReplaceColour(BorrowBMFontPtr(GetDefaultFontHandle)^.texHandle, white, Palette[1]); }
 
   { Init your game state here }
   gameTime := 0.0
@@ -72,8 +73,6 @@ end;
 
 procedure Draw;
 var
-  font: PBMFont;
-
   a: word;
   positNow: double;
   h, m, s: double;
@@ -82,8 +81,6 @@ var
 
   dotw: smallint;
 begin
-  font := BorrowBMFontPtr(GetDefaultFontHandle);
-
   cls(palette[0]);
 
   for a:=0 to 11 do begin
@@ -100,7 +97,7 @@ begin
   PrintDefaultCentred(
     FormatDateTime('dd-mm-yyyy', now),
     vgaWidth div 2,
-    vgaHeight * 3 div 4 - font^.lineHeight - 2);
+    vgaHeight * 3 div 4 - 20);
 
   dotw := DayOfTheWeek(now);
   { testStr := format('Today is %s', [GetDayName(dotw)]); }
@@ -153,7 +150,8 @@ begin
 
     fps := 20;
 
-    defaultFontPath := 'assets\fonts\pico-8_regular_5.txt';
+    enableDefaultFont := false;
+    { defaultFontPath := 'assets\fonts\pico-8_regular_5.txt'; }
   end;
 
   appConfig.OnReady := @OnReady;

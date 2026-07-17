@@ -280,8 +280,11 @@ end;
 
 function BorrowBMFontPtr(const bmfontHandle: TBMFontHandle): PBMFont;
 begin
-  { if bmfonts[bmfontHandle].status <> AssetStatusReady then
-    raise Exception.Create('Attempting to use bmfont ' + i32str(bmfontHandle)); }
+  if bmfonts[bmfontHandle].status <> AssetStatusReady then begin
+    { raise Exception.Create('Attempting to use bmfont ' + i32str(bmfontHandle)); }
+    BorrowBMFontPtr := nil;
+    exit
+  end;
 
   BorrowBMFontPtr := @bmfonts[bmfontHandle]
 end;

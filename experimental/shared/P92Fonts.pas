@@ -20,10 +20,12 @@ function PrintCharColour(const ch: char; const x, y: integer; const colour: long
 
 implementation
 
-uses P92AssetRegistry, P92BMFont, P92Core;
+uses
+  P92AssetRegistry, P92BMFont, P92Core, P92Logger;
 
 var
   defaultFontHandle: TBMFontHandle;
+  shownWarning: boolean;
 
 function GetDefaultFontHandle: TBMFontHandle;
 begin
@@ -41,8 +43,21 @@ begin
 {$endif}
 end;
 
+function AssertWarnDefaultFont: boolean;
+begin
+  AssertWarnDefaultFont := true;
+
+  if (defaultFontHandle < 1) and not shownWarning then begin
+    AssertWarnDefaultFont := false;
+    WriteWarn('No usable default font');
+    shownWarning := true
+  end;
+end;
+
 procedure PrintDefault(const text: string; const x, y: integer);
 begin
+  if not AssertWarnDefaultFont then exit;
+
   PrintBMFont(defaultFontHandle, text, x, y)
 end;
 
@@ -50,21 +65,30 @@ procedure PrintDefaultCentred(const text: string; const cx, y: integer);
 var
   w: word;
 begin
+  if not AssertWarnDefaultFont then exit;
+
   w := MeasureDefault(text);
   PrintDefault(text, cx - w div 2, y)
 end;
 
 function MeasureDefault(const text: string): word;
 begin
+  if not AssertWarnDefaultFont then exit;
+
   MeasureDefault := MeasureBMFont(defaultFontHandle, text)
 end;
 
 { Returns the width of the glyph }
 function PrintCharColour(const ch: char; const x, y: integer; const colour: longword): word;
 begin
+  if not AssertWarnDefaultFont then exit;
+
   PrintCharColour := PrintBMFontCharColour(
     defaultFontHandle, ch, x, y, colour)
 end;
+
+initialization
+  defaultFontHandle := 0;
 
 end.
 
