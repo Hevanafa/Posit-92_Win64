@@ -8,10 +8,16 @@ interface
 {$ifdef P92_SDL2}
 uses SDL2;
 
+const
+  MinimisedFPS = 10;
+
 var
   TargetFPS: smallint;
+
   { in ms }
   FrameTime: longword;
+  { in ms }
+  MinimisedFrameTime: longword;
 
   done: boolean;
 
@@ -32,6 +38,9 @@ procedure ShowCursor;
 procedure InitSDL;
 procedure HandleSDLEvents;
 procedure CleanupSDL;
+
+procedure MinimiseWindow;
+function WindowMinimised: boolean;
 {$endif}
 
 
@@ -164,6 +173,17 @@ begin
   SDL_DestroyWindow(window);
   SDL_Quit
 end;
+
+procedure MinimiseWindow;
+begin
+  SDL_MinimizeWindow(window)
+end;
+
+function WindowMinimised: boolean;
+begin
+  WindowMinimised := (SDL_WINDOW_MINIMIZED and SDL_GetWindowFlags(window)) <> 0
+end;
+
 {$endif}
 
 end.

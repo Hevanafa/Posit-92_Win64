@@ -174,6 +174,7 @@ begin
 
   TargetFPS := bootConfig.fps;
   FrameTime := 1000 div TargetFPS;
+  MinimisedFrameTime := 1000 div MinimisedFPS;
 
   InitDeltaTime;
   InitFPSCounter;
@@ -450,13 +451,17 @@ begin
     if elapsed >= FrameTime then begin
       P92Update;
 
-      { User loop }
-      appConfig.Update;
-      appConfig.Draw;
+      appConfig.Update; { user callback }
 
-      P92AfterDraw;
+      if not WindowMinimised then begin
+        appConfig.Draw; { user callback }
+        P92AfterDraw
+      end;
 
-      lastFrameTime := frameTimeNow - (elapsed mod FrameTime) { Carry over extra time }
+      if WindowMinimised then
+        lastFrameTime := frameTimeNow - (elapsed mod MinimisedFrameTime)  { Carry over extra time }
+      else
+        lastFrameTime := frameTimeNow - (elapsed mod FrameTime);  { Carry over extra time }
     end;
 
     SDL_Delay(1)
