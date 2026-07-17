@@ -15,9 +15,6 @@ uses
   Assets;
 
 const
-  TargetFPS = 18;
-  FrameTime = 1000 div TargetFPS;
-
   White = $FFFFFFFF;
   Palette: array[0..1] of longword = ($FF3C3C3C, $FFB5F80E);
 
@@ -25,10 +22,9 @@ var
   { Game state variables }
   gameTime: double;
 
-
 procedure DrawFPS;
 begin
-  printDefault(format('FPS: %d', [getLastFPS]), vgaWidth - 50, 0);
+  PrintDefault(format('FPS: %d', [getLastFPS]), vgaWidth - 50, 0);
 end;
 
 procedure DrawMouse;
@@ -147,7 +143,7 @@ begin
     height := 128;
     sdlScale := 3;
 
-    fps := 20;
+    fps := 18;
 
     defaultFontPath := 'assets\fonts\pico-8_regular_5.txt';
   end;
