@@ -6,8 +6,12 @@ unit Assets;
 
 interface
 
+uses P92AssetHandles;
+
 var
-  imgSpecimenP92: array[0..1] of longint;
+  imgSpecimenP92: array[0..1] of TTextureHandle;
+
+  imgCGAFont2y, imgEGAFont: TTextureHandle;
 
 
 implementation

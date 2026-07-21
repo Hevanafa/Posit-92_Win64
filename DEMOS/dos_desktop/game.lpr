@@ -7,10 +7,14 @@ program Game;
 uses
   SysUtils, SDL2,
   P92Core, P92CoreSDL2, P92Fonts, P92AssetRegistry,
+  P92Conversions,
   P92Keyboard, P92Mouse,
   P92Tex, P92TexDraw, P92Sounds,
   P92Logger, P92Timing, P92VGA,
   Assets;
+
+const
+  Black = $FF000000;
 
 var
   { Game state variables }
@@ -20,6 +24,9 @@ procedure OnPreload;
 begin
   imgSpecimenP92[0] := RequestImage('assets\images\specimen_p-92_1.png');
   imgSpecimenP92[1] := RequestImage('assets\images\specimen_p-92_2.png');
+
+  imgEGAFont := RequestImage('assets\EGA8x14.png');
+  imgCGAFont2y := RequestImage('assets\CGA8x16.png');;
 
   { Load more assets here }
 end;
@@ -40,6 +47,37 @@ begin
   FreeTexture(imgSpecimenP92[1]);
 end;
 
+
+procedure PrintChar(const c: char; const x, y: smallint);
+var
+  row, col: smallint;
+begin
+  if not (ord(c) in [1..255]) then exit;
+
+  row := ord(c) div 16;
+  col := ord(c) mod 16;
+
+  SprRegion(
+    imgCGAFont2y,
+    col * 8, row * 16,
+    8, 14,
+    x, y)
+end;
+
+procedure Print(const txt: string; const x, y: smallint);
+var
+  c: char;
+  left: smallint;
+begin
+  left := x;
+
+  for c in txt do begin
+    PrintChar(c, left, y);
+    inc(left, 8)
+  end;
+end;
+
+
 procedure Update;
 begin
   if IsKeyDown(SC_ESCAPE) then SignalDone;
@@ -48,13 +86,20 @@ begin
 end;
 
 procedure Draw;
+var
+  a: smallint;
 begin
-  cls($FF6495ED);
+  cls(black);
 
   if (trunc(gameTime * 4) and 1) > 0 then
     spr(imgSpecimenP92[1], 148, 88)
   else
     spr(imgSpecimenP92[0], 148, 88);
+
+  {spr(imgEGAFont, 10, 10); }
+
+  for a:=0 to 79 do
+    print(i32str(a mod 10), 8 * a, 16);
 
   { PrintDefaultCentred('Hello world!', vgaWidth div 2, 120) }
 end;
@@ -69,6 +114,10 @@ begin
 
   with appConfig do begin
     windowTitle := 'Posit-92 with SDL2';
+
+    width := 8 * 40;
+    height := 16 * 13;
+    { sdlScale := 1; }
 
     enableDefaultFont := false;
   end;
