@@ -149,6 +149,18 @@ begin
   end;
 end;
 
+procedure PrintColour(const txt: string; const x, y: smallint; const colour: longword);
+var
+  c: char;
+  left: smallint;
+begin
+  left := x;
+
+  for c in txt do begin
+    PrintCharColour(c, left, y, colour);
+    inc(left, 8)
+  end;
+end;
 
 procedure Update;
 begin
@@ -168,9 +180,11 @@ begin
   else
     spr(imgSpecimenP92[0], 148, 88);
 
-  { Cursor }
+  { Blinking cursor }
   if frac(GetTimer) >= 0.5 then
     rectfill(8, 16 * 4, 15, 16 * 5 - 1, DullWhite);
+
+  PrintColour('Red text', 8, 32, red);
 
   { Footer area }
   print('F1 Help   F2 Run   F10 Exit', 8, VgaHeight - 16);
@@ -179,15 +193,6 @@ begin
   Print('Posit-92 Workstation', 8, 0);
 
   print(FormatDateTime('hh:nn', now), VgaWidth - 48, 0);
-
-  PrintCharColour('R', 8, 32, red);
-
-  {spr(imgEGAFont, 10, 10); }
-
-  { for a:=0 to 79 do
-    print(i32str(a mod 10), 8 * a, 16); }
-
-  { PrintDefaultCentred('Hello world!', vgaWidth div 2, 120) }
 end;
 
 
