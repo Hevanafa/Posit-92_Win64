@@ -164,7 +164,7 @@ end;
 
 procedure Update;
 begin
-  if IsKeyDown(SC_ESCAPE) then SignalDone;
+  if IsKeyDown(SC_F10) then SignalDone;
 
   gameTime := gameTime + DeltaTime
 end;
