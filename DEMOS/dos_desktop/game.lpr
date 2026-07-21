@@ -49,19 +49,55 @@ end;
 
 
 procedure PrintChar(const c: char; const x, y: smallint);
+const
+  GlyphWidth = 8;
+  GlyphHeight = 16;
 var
   row, col: smallint;
+  texture: PSoftwareTex;
+  a, b: smallint;
+  colour: longword;
+  sx, sy: smallint;
+  destX, destY: smallint;
 begin
   if not (ord(c) in [1..255]) then exit;
 
   row := ord(c) div 16;
   col := ord(c) mod 16;
 
-  SprRegion(
+  { SprRegion(
     imgCGAFont2y,
     col * 8, row * 16,
     8, 14,
-    x, y)
+    x, y) }
+
+  sx := col * GlyphWidth;
+  sy := row * GlyphHeight;
+
+  texture := BorrowTexturePtr(imgCGAFont2y);
+
+  { glyph size: 8x16 }
+
+  for b:=0 to GlyphHeight - 1 do
+  for a:=0 to GlyphWidth - 1 do begin
+    if (x + a > ClipX2) or (x + a < ClipX1)
+      or (y + b > ClipY2) or (y + b < ClipY1) then continue;
+
+    sx := sx + a;
+    sy := sy + b;
+    srcPos := (sx + sy * texture^.width) * 4;
+
+    alpha := texture^.pixelData[srcPos + 3];
+    if alpha < 255 then continue;
+
+    colour := UnsafeSprPget(texture, sx, sy);
+    UnsafePset(destX + a, destY + b, colour);
+  end;
+end;
+
+procedure PrintCharColour(const c: char; const x, y: smallint; const colour: longword);
+begin
+
 end;
 
 procedure Print(const txt: string; const x, y: smallint);
