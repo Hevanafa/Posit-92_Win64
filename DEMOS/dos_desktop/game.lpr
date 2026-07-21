@@ -57,22 +57,19 @@ var
   texture: PSoftwareTex;
   a, b: smallint;
   colour: longword;
+  alpha: byte;
+  srcX, srcY: smallint;
   sx, sy: smallint;
-  destX, destY: smallint;
+  { offset of the pixel data array }
+  offset: longword;
 begin
   if not (ord(c) in [1..255]) then exit;
 
   row := ord(c) div 16;
   col := ord(c) mod 16;
 
-  { SprRegion(
-    imgCGAFont2y,
-    col * 8, row * 16,
-    8, 14,
-    x, y) }
-
-  sx := col * GlyphWidth;
-  sy := row * GlyphHeight;
+  srcX := col * GlyphWidth;
+  srcY := row * GlyphHeight;
 
   texture := BorrowTexturePtr(imgCGAFont2y);
 
@@ -83,15 +80,15 @@ begin
     if (x + a > ClipX2) or (x + a < ClipX1)
       or (y + b > ClipY2) or (y + b < ClipY1) then continue;
 
-    sx := sx + a;
-    sy := sy + b;
-    srcPos := (sx + sy * texture^.width) * 4;
+    sx := srcX + a;
+    sy := srcY + b;
+    offset := (sx + sy * texture^.width) * 4;
 
-    alpha := texture^.pixelData[srcPos + 3];
+    alpha := texture^.pixelData[offset + 3];
     if alpha < 255 then continue;
 
     colour := UnsafeSprPget(texture, sx, sy);
-    UnsafePset(destX + a, destY + b, colour);
+    UnsafePset(x + a, y + b, colour);
   end;
 end;
 
