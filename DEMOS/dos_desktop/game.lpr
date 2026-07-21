@@ -124,6 +124,10 @@ var
 begin
   cls(black);
 
+  Print('Posit-92 Workstation', 8, 0);
+
+  print(FormatDateTime('hh:nn', now), VgaWidth - 48, 0);
+
   if (trunc(gameTime * 4) and 1) > 0 then
     spr(imgSpecimenP92[1], 148, 88)
   else
@@ -131,8 +135,8 @@ begin
 
   {spr(imgEGAFont, 10, 10); }
 
-  for a:=0 to 79 do
-    print(i32str(a mod 10), 8 * a, 16);
+  { for a:=0 to 79 do
+    print(i32str(a mod 10), 8 * a, 16); }
 
   { PrintDefaultCentred('Hello world!', vgaWidth div 2, 120) }
 end;
@@ -148,9 +152,11 @@ begin
   with appConfig do begin
     windowTitle := 'Posit-92 with SDL2';
 
-    width := 8 * 40;
-    height := 16 * 13;
-    { sdlScale := 1; }
+    width := 8 * 80;
+    height := 16 * 25;
+    sdlScale := 1;
+
+    fps := 18;
 
     enableDefaultFont := false;
   end;
