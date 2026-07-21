@@ -118,9 +118,14 @@ var
   lastF2: boolean;
   enableScreenshotHotkey: boolean;
 
-function GetCgaFontHandle: longint;
+function GetCGAFontHandle: longint;
 begin
-  GetCgaFontHandle := cgaFontHandle
+  GetCGAFontHandle := cgaFontHandle
+end;
+
+procedure SetCGAFontHandle(value: longint);
+begin
+  cgaFontHandle := value
 end;
 
 {$ifdef P92_WASM}
@@ -130,11 +135,6 @@ begin
   GetBootOptionBoolean := JsGetBootOptionBoolean
 end;
 {$endif}
-
-procedure SetCGAFontHandle(value: longint);
-begin
-  cgaFontHandle := value
-end;
 
 function IsEngineReady: boolean;
 begin
