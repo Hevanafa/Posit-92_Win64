@@ -16,6 +16,7 @@ uses
 const
   Black = $FF000000;
   DullWhite = $FFAAAAAA;
+  Red = $FFFF0000;
 
 var
   { Game state variables }
@@ -94,8 +95,45 @@ begin
 end;
 
 procedure PrintCharColour(const c: char; const x, y: smallint; const colour: longword);
+const
+  GlyphWidth = 8;
+  GlyphHeight = 16;
+var
+  row, col: smallint;
+  texture: PSoftwareTex;
+  a, b: smallint;
+  alpha: byte;
+  srcX, srcY: smallint;
+  sx, sy: smallint;
+  { offset of the pixel data array }
+  offset: longword;
 begin
+  if not (ord(c) in [1..255]) then exit;
 
+  row := ord(c) div 16;
+  col := ord(c) mod 16;
+
+  srcX := col * GlyphWidth;
+  srcY := row * GlyphHeight;
+
+  texture := BorrowTexturePtr(imgCGAFont2y);
+
+  { glyph size: 8x16 }
+
+  for b:=0 to GlyphHeight - 1 do
+  for a:=0 to GlyphWidth - 1 do begin
+    if (x + a > ClipX2) or (x + a < ClipX1)
+      or (y + b > ClipY2) or (y + b < ClipY1) then continue;
+
+    sx := srcX + a;
+    sy := srcY + b;
+    offset := (sx + sy * texture^.width) * 4;
+
+    alpha := texture^.pixelData[offset + 3];
+    if alpha < 255 then continue;
+
+    UnsafePset(x + a, y + b, colour);
+  end;
 end;
 
 procedure Print(const txt: string; const x, y: smallint);
@@ -141,6 +179,8 @@ begin
   Print('Posit-92 Workstation', 8, 0);
 
   print(FormatDateTime('hh:nn', now), VgaWidth - 48, 0);
+
+  PrintCharColour('R', 8, 32, red);
 
   {spr(imgEGAFont, 10, 10); }
 
