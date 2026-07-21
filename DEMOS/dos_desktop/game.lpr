@@ -7,7 +7,7 @@ program Game;
 uses
   SysUtils, SDL2,
   P92Core, P92CoreSDL2, P92Fonts, P92AssetRegistry,
-  P92Conversions,
+  P92Conversions, P92Graphics,
   P92Keyboard, P92Mouse,
   P92Tex, P92TexDraw, P92Sounds,
   P92Logger, P92Timing, P92VGA,
@@ -15,6 +15,7 @@ uses
 
 const
   Black = $FF000000;
+  DullWhite = $FFAAAAAA;
 
 var
   { Game state variables }
@@ -124,14 +125,22 @@ var
 begin
   cls(black);
 
-  Print('Posit-92 Workstation', 8, 0);
-
-  print(FormatDateTime('hh:nn', now), VgaWidth - 48, 0);
-
   if (trunc(gameTime * 4) and 1) > 0 then
     spr(imgSpecimenP92[1], 148, 88)
   else
     spr(imgSpecimenP92[0], 148, 88);
+
+  { Cursor }
+  if frac(GetTimer) >= 0.5 then
+    rectfill(8, 16 * 4, 15, 16 * 5 - 1, DullWhite);
+
+  { Footer area }
+  print('F1 Help   F2 Run   F10 Exit', 8, VgaHeight - 16);
+
+  { Title bar area }
+  Print('Posit-92 Workstation', 8, 0);
+
+  print(FormatDateTime('hh:nn', now), VgaWidth - 48, 0);
 
   {spr(imgEGAFont, 10, 10); }
 
