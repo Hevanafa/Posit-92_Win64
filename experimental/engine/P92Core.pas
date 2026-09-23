@@ -55,7 +55,7 @@ type
     EnableDefaultBMFont: boolean;
     DefaultBMFontPath: string;
 
-    FPS: smallint;
+    TargetFPS: smallint;
     EnableScreenshotHotkey: boolean;
 
     { Callbacks }
@@ -219,7 +219,7 @@ begin
     GetMem(GetBootConfig.BufferWidth * GetBootConfig.BufferHeight * 4),
     bootConfig.BufferWidth, bootConfig.BufferHeight);
 
-  TargetFPS := bootConfig.FPS;
+  TargetFPS := bootConfig.TargetFPS;
   FrameTime := 1000 div TargetFPS;
 {$endif}
 
@@ -532,7 +532,7 @@ begin
     EnableDefaultBMFont := true;
     DefaultBMFontPath := 'assets/fonts/nokia_cellphone_fc_8.txt';
 
-    FPS := 60;
+    TargetFPS := 60;
     EnableScreenshotHotkey := true;
   end;
 
