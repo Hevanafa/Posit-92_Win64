@@ -36,7 +36,7 @@ var
 
 procedure DrawMouse;
 begin
-  spr(imgCursor, GetMouseX, GetMouseY)
+  spr(texCursor, GetMouseX, GetMouseY)
 end;
 
 procedure SpawnRipple(const cx, cy: smallint);
@@ -97,9 +97,9 @@ end;
 
 procedure OnPreload;
 begin
-  imgCursor := RequestImage('assets\images\cursor.png');
-  imgDosuEXE[0] := RequestImage('assets\images\dosu_1.png');
-  imgDosuEXE[1] := RequestImage('assets\images\dosu_2.png');
+  texCursor := RequestImage('assets\images\cursor.png');
+  texDosuEXE[0] := RequestImage('assets\images\dosu_1.png');
+  texDosuEXE[1] := RequestImage('assets\images\dosu_2.png');
 
   { Load more assets here }
 end;
@@ -117,9 +117,9 @@ procedure OnCleanup;
 begin
   ShowCursor;
 
-  FreeTex(imgCursor);
-  FreeTex(imgDosuEXE[0]);
-  FreeTex(imgDosuEXE[1]);
+  FreeTex(texCursor);
+  FreeTex(texDosuEXE[0]);
+  FreeTex(texDosuEXE[1]);
 end;
 
 procedure Update;
@@ -169,9 +169,9 @@ begin
   end;
 
   if (trunc(gameTime * 4) and 1) > 0 then
-    Spr(imgDosuEXE[1], 148, 88)
+    Spr(texDosuEXE[1], 148, 88)
   else
-    Spr(imgDosuEXE[0], 148, 88);
+    Spr(texDosuEXE[0], 148, 88);
 
   s := 'It is time!';
   w := measureDefault(s);

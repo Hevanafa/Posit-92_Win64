@@ -18,8 +18,8 @@ var
 
 procedure OnPreload;
 begin
-  imgSpecimenP92[0] := RequestImage('assets\images\specimen_p-92_1.png');
-  imgSpecimenP92[1] := RequestImage('assets\images\specimen_p-92_2.png');
+  texSpecimenP92[0] := RequestImage('assets\images\specimen_p-92_1.png');
+  texSpecimenP92[1] := RequestImage('assets\images\specimen_p-92_2.png');
 
   { Load more assets here }
 end;
@@ -36,8 +36,8 @@ procedure OnCleanup;
 begin
   ShowCursor;
 
-  FreeTex(imgSpecimenP92[0]);
-  FreeTex(imgSpecimenP92[1]);
+  FreeTex(texSpecimenP92[0]);
+  FreeTex(texSpecimenP92[1]);
 end;
 
 procedure Update;
@@ -52,9 +52,9 @@ begin
   cls($FF6495ED);
 
   if (trunc(gameTime * 4) and 1) > 0 then
-    spr(imgSpecimenP92[1], 148, 88)
+    spr(texSpecimenP92[1], 148, 88)
   else
-    spr(imgSpecimenP92[0], 148, 88);
+    spr(texSpecimenP92[0], 148, 88);
 
   PrintDefaultCentred('Hello world!', vgaWidth div 2, 120)
 end;

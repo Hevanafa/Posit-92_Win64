@@ -7,7 +7,7 @@ unit Assets;
 interface
 
 var
-  imgSpecimenP92: array[0..1] of longint;
+  texSpecimenP92: array[0..1] of longint;
 
 
 implementation

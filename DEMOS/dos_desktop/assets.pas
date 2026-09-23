@@ -9,9 +9,8 @@ interface
 uses P92AssetHandles;
 
 var
-  imgSpecimenP92: array[0..1] of TTextureHandle;
-
-  imgCGAFont2y, imgEGAFont: TTextureHandle;
+  texSpecimenP92: array[0..1] of TTextureHandle;
+  texCGAFont2y, texEGAFont: TTextureHandle;
 
 
 implementation

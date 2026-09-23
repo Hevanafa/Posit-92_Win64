@@ -6,17 +6,16 @@ program Game;
 uses
   SDL2,
   P92Core, P92CoreSDL2, P92Fonts, P92AssetRegistry,
-  P92Keyboard, P92Mouse,
-  P92Logger,
-  P92Tex, P92TexDraw,
-  P92Timing, P92VGA,
-  P92Sounds, Assets;
+  P92Keyboard, P92Mouse, P92Tex, P92TexDraw, P92Timing, P92VGA,
+  P92Sounds,
+  Assets;
 
 var
   lastSpacebar: boolean;
   lastD1, lastD2, lastD3, lastD4, lastD5: boolean;
 
   { Game state variables }
+
   gameTime: double;
 
 
@@ -28,8 +27,8 @@ end;
 
 procedure OnPreload;
 begin
-  imgDosuEXE[0] := RequestImage('assets\images\dosu_1.png');
-  imgDosuEXE[1] := RequestImage('assets\images\dosu_2.png');
+  texDosuEXE[0] := RequestImage('assets\images\dosu_1.png');
+  texDosuEXE[1] := RequestImage('assets\images\dosu_2.png');
 
   sfxBwonk := RequestSound('assets\sfx\bwonk.ogg');
   sfxBite := RequestSound('assets\sfx\bite.ogg');
@@ -53,8 +52,8 @@ begin
   CleanupSounds;
   ShowCursor;
 
-  FreeTex(imgDosuEXE[0]);
-  FreeTex(imgDosuEXE[1]);
+  FreeTex(texDosuEXE[0]);
+  FreeTex(texDosuEXE[1]);
 end;
 
 procedure Update;
@@ -103,9 +102,9 @@ begin
   cls($FF6495ED);
 
   if (trunc(gameTime * 4) and 1) > 0 then
-    spr(imgDosuEXE[1], 148, 88)
+    spr(texDosuEXE[1], 148, 88)
   else
-    spr(imgDosuEXE[0], 148, 88);
+    spr(texDosuEXE[0], 148, 88);
 
   s := '1, 2, 3, 4, 5 - Play sound';
   w := measureDefault(s);
