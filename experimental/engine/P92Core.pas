@@ -545,8 +545,6 @@ end;
 procedure P92Start(const appConfig: TP92AppConfig);
 begin
   bootConfig := appConfig;
-  enableDefaultBMFont := appConfig.enableDefaultFont;
-  enableScreenshotHotkey := appConfig.enableScreenshotHotkey;
 
   if not assigned(appConfig.Update) then
     PanicHalt('Update callback is required');
