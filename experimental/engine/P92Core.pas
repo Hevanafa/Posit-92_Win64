@@ -64,6 +64,8 @@ type
     TargetFPS: smallint;
     EnableScreenshotHotkey: boolean;
 
+    LoadDefaultCursor: boolean;
+
     { Callbacks }
 
     OnPreload: TCallback;
@@ -261,8 +263,12 @@ begin
     writelog('ersPreload');
 
 {$ifdef P92_SDL2}
-  { imgCursor := LoadImage('assets\images\cursor.png'); }
-  hwCursor := HwRequestImage('assets\images\cursor.png');
+  if bootConfig.LoadDefaultCursor then
+    { imgCursor := LoadImage('assets\images\cursor.png'); }
+    hwCursor := HwRequestImage('assets\images\cursor.png')
+  else
+    hwCursor := 0;
+
   LoadDefaultBMFont;
 {$endif}
 
@@ -541,6 +547,8 @@ begin
 
     TargetFPS := 60;
     EnableScreenshotHotkey := true;
+
+    LoadDefaultCursor := true;
   end;
 
   DefaultP92AppConfig := newConfig

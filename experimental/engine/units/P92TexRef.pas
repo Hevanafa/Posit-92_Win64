@@ -24,6 +24,7 @@ function HwRegisterTexRef(const tex: PSDL_Texture; const w, h: smallint): longin
 procedure HwFreeTex(const imgHandle: longint);
 
 { Blitting procedures }
+
 procedure HwSpr(const imgHandle: longint; const x, y: smallint);
 procedure HwSprRegion(
   const imgHandle: longint;

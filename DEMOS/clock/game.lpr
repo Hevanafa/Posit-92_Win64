@@ -95,8 +95,11 @@ begin
     vgaHeight * 3 div 4 - 20);
 
   dotw := DayOfTheWeek(now);
+
   { testStr := format('Today is %s', [GetDayName(dotw)]); }
-  printDefaultCentred(GetDayName(dotw), vgaWidth div 2, vgaHeight * 3 div 4);
+  PrintDefaultCentred(
+    GetDayName(dotw),
+    vgaWidth div 2, vgaHeight * 3 div 4 - 10);
 
 
   positNow := getTimer;
@@ -124,8 +127,9 @@ begin
   y1 := sin(angle) * 40 + vgaHeight div 2;
   x2 := cos(angle) * -10 + vgaWidth div 2;
   y2 := sin(angle) * -10 + vgaHeight div 2;
-  line(round(x1), round(y1), round(x2), round(y2), palette[1]);
+  Line(round(x1), round(y1), round(x2), round(y2), palette[1]);
 
+  DrawMouse;
   DrawFPS
 end;
 
@@ -145,6 +149,8 @@ begin
     BufferHeight := 128;
 
     TargetFPS := 18;
+
+    LoadDefaultCursor := false;
   end;
 
   appConfig.OnReady := @OnReady;
