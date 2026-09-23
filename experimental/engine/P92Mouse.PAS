@@ -20,7 +20,7 @@ const
   MouseButtonRight = 2;
   MouseButtonBoth = 3;
 
-{$ifdef P92_WASM}
+{$IfDef P92_WASM}
 { Hide system cursor }
 procedure HideCursor; external 'env' name 'HideCursor';
 
@@ -35,7 +35,13 @@ function IsLeftMousePressed: boolean;
 function IsRightMousePressed: boolean;
 
 procedure UpdateMouse;
-{$endif}
+{$EndIf}
+
+{$IFDEF P92_SDL2}
+procedure SetMouseX(const value: smallint);
+procedure SetMouseY(const value: smallint);
+procedure SetMouseButton(const value: smallint);
+{$ENDIF}
 
 
 implementation
@@ -80,5 +86,23 @@ begin
   mouseButton := JsGetMouseButton;
 end;
 {$endif}
+
+
+{$IFDEF P92_SDL2}
+procedure SetMouseX(const value: smallint);
+begin
+  mouseX := value
+end;
+
+procedure SetMouseY(const value:smallint);
+begin
+  mouseY := value
+end;
+
+procedure SetMouseButton(const value:smallint);
+begin
+  mouseButton := value
+end;
+{$ENDIF}
 
 end.
