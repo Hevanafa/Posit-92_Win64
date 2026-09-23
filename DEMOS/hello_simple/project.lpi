@@ -31,7 +31,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="..\..\experimental\engine;..\..\experimental\shared\units;..\..\experimental\shared;..\..\experimental\shared\sdl2"/>
+            <OtherUnitFiles Value="..\..\experimental\engine;..\..\experimental\engine\units;..\..\experimental\engine\sdl2"/>
             <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -48,7 +48,7 @@
             <LinkSmart Value="True"/>
           </Linking>
           <Other>
-            <CustomOptions Value="-dUSE_SDL2"/>
+            <CustomOptions Value="-dP92_SDL2"/>
           </Other>
         </CompilerOptions>
       </Item>
@@ -81,7 +81,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="..\..\experimental\shared\sdl2;..\..\experimental\shared\units;..\..\experimental\shared"/>
+      <OtherUnitFiles Value="..\..\experimental\engine;..\..\experimental\engine\units;..\..\experimental\engine\sdl2"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>
