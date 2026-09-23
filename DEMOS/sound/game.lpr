@@ -53,8 +53,8 @@ begin
   CleanupSounds;
   ShowCursor;
 
-  FreeTexture(imgDosuEXE[0]);
-  FreeTexture(imgDosuEXE[1]);
+  FreeTex(imgDosuEXE[0]);
+  FreeTex(imgDosuEXE[1]);
 end;
 
 procedure Update;

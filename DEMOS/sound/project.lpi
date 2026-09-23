@@ -48,7 +48,7 @@
             <LinkSmart Value="True"/>
           </Linking>
           <Other>
-            <CustomOptions Value="-dP92_SDL2"/>
+            <CustomOptions Value="-dP92_SDL2 -dP92_ENABLE_SOUNDS"/>
           </Other>
         </CompilerOptions>
       </Item>
@@ -107,7 +107,7 @@
       </Debugging>
     </Linking>
     <Other>
-      <CustomOptions Value="-dP92_SDL2"/>
+      <CustomOptions Value="-dP92_SDL2 -dP92_ENABLE_SOUNDS"/>
     </Other>
   </CompilerOptions>
   <Debugging>
