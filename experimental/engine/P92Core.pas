@@ -214,7 +214,7 @@ begin
 {$ifdef P92_SDL2}
   InitVideoMem(
     bootConfig.width, bootConfig.height,
-    getmem(bootConfig.width * bootConfig.height * 4));
+    getmem(GetBootConfig.width * GetBootConfig.height * 4));
 
   TargetFPS := bootConfig.fps;
   FrameTime := 1000 div TargetFPS;
@@ -222,7 +222,6 @@ begin
 
   InitDeltaTime;
   InitFPSCounter;
-
   InitAssetRegistry;
 
 {$ifdef P92_ENABLE_SOUNDS}
@@ -347,7 +346,7 @@ end;
 procedure DrawMouse;
 begin
   { spr(imgCursor, mouseX, mouseY) }
-  HwSpr(hwCursor, mouseX, mouseY)
+  HwSpr(hwCursor, GetMouseX, GetMouseY)
 end;
 {$endif}
 
@@ -511,7 +510,7 @@ begin
   { FreeTexture(imgCursor);
   FreeTexture(defaultFont.imgHandle); }
 
-  freemem(getSurfacePtr);
+  freemem(BorrowSurfacePtr);
 end;
 
 procedure P92Shutdown;
