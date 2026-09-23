@@ -66,8 +66,6 @@ type
 {$ENDIF}
 
 {$IFDEF P92_WASM}
-function GetBootConfig: TP92AppConfig;
-
 function GetBootFontHandle: TTextureHandle;
 procedure SetBootFontHandle(const value: TTextureHandle);
 
@@ -75,6 +73,8 @@ function IsEngineReady: boolean; public name 'IsEngineReady';
 procedure HostCallOnPreload; external 'env' name 'HostCallOnPreload';
 procedure HostCallOnReady; external 'env' name 'HostCallOnReady';
 {$ENDIF}
+
+function GetBootConfig: TP92AppConfig;
 
 procedure P92Boot; public name 'P92Boot';
 procedure P92Update; public name 'P92Update';

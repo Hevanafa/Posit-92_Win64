@@ -82,12 +82,12 @@ begin
   end;
 
   { this converts the ShortString to AnsiString }
-  windowTitle := bootConfig.windowTitle;
+  windowTitle := GetBootConfig.windowTitle;
 
   window := SDL_CreateWindow(
     PAnsiChar(windowTitle),
     SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-    vgaWidth * bootConfig.sdlScale, vgaHeight * bootConfig.sdlScale,
+    vgaWidth * GetBootConfig.sdlScale, VGAHeight * GetBootConfig.sdlScale,
     SDL_WINDOW_SHOWN);
 
   renderer := SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
@@ -139,17 +139,17 @@ begin
       { Mouse }
       SDL_MOUSEMOTION: begin
         mouseEvent := PSDL_MouseMotionEvent(@event);
-        mouseX := mouseEvent^.x;
-        mouseY := mouseEvent^.y;
+        SetMouseX(mouseEvent^.x);
+        SetMouseY(mouseEvent^.y);
       end;
 
       SDL_MOUSEBUTTONDOWN: begin
         buttonEvent := PSDL_MouseButtonEvent(@event);
         case buttonEvent^.button of
           SDL_BUTTON_LEFT:
-            mouseButton := mouseButton or MouseButtonLeft;
+            SetMouseButton(GetMouseButton or MouseButtonLeft);
           SDL_BUTTON_RIGHT:
-            mouseButton := mouseButton or MouseButtonRight;
+            SetMouseButton(GetMouseButton or MouseButtonRight);
         end;
       end;
 
@@ -157,9 +157,9 @@ begin
         buttonEvent := PSDL_MouseButtonEvent(@event);
         case buttonEvent^.button of
           SDL_BUTTON_LEFT:
-            mouseButton := mouseButton xor MouseButtonLeft;
+            SetMouseButton(GetMouseButton xor MouseButtonLeft);
           SDL_BUTTON_RIGHT:
-            mouseButton := mouseButton xor MouseButtonRight;
+            SetMouseButton(GetMouseButton xor MouseButtonRight);
         end;
       end;
     end;
