@@ -43,7 +43,7 @@ type
 {$IFDEF P92_SDL2}
   TP92AppConfig = record
     { Window }
-    windowTitle: string;
+    WindowTitle: string;
     width: smallint;
     height: smallint;
     sdlScale: smallint;
@@ -213,8 +213,8 @@ begin
 
 {$ifdef P92_SDL2}
   InitVideoMem(
-    bootConfig.width, bootConfig.height,
-    getmem(GetBootConfig.width * GetBootConfig.height * 4));
+    GetMem(GetBootConfig.width * GetBootConfig.height * 4),
+    bootConfig.width, bootConfig.height);
 
   TargetFPS := bootConfig.fps;
   FrameTime := 1000 div TargetFPS;
@@ -242,7 +242,7 @@ begin
   SetBootFontHandle(RequestImage('assets/CGA8x8.png'));
 {$endif}
 {$ifdef P92_SDL2}
-  SetCGAFontHandle(LoadImage('assets/CGA8x8.png'));
+  SetBootFontHandle(LoadImage('assets/CGA8x8.png'));
 {$endif}
 end;
 
@@ -260,7 +260,7 @@ begin
 {$ifdef P92_SDL2}
   { imgCursor := LoadImage('assets\images\cursor.png'); }
   hwCursor := HwLoadImage('assets\images\cursor.png');
-  LoadDefaultFont;
+  LoadDefaultBMFont;
 {$endif}
 
 {$ifdef P92_WASM}
@@ -527,7 +527,7 @@ begin
   newConfig := default(TP92AppConfig);
 
   with newConfig do begin
-    windowTitle := 'Posit-92 + SDL2 on Windows';
+    WindowTitle := 'Posit-92 + SDL2 on Windows';
     width := 320;
     height := 200;
     sdlScale := 2;

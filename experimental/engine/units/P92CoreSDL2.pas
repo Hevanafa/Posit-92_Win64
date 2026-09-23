@@ -82,7 +82,7 @@ begin
   end;
 
   { this converts the ShortString to AnsiString }
-  windowTitle := GetBootConfig.windowTitle;
+  windowTitle := GetBootConfig.WindowTitle;
 
   window := SDL_CreateWindow(
     PAnsiChar(windowTitle),
