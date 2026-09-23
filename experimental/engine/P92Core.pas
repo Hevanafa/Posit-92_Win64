@@ -8,13 +8,13 @@ interface
 
 uses P92AssetHandles;
 
+{$IFDEF P92_WASM}
 const
   Posit92Version = '0.3.4';
 
 type
   TCallback = procedure;
 
-{$IFDEF P92_WASM}
   TP92AppConfig = record
     { default: "game" }
     CanvasID: string;
@@ -41,6 +41,12 @@ type
 {$ENDIF}
 
 {$IFDEF P92_SDL2}
+const
+  Posit92Version = '0.2.1';
+
+type
+  TCallback = procedure;
+
   TP92AppConfig = record
     { SDL2 }
 
