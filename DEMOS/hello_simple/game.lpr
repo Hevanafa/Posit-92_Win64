@@ -36,8 +36,8 @@ procedure OnCleanup;
 begin
   ShowCursor;
 
-  FreeTexture(imgSpecimenP92[0]);
-  FreeTexture(imgSpecimenP92[1]);
+  FreeTex(imgSpecimenP92[0]);
+  FreeTex(imgSpecimenP92[1]);
 end;
 
 procedure Update;

@@ -110,9 +110,9 @@ procedure PascalSoundFailed(sndHandle: longint; errorCode: smallint); public nam
 {$endif}
 
 {$ifdef P92_SDL2}
-function LoadImage(const filename: string): TTextureHandle;
-function LoadBMFont(const filename: string): TBMFontHandle;
-function HwLoadImage(const filename: string): longint;
+function RequestImage(const filename: string): TTextureHandle;
+function RequestBMFont(const filename: string): TBMFontHandle;
+function HwRequestImage(const filename: string): longint;
 function LoadSound(const filename: string): TSoundHandle;
 {$endif}
 
@@ -354,7 +354,7 @@ end;
 {$endif}
 
 {$ifdef P92_SDL2}
-function LoadImage(const filename: string): TTextureHandle;
+function RequestImage(const filename: string): TTextureHandle;
 var
   strBuffer: array[0..255] of char;
   surface: PSDL_Surface;
@@ -362,14 +362,12 @@ var
   texture: PSoftwareTex;
   src, dest: PByte;
 begin
-  { writeLog('loadImage ' + filename); }
-
   strpcopy(strBuffer, filename);
   surface := IMG_Load(strBuffer);
 
   if surface = nil then begin
-    writeLog('loadImage: Failed to load ' + filename);
-    loadImage := -1;
+    writeLog('RequestImage: Failed to load ' + filename);
+    RequestImage := -1;
     exit
   end;
 
@@ -377,7 +375,7 @@ begin
     WriteWarn('loadImage: Warning: ' + filename + ' is not 32 BPP!');
     writeLog('loadImage: Convert it to 32 BPP then reload');
     SDL_FreeSurface(surface);
-    loadImage := -1;
+    RequestImage := -1;
     exit
   end;
 
@@ -389,11 +387,11 @@ begin
   move(src^, dest^, surface^.w * surface^.h * 4);
 
   SDL_FreeSurface(surface);
-  loadImage := texHandle
+  RequestImage := texHandle
 end;
 
-{ 32 to 126: 0 to 94 }
-function LoadBMFont(const filename: string): TBMFontHandle;
+
+function RequestBMFont(const filename: string): TBMFontHandle;
 var
   fontHandle: TBMFontHandle;
   font: PBMFont;
@@ -413,7 +411,7 @@ begin
   bmfonts[fontHandle].status := AssetStatusLoading;
   bmfonts[fontHandle].errorCode := 0;
 
-  LoadBMFont := fontHandle;
+  RequestBMFont := fontHandle;
   font := BorrowBMFontPtr(fontHandle);
 
   assign(f, filename);
@@ -516,10 +514,10 @@ begin
   bmfonts[fontHandle].status := AssetStatusReady;
   bmfonts[fontHandle].errorCode := 0;
 
-  font^.texHandle := LoadImage(textureFilename)
+  font^.texHandle := RequestImage(textureFilename)
 end;
 
-function HwLoadImage(const filename: string): longint;
+function HwRequestImage(const filename: string): longint;
 var
   surface: PSDL_Surface;
   tex: PSDL_Texture;
@@ -539,9 +537,9 @@ begin
   SDL_FreeSurface(surface);
 
   SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
-  hwLoadImage := HwRegisterTexRef(tex, surface^.w, surface^.h);
+  HwRequestImage := HwRegisterTexRef(tex, surface^.w, surface^.h);
 
-  { writelog(format('hwLoadImage %d: %s', [hwLoadImage, filename])) }
+  { writelog(format('hwLoadImage %d: %s', [HwRequestImage, filename])) }
 end;
 
 
