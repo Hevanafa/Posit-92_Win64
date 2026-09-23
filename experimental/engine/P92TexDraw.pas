@@ -14,46 +14,58 @@ unit P92TexDraw;
 {$B-}  { Enable boolean short-circuiting }
 {$R-}  { Turn off range checks }
 {$Q-}  { Turn off overflow checks }
+{$Inline ON}
 
 interface
 
-procedure Spr(const texHandle: longint; const x, y: smallint);
+uses P92AssetHandles;
 
-procedure SprClear(const texHandle: longint; const colour: longword);
+procedure Spr(const texHandle: TTextureHandle; const x, y: smallint);
+
+procedure SprTint(const texHandle: TTextureHandle; const x, y: smallint; const colour: longword);
+
+{ This procedure is destructive }
+procedure SprClear(const texHandle: TTextureHandle; const colour: longword);
 
 procedure SprRegion(
-  const texHandle: longint;
+  const texHandle: TTextureHandle;
   const srcX, srcY, srcW, srcH: smallint;
   const destX, destY: smallint);
 
 procedure SprStretch(
-  const texHandle: longint;
+  const texHandle: TTextureHandle;
   const destX, destY, destWidth, destHeight: smallint);
 
 procedure SprRegionStretch(
-  const texHandle: longint;
+  const texHandle: TTextureHandle;
   const srcX, srcY, srcWidth, srcHeight: smallint;
   const destX, destY, destWidth, destHeight: smallint);
 
-procedure SprRegionSolid(
-  const texHandle: longint;
+procedure SprRegionTint(
+  const texHandle: TTextureHandle;
   const srcX, srcY, srcW, srcH: smallint;
   const destX, destY: smallint;
   const colour: longword);
 
-procedure SprFlip(const texHandle: longint; const x, y: smallint; const flip: smallint);
+procedure SprFlipped(
+  const texHandle: TTextureHandle;
+  const x, y: smallint;
+  const flip: smallint);
 
 { rotation is in radians }
-procedure SprRotate(const texHandle: longint; const cx, cy: smallint; const rotation: double);
+procedure SprRotate(
+  const texHandle: TTextureHandle;
+  const cx, cy: smallint;
+  const rotation: double);
 
-procedure SprToDest(const src, dest: longint; const x, y: smallint);
+procedure SprToDest(const src, dest: TTextureHandle; const x, y: smallint);
 
 procedure SprRegionToDest(
-  const src, dest: longint;
+  const src, dest: TTextureHandle;
   const srcX, srcY, srcW, srcH: smallint;
   const destX, destY: smallint);
 
-procedure SprFlipInPlace(const texHandle: longint; const flip: smallint);
+procedure SprFlipInPlace(const texHandle: TTextureHandle; const flip: smallint);
 
 
 implementation
@@ -63,50 +75,160 @@ uses
   P92Tex, P92Maths,
   P92Panic, P92VGA;
 
-procedure Spr(const texHandle: longint; const x, y: smallint);
+
+procedure Spr(const texHandle: TTextureHandle; const x, y: smallint);
+var
+  texture: PSoftwareTex;
+  startX, endX, startY, endY: smallint;
+  rowBase, stride: longword;
+  destRowBase, destStride: longword;
+
+  px, py: smallint;
+  { offset to the pixel data }
+  offset: longword;
+  alpha: byte;
+begin
+  if not IsTexSet(texHandle) then exit;
+
+  texture := BorrowTexPtr(texHandle);
+
+  { Handle clipping }
+  startX := trunc(max(0, ClipX1 - x));
+  endX := trunc(min(texture^.width - 1, ClipX2 - x));
+
+  startY := trunc(max(0, ClipY1 - y));
+  endY := trunc(min(texture^.height - 1, ClipY2 - y));
+
+  if (startX > endX) or (startY > endY) then exit;
+
+  stride := texture^.width * 4;
+  destStride := VGAWidth * 4;
+
+  for py := startY to endY do begin
+    rowBase := py * stride;
+    destRowBase := (y + py) * destStride;
+
+    for px := startX to endX do begin
+      offset := rowBase + px * 4;
+      alpha := texture^.pixelData[offset + 3];
+
+      if alpha < 255 then continue;
+
+      PLongWord(@BorrowSurfacePtr^[destRowBase + (x + px) * 4])^ :=
+        PLongWord(@texture^.pixelData[offset])^
+    end;
+  end;
+end;
+
+{
+  Base version of Spr
+
+  Made readable rather than optimised
+}
+procedure SprBase(const texHandle: longint; const x, y: smallint);
 var
   texture: PSoftwareTex;
   px, py: smallint;
+  { offset to the pixel data }
   offset: longword;
   alpha: byte;
   colour: longword;
 begin
-  if not IsTextureSet(texHandle) then exit;
+  if not IsTexSet(texHandle) then exit;
 
-  texture := BorrowTexturePtr(texHandle);
+  texture := BorrowTexPtr(texHandle);
 
   for py:=0 to texture^.height - 1 do
-  for px:=0 to texture^.width - 1 do begin
-    if (x + px > ClipX2) or (x + px < ClipX1)
-      or (y + py > ClipY2) or (y + py < ClipY1) then continue;
+    for px:=0 to texture^.width - 1 do begin
+      if (x + px > ClipX2) or (x + px < ClipX1)
+        or (y + py > ClipY2) or (y + py < ClipY1) then continue;
 
-    { offset to the pixel data }
-    offset := (px + py * texture^.width) * 4;
+      offset := (px + py * texture^.width) * 4;
 
-    alpha := texture^.pixelData[offset + 3];
-    if alpha < 255 then continue;
+      alpha := texture^.pixelData[offset + 3];
+      if alpha < 255 then continue;
 
-    colour := UnsafeSprPget(texture, px, py);
-    UnsafePset(x + px, y + py, colour)
+      colour := UnsafeTexPGet(texture, px, py);
+      UnsafePSet(x + px, y + py, colour)
+    end;
+end;
+
+{ Copied from Spr }
+procedure SprTint(const texHandle: TTextureHandle; const x, y: smallint; const colour: longword);
+var
+  texture: PSoftwareTex;
+  startX, endX, startY, endY: smallint;
+  rowBase, stride: longword;
+  destRowBase, destStride: longword;
+
+  px, py: smallint;
+  { offset to the pixel data }
+  offset: longword;
+  alpha: byte;
+
+  ABGR: longword;
+begin
+  if not IsTexSet(texHandle) then exit;
+
+  texture := BorrowTexPtr(texHandle);
+
+  { Handle clipping }
+
+  startX := trunc(max(0, ClipX1 - x));
+  endX := trunc(min(texture^.width - 1, ClipX2 - x));
+
+  startY := trunc(max(0, ClipY1 - y));
+  endY := trunc(min(texture^.height - 1, ClipY2 - y));
+
+  if (startX > endX) or (startY > endY) then exit;
+
+  { Render logic }
+
+  stride := texture^.width * 4;
+  destStride := VGAWidth * 4;
+
+  ABGR := ARGBtoABGR(colour);
+
+  for py := startY to endY do begin
+    rowBase := py * stride;
+    destRowBase := (y + py) * destStride;
+
+    for px := startX to endX do begin
+      offset := rowBase + px * 4;
+      alpha := texture^.pixelData[offset + 3];
+
+      if alpha < 255 then continue;
+
+      PLongWord(@BorrowSurfacePtr^[destRowBase + (x + px) * 4])^ :=
+        { PLongWord(@texture^.pixelData[offset])^ }
+        ABGR;
+    end;
   end;
 end;
 
-procedure SprClear(const texHandle: longint; const colour: longword);
+procedure SprClear(const texHandle: TTextureHandle; const colour: longword);
 var
   texture: PSoftwareTex;
   px, py: smallint;
+  ABGR: longword;
 begin
-  if not IsTextureSet(texHandle) then exit;
+  if not IsTexSet(texHandle) then exit;
 
-  texture := BorrowTexturePtr(texHandle);
+  texture := BorrowTexPtr(texHandle);
+  ABGR := ARGBtoABGR(colour);
 
   for py:=0 to texture^.height - 1 do
-  for px:=0 to texture^.width - 1 do
-    UnsafeSprPset(texture, px, py, colour);
+    for px:=0 to texture^.width - 1 do
+      UnsafeTexPSet(texture, px, py, ABGR);
 end;
 
-procedure SprRegion(
-  const texHandle: longint;
+{
+  Base version of SprRegion
+
+  Made readable rather than optimised
+}
+procedure SprRegionBase(
+  const texHandle: TTextureHandle;
   const srcX, srcY, srcW, srcH: smallint;
   const destX, destY: smallint);
 var
@@ -117,9 +239,9 @@ var
   alpha: byte;
   colour: longword;
 begin
-  if not IsTextureSet(texHandle) then exit;
+  if not IsTexSet(texHandle) then exit;
 
-  texture := BorrowTexturePtr(texHandle);
+  texture := BorrowTexPtr(texHandle);
 
   for b:=0 to srcH - 1 do
   for a:=0 to srcW - 1 do begin
@@ -133,13 +255,72 @@ begin
     alpha := texture^.pixelData[srcPos + 3];
     if alpha < 255 then continue;
 
-    colour := UnsafeSprPget(texture, sx, sy);
-    UnsafePset(destX + a, destY + b, colour);
+    colour := UnsafeTexPGet(texture, sx, sy);
+    UnsafePSet(destX + a, destY + b, colour);
+  end;
+end;
+
+procedure SprRegion(
+  const texHandle: TTextureHandle;
+  const srcX, srcY, srcW, srcH: smallint;
+  const destX, destY: smallint);
+var
+  texture: PSoftwareTex;
+  surface: PByteArray;
+
+  startX, endX, startY, endY: smallint;
+  srcRowBase, texWidth4: longword;
+  destRowBase, vgaWidth4: longword;
+
+  a, b: smallint;
+  srcOffset: longword;
+  alpha: byte;
+begin
+  if not IsTexSet(texHandle) then exit;
+
+  { Handle clipping }
+
+  startX := 0;
+  endX := srcW - 1;
+  startY := 0;
+  endY := srcH - 1;
+
+  if destX + startX < ClipX1 then startX := ClipX1 - destX;
+  if destX + endX > ClipX2 then endX := ClipX2 - destX;
+
+  if destY + startY < ClipY1 then startY := ClipY1 - destY;
+  if destY + endY > ClipY2 then endY := ClipY2 - destY;
+
+  if (startX > endX) or (startY > endY) then exit;
+
+  texture := BorrowTexPtr(texHandle);
+  texWidth4 := texture^.width * 4;
+
+  surface := BorrowSurfacePtr;
+  vgaWidth4 := VGAWidth * 4;
+
+  for b := startY to endY do begin
+    srcRowBase := (srcY + b) * texWidth4 + srcX * 4;
+    destRowBase := (destY + b) * vgaWidth4 + destX * 4;
+
+    for a := startX to endX do begin
+      srcOffset := srcRowBase + a * 4;
+
+      alpha := texture^.pixelData[srcOffset + 3];
+      if alpha < 255 then continue;
+
+      PLongWord(@surface^[destRowBase + a * 4])^ :=
+        PLongWord(@texture^.pixelData[srcOffset])^;
+    end;
   end;
 end;
 
 { Stretch a sprite with nearest neighbour scaling }
-procedure SprStretch(const texHandle: longint; const destX, destY, destWidth, destHeight: smallint);
+
+procedure SprStretch(
+  const texHandle: TTextureHandle;
+  const destX, destY, destWidth, destHeight: smallint
+);
 var
   sx, sy: smallint;
   dx, dy: smallint;
@@ -149,8 +330,8 @@ var
   scaleX, scaleY: double;
   colour: longword;
 begin
-  if not IsTextureSet(texHandle) then exit;
-  texture := BorrowTexturePtr(texHandle);
+  if not IsTexSet(texHandle) then exit;
+  texture := BorrowTexPtr(texHandle);
 
   scaleX := texture^.width / destWidth;
   scaleY := texture^.height / destHeight;
@@ -167,13 +348,13 @@ begin
     alpha := texture^.pixelData[srcPos + 3];
     if alpha < 255 then continue;
 
-    colour := UnsafeSprPget(texture, sx, sy);
-    UnsafePset(dx + destX, dy + destY, colour);
+    colour := UnsafeTexPGet(texture, sx, sy);
+    UnsafePSet(dx + destX, dy + destY, colour);
   end;
 end;
 
 procedure SprRegionStretch(
-  const texHandle: longint;
+  const texHandle: TTextureHandle;
   const srcX, srcY, srcWidth, srcHeight: smallint;
   const destX, destY, destWidth, destHeight: smallint);
 var
@@ -184,8 +365,8 @@ var
   scaleX, scaleY: double;
   colour: longword;
 begin
-  if not IsTextureSet(texHandle) then exit;
-  texture := BorrowTexturePtr(texHandle);
+  if not IsTexSet(texHandle) then exit;
+  texture := BorrowTexPtr(texHandle);
 
   scaleX := srcWidth / destWidth;
   scaleY := srcHeight / destHeight;
@@ -202,29 +383,33 @@ begin
     if (sx >= texture^.width) or (sx < 0)
       or (sy >= texture^.height) or (sy < 0) then continue;
 
-    colour := UnsafeSprPget(texture, sx, sy);
+    colour := UnsafeTexPGet(texture, sx, sy);
+
     alpha := colour shr 24;
     if alpha < 255 then continue;
 
-    UnsafePset(dx + destX, dy + destY, colour)
+    UnsafePSet(dx + destX, dy + destY, colour)
   end;
 end;
 
-procedure SprRegionSolid(
-  const texHandle: longint;
+procedure SprRegionTint(
+  const texHandle: TTextureHandle;
   const srcX, srcY, srcW, srcH: smallint;
   const destX, destY: smallint;
-  const colour: longword);
+  const colour: longword
+);
 var
   texture: PSoftwareTex;
   a, b: smallint;
   sx, sy: smallint;
   srcPos: longword;
   alpha: byte;
+  ABGR: longword;
 begin
-  if not IsTextureSet(texHandle) then exit;
+  if not IsTexSet(texHandle) then exit;
 
-  texture := BorrowTexturePtr(texHandle);
+  texture := BorrowTexPtr(texHandle);
+  ABGR := ARGBtoABGR(colour);
 
   for b:=0 to srcH - 1 do
   for a:=0 to srcW - 1 do begin
@@ -238,13 +423,16 @@ begin
     alpha := texture^.pixelData[srcPos + 3];
     if alpha < 255 then continue;
 
-    { colour := UnsafeSprPget(texture, sx, sy); }
-    UnsafePset(destX + a, destY + b, colour);
+    UnsafePSet(destX + a, destY + b, ABGR);
   end;
 end;
 
 { flip: use SprFlips enum }
-procedure SprFlip(const texHandle: longint; const x, y: smallint; const flip: smallint);
+procedure SprFlipped(
+  const texHandle: TTextureHandle;
+  const x, y: smallint;
+  const flip: smallint
+);
 var
   sx, sy: smallint;
   dx, dy: smallint;
@@ -258,14 +446,15 @@ begin
     exit
   end;
 
-  if not IsTextureSet(texHandle) then exit;
+  if not IsTexSet(texHandle) then exit;
 
-  texture := BorrowTexturePtr(texHandle);
+  texture := BorrowTexPtr(texHandle);
 
   for sy := 0 to texture^.height - 1 do
   for sx := 0 to texture^.width - 1 do begin
     srcPos := (sx + sy * texture^.width) * 4;
     alpha := texture^.pixelData[srcPos + 3];
+
     if alpha < 255 then continue;
 
     dx := x + sx;
@@ -285,12 +474,16 @@ begin
     if (dx > ClipX2) or (dx < ClipX1)
       or (dy > ClipY2) or (dy < ClipY1) then continue;
 
-    colour := UnsafeSprPget(texture, sx, sy);
-    UnsafePset(dx, dy, colour);
+    colour := UnsafeTexPGet(texture, sx, sy);
+    UnsafePSet(dx, dy, colour);
   end;
 end;
 
-procedure SprRotate(const texHandle: longint; const cx, cy: smallint; const rotation: double);
+procedure SprRotate(
+  const texHandle: TTextureHandle;
+  const cx, cy: smallint;
+  const rotation: double
+);
 var
   sx, sy: double;
   dx, dy: smallint;
@@ -305,8 +498,8 @@ var
   halfW, halfH: smallint;
   maxRadius: smallint;
 begin
-  if not IsTextureSet(texHandle) then exit;
-  texture := BorrowTexturePtr(texHandle);
+  if not IsTexSet(texHandle) then exit;
+  texture := BorrowTexPtr(texHandle);
 
   { Negative for inverse transform }
   cosAngle := cos(-rotation);
@@ -335,13 +528,13 @@ begin
     alpha := texture^.pixelData[srcPos + 3];
     if alpha < 255 then continue;
 
-    colour := UnsafeSprPget(texture, srcX, srcY);
-    UnsafePset(cx + dx, cy + dy, colour)
+    colour := UnsafeTexPGet(texture, srcX, srcY);
+    UnsafePSet(cx + dx, cy + dy, colour)
   end;
 end;
 
 
-procedure SprToDest(const src, dest: longint; const x, y: smallint);
+procedure SprToDest(const src, dest: TTextureHandle; const x, y: smallint);
 var
   srcTex, destTex: PSoftwareTex;
   startX, endX, startY, endY: word;
@@ -350,10 +543,10 @@ var
   alpha: byte;
   colour: longword;
 begin
-  if not IsTextureSet(src) or not IsTextureSet(dest) then exit;
+  if not IsTexSet(src) or not IsTexSet(dest) then exit;
 
-  srcTex := BorrowTexturePtr(src);
-  destTex := BorrowTexturePtr(dest);
+  srcTex := BorrowTexPtr(src);
+  destTex := BorrowTexPtr(dest);
 
   startX := trunc(Max(0, -x));
   startY := trunc(Max(0, -y));
@@ -366,15 +559,16 @@ begin
     alpha := srcTex^.pixelData[srcOffset + 3];
     if alpha < 255 then continue;
 
-    colour := UnsafeSprPget(srcTex, a, b);
-    UnsafeSprPset(destTex, x + a, y + b, colour)
+    colour := UnsafeTexPGet(srcTex, a, b);
+    UnsafeTexPSet(destTex, x + a, y + b, colour)
   end;
 end;
 
 procedure SprRegionToDest(
-  const src, dest: longint;
+  const src, dest: TTextureHandle;
   const srcX, srcY, srcW, srcH: smallint;
-  const destX, destY: smallint);
+  const destX, destY: smallint
+);
 var
   srcTex, destTex: PSoftwareTex;
   px, py: smallint;
@@ -383,12 +577,14 @@ var
   alpha: byte;
   colour: longword;
 begin
-  if not IsTextureSet(src) or not IsTextureSet(dest) then exit;
+  if not IsTexSet(src) then PanicHalt('SprRegionToDest: src handle is unset!');
+  if not IsTexSet(dest) then PanicHalt('SprRegionToDest: dest handle is unset!');
 
-  srcTex := BorrowTexturePtr(src);
-  destTex := BorrowTexturePtr(dest);
+  srcTex := BorrowTexPtr(src);
+  destTex := BorrowTexPtr(dest);
 
   for py:=0 to srcH - 1 do
+  { TODO: Hoist the Y bounds check and `sy` }
   for px:=0 to srcW - 1 do begin
     if (destX + px >= destTex^.width) or (destX + px < 0)
       or (destY + py >= destTex^.height) or (destY + py < 0) then continue;
@@ -400,13 +596,13 @@ begin
     alpha := srcTex^.pixelData[srcPos + 3];
     if alpha < 255 then continue;
 
-    colour := UnsafeSprPget(srcTex, sx, sy);
-    UnsafeSprPset(destTex, destX + px, destY + py, colour);
+    colour := UnsafeTexPGet(srcTex, sx, sy);
+    UnsafeTexPSet(destTex, destX + px, destY + py, colour);
   end;
 end;
 
-{ flip: Use SprFlip enum }
-procedure SprFlipInPlace(const texHandle: longint; const flip: smallint);
+{ flip: Use SprFlipped enum }
+procedure SprFlipInPlace(const texHandle: TTextureHandle; const flip: smallint);
 var
   texture: PSoftwareTex;
   px, py: smallint;
@@ -415,9 +611,9 @@ var
   pos1, pos2: longint;
 begin
   if flip = SprFlipNone then exit;
-  if not IsTextureSet(texHandle) then exit;
+  if not IsTexSet(texHandle) then exit;
 
-  texture := BorrowTexturePtr(texHandle);
+  texture := BorrowTexPtr(texHandle);
 
   { Horizontal flip }
   if (flip and SprFlipHorizontal) <> 0 then begin

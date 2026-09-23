@@ -12,25 +12,53 @@ unit P92Conversions;
 
 interface
 
-function I32Str(const value: Longint): string;
-function F32str(const value: double): string;
+function I32Str(const value: longint): string;
+function U32Str(const value: longword): string;
+function F32Str(const value: double): string;
+function NumberToStr(const value: double): string;
+
 function ToFixed(const value: double; const decimals: smallint): string;
-function I16HexStr(const value: word): string;
-function I8HexStr(const value: byte): string;
+
+function U16HexStr(const value: word): string;
+function U8HexStr(const value: byte): string;
+
 function BoolStr(const value: boolean): string;
-function ParseInt(const text: string): smallint;
+function ParseInt(const text: string): longint;
+
+function I32CoordStr(const x, y: longint): string;
 
 
 implementation
 
-function I32Str(const value: longInt): string;
+function I32Str(const value: longint): string;
 begin
   str(value, I32Str)
 end;
 
-function F32str(const value: double): string;
+function U32Str(const value: longword): string;
 begin
-  str(value:0:4, F32str)
+  str(value, U32Str)
+end;
+
+function F32Str(const value: double): string;
+begin
+  str(value:0:4, F32Str)
+end;
+
+function NumberToStr(const value: double): string;
+var
+  s: string;
+begin
+  if frac(value) = 0 then
+    str(trunc(value), NumberToStr)
+  else begin
+    str(value:0:15, s);
+
+    while s[length(s)] = '0' do
+      delete(s, length(s), 1);
+
+    NumberToStr := s
+  end;
 end;
 
 function ToFixed(const value: double; const decimals: smallint): string;
@@ -38,24 +66,22 @@ begin
   str(value:0:decimals, ToFixed)
 end;
 
-
-
-function I16HexStr(const value: word): string;
+function U16HexStr(const value: word): string;
 const
   digits: array[0..15] of char = '0123456789ABCDEF';
 var
   a: byte;
 begin
-  I16HexStr := '';
+  U16HexStr := '';
   for a := 3 downto 0 do
-    I16HexStr := I16HexStr + digits[(value shr (a * 4)) and $F];
+    U16HexStr := U16HexStr + digits[(value shr (a * 4)) and $F];
 end;
 
-function I8HexStr(const value: byte): string;
+function U8HexStr(const value: byte): string;
 const
   digits: array[0..15] of char = '0123456789ABCDEF';
 begin
-  I8HexStr := digits[(value shr 4) and $F] + digits[value and $F];
+  U8HexStr := digits[(value shr 4) and $F] + digits[value and $F];
 end;
 
 function BoolStr(const value: boolean): string;
@@ -66,9 +92,9 @@ begin
     BoolStr := 'false'
 end;
 
-function ParseInt(const text: string): smallint;
+function ParseInt(const text: string): longint;
 var
-  parseResult: smallint;
+  parseResult: longint;
 begin
   val(text, ParseInt, parseResult);
 
@@ -78,4 +104,13 @@ begin
   end;
 end;
 
+function I32CoordStr(const x, y: longint): string;
+begin
+  I32CoordStr := '{'
+    + 'X=' + I32Str(x)
+    + ', Y=' + I32Str(y)
+    + '}'
+end;
+
 end.
+

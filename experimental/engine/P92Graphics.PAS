@@ -15,18 +15,18 @@ interface
 uses P92Geometry;
 
 function GetAlpha(const colour: longword): byte;
+
 { Raises the alpha to $FF or leaves it at $00 }
 function SolidColour(const colour: longword): longword;
 
 procedure Circ(const cx, cy, radius: smallint; const colour: longword);
 procedure CircFill(const cx, cy, radius: smallint; const colour: longword);
 
-procedure Rect(x0, y0, x1, y1: smallint; const colour: longword);
+procedure Rect(const x0, y0, x1, y1: smallint; const colour: longword);
 procedure RectFill(x0, y0, x1, y1: smallint; const colour: longword);
-procedure HLine(x0, x1, y: smallint; const colour: longword);
-{ procedure hline2(x0, x1, y: smallint; const colour: longword); }
-procedure VLine(x, y0, y1: smallint; const colour: longword);
-{ procedure vline2(x, y0, y1: smallint; const colour: longword); }
+
+procedure HLine(const x0, x1, y: smallint; const colour: longword);
+procedure VLine(const x, y0, y1: smallint; const colour: longword);
 
 procedure Line(x0, y0, x1, y1: smallint; const colour: longword);
 procedure LineThick(x0, y0, x1, y1, thickness: smallint; const colour: longword);
@@ -135,28 +135,12 @@ begin
   end;
 end;
 
-procedure Rect(x0, y0, x1, y1: smallint; const colour: longword);
-var
-  a, b, temp: smallint;
-  solid: longword;
+procedure Rect(const x0, y0, x1, y1: smallint; const colour: longword);
 begin
-  if GetAlpha(colour) = 0 then exit;
-  solid := SolidColour(colour);
-
-  if x0 > x1 then begin
-    temp := x0; x0 := x1; x1 := temp
-  end;
-  if y0 > y1 then begin
-    temp := y0; y0 := y1; y1 := temp
-  end;
-  for b:=y0 to y1 do begin
-    pset(x0, b, solid);
-    pset(x1, b, solid)
-  end;
-  for a:=x0 to x1 do begin
-    pset(a, y0, solid);
-    pset(a, y1, solid)
-  end;
+  HLine(x0, x1, y0, colour);
+  HLine(x0, x1, y1, colour);
+  VLine(x0, y0, y1, colour);
+  VLine(x1, y0, y1, colour);
 end;
 
 procedure RectFill(x0, y0, x1, y1: smallint; const colour: longword);
@@ -173,88 +157,73 @@ begin
   if y0 > y1 then begin
     temp := y0; y0 := y1; y1 := temp
   end;
+
   for b:=y0 to y1 do
     HLine(x0, x1, b, solid);
 end;
 
-procedure LegacyHLine(x0, x1, y: smallint; const colour: longword);
+procedure HLine(const x0, x1, y: smallint; const colour: longword);
 var
-  x: smallint;
-  solid: longword;
+  x, startX, endX: smallint;
+  solid, ABGR: longword;
 begin
   if GetAlpha(colour) = 0 then exit;
-  solid := SolidColour(colour);
+
+  { Handle edge cases }
+
+  if (y < ClipY1) or (y > ClipY2) then exit;
 
   if x1 < x0 then begin
-    x := x0; x0 := x1; x1 := x
+    startX := x1;
+    endX := x0
+  end else begin
+    startX := x0;
+    endX := x1
   end;
 
-  for x := x0 to x1 do
-    pset(x, y, solid);
-end;
+  if startX < ClipX1 then startX := ClipX1;
+  if endX > ClipX2 then endX := ClipX2;
+  if startX > endX then exit;
 
-procedure HLine(x0, x1, y: smallint; const colour: longword);
-var
-  x: smallint;
-  solid: longword;
-begin
-  if GetAlpha(colour) = 0 then exit;
-  solid := SolidColour(colour);
-
-  if (y < clipY1) or (y > clipY2) then exit;
-
-  if x1 < x0 then begin
-    x := x0; x0 := x1; x1 := x
-  end;
-
-  if x0 < clipX1 then x0 := clipX1;
-  if x1 > clipX2 then x1 := clipX2;
-
-  for x:=x0 to x1 do
-    unsafePset(x, y, solid);
-end;
-
-procedure LegacyVLine(x, y0, y1: smallint; const colour: longword);
-var
-  temp, a: smallint;
-  solid: longword;
-begin
-  if GetAlpha(colour) = 0 then exit;
-  if (x < 0) or (x >= vgaWidth) then exit;
-  solid := SolidColour(colour);
-
-  if y0 > y1 then begin
-    temp := y0; y0 := y1; y1 := temp
-  end;
-
-  if (y0 >= vgaHeight) or (y1 < 0) then exit;
-
-  for a:=y0 to y1 do begin
-    if (a < 0) then continue;
-    pset(x, a, solid)
-  end;
-end;
-
-procedure VLine(x, y0, y1: smallint; const colour: longword);
-var
-  y, temp: smallint;
-  solid: longword;
-begin
-  if GetAlpha(colour) = 0 then exit;
-  if (x < clipX1) or (x > clipX2) then exit;
+  { Render logic }
 
   solid := SolidColour(colour);
+  ABGR := ARGBtoABGR(solid);
+
+  for x:=startX to endX do
+    UnsafePSet(x, y, ABGR);
+end;
+
+procedure VLine(const x, y0, y1: smallint; const colour: longword);
+var
+  y, startY, endY: smallint;
+  solid, ABGR: longword;
+begin
+  if GetAlpha(colour) = 0 then exit;
+
+  { Handle edge cases }
+
+  if (x < ClipX1) or (x > ClipX2) then exit;
 
   if y1 < y0 then begin
-    temp := y0; y0 := y1; y1 := temp
+    startY := y1;
+    endY := y0
+  end else begin
+    startY := y0;
+    endY := y1
   end;
 
-  if y0 < clipY1 then y0 := clipY1;
-  if y1 > clipY2 then y1 := clipY2;
-  if y0 > y1 then exit;
+  if startY < clipY1 then startY := clipY1;
+  if endY > clipY2 then endY := clipY2;
+  if startY > endY then exit;
 
-  for y:=y0 to y1 do
-    unsafePset(x, y, solid);
+  { Render logic }
+
+  solid := SolidColour(colour);
+  ABGR := ARGBtoABGR(solid);
+
+  for y := startY to endY do
+    UnsafePSet(x, y, ABGR);
 end;
 
 

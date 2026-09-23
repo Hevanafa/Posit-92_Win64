@@ -19,10 +19,10 @@ function GetFullTimer: double; external 'env' name 'GetFullTimer';
 {$endif}
 
 {$ifdef P92_SDL2}
-procedure InitTiming;
-function GetMidnightOffset: double;
-function GetTimer: double;
-function GetFullTimer: double;
+procedure initTiming;
+function getMidnightOffset: double;
+function getTimer: double;
+function getFullTimer: double;
 {$endif}
 
 procedure InitDeltaTime;
@@ -64,30 +64,30 @@ var
   midnightOffset: double;  { Offset from midnight the day when the app started }
   epochStart: TDateTime;
 
-procedure InitTiming;
+procedure initTiming;
 begin
   epochStart := EncodeDate(1970, 1, 1);
   midnightOffset := trunc(now);
   timingInitialised := true
 end;
 
-function GetMidnightOffset: double;
+function getMidnightOffset: double;
 begin
-  GetMidnightOffset := midnightOffset
+  getMidnightOffset := midnightOffset
 end;
 
 { Returns the time in seconds }
-function GetTimer: double;
+function getTimer: double;
 begin
-  if not timingInitialised then InitTiming;
-  GetTimer := frac(now - midnightOffset) * 86400.0
+  if not timingInitialised then initTiming;
+  getTimer := frac(now - midnightOffset) * 86400.0
 end;
 
 { Returns the time in seconds since epoch }
-function GetFullTimer: double;
+function getFullTimer: double;
 begin
-  if not timingInitialised then InitTiming;
-  GetFullTimer := (now - epochStart) * 86400.0
+  if not timingInitialised then initTiming;
+  getFullTimer := (now - epochStart) * 86400.0
 end;
 {$endif}
 

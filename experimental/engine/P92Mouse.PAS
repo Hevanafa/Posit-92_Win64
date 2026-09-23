@@ -20,30 +20,64 @@ const
   MouseButtonRight = 2;
   MouseButtonBoth = 3;
 
-var
-  mouseX, mouseY, mouseButton: smallint;
-
 {$ifdef P92_WASM}
 { Hide system cursor }
 procedure HideCursor; external 'env' name 'HideCursor';
+
 { Show system cursor }
 procedure ShowCursor; external 'env' name 'ShowCursor';
+
+function GetMouseX: smallint;
+function GetMouseY: smallint;
+function GetMouseButton: smallint;
+
+function IsLeftMousePressed: boolean;
+function IsRightMousePressed: boolean;
+
 procedure UpdateMouse;
 {$endif}
 
 
 implementation
 
+var
+  mouseX, mouseY, mouseButton: smallint;
+
 {$ifdef P92_WASM}
-function GetMouseX: smallint; external 'env' name 'GetMouseX';
-function GetMouseY: smallint; external 'env' name 'GetMouseY';
-function GetMouseButton: smallint; external 'env' name 'GetMouseButton';
+function JsGetMouseX: smallint; external 'env' name 'JsGetMouseX';
+function JsGetMouseY: smallint; external 'env' name 'JsGetMouseY';
+function JsGetMouseButton: smallint; external 'env' name 'JsGetMouseButton';
+
+function GetMouseX: smallint;
+begin
+  GetMouseX := mouseX
+end;
+
+function GetMouseY: smallint;
+begin
+  GetMouseY := mouseY
+end;
+
+function GetMouseButton: smallint;
+begin
+  GetMouseButton := mouseButton
+end;
+
+function IsLeftMousePressed: boolean;
+begin
+  IsLeftMousePressed := (mouseButton and MouseButtonLeft) <> 0
+end;
+
+function IsRightMousePressed: boolean;
+begin
+  IsRightMousePressed := (mouseButton and MouseButtonRight) <> 0
+end;
 
 procedure UpdateMouse;
 begin
-  mouseX := GetMouseX;
-  mouseY := GetMouseY;
-  mouseButton := GetMouseButton;
+  mouseX := JsGetMouseX;
+  mouseY := JsGetMouseY;
+  mouseButton := JsGetMouseButton;
 end;
 {$endif}
 

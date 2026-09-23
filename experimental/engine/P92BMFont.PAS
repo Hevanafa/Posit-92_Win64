@@ -27,14 +27,15 @@ type
 
   PBMFont = ^TBMFont;
   TBMFont = record
-    texHandle: longint;
+    texHandle: TTextureHandle;
     lineHeight: smallint;
     spacing: array[0..1] of byte;
     glyphs: array[TByteRange] of TBMFontGlyph;
   end;
 
-
+{ This function also clones the texture data }
 function CloneBMFont(const srcFontHandle: TBMFontHandle): TBMFontHandle;
+
 procedure FreeBMFont(const fontHandle: TBMFontHandle);
 
 procedure PrintBMFont(
@@ -117,7 +118,7 @@ begin
     PanicHaltDisplay('BMFont handles are full!');
 
   bmfonts[destFontHandle] := bmfonts[srcFontHandle];
-  bmfonts[destFontHandle].font.texHandle := CopyTexture(bmfonts[srcFontHandle].font.texHandle);
+  bmfonts[destFontHandle].font.texHandle := CloneTex(bmfonts[srcFontHandle].font.texHandle);
 
   CloneBMFont := destFontHandle
 end;
@@ -129,12 +130,12 @@ begin
   bmfonts[fontHandle].status := AssetStatusEmpty;
   bmfonts[fontHandle].errorCode := 0;
 
+  FreeTex(BorrowBMFontPtr(fontHandle)^.texHandle);
+
   fillchar(bmfonts[fontHandle].font, sizeof(TBMFont), 0);
 
   for a:=0 to high(bmfonts[fontHandle].font.glyphs) do
     fillchar(bmfonts[fontHandle].font.glyphs[a], sizeof(TBMFontGlyph), 0);
-
-  FreeTexture(BorrowBMFontPtr(fontHandle)^.texHandle)
 end;
 
 procedure PrintBMFont(
@@ -209,7 +210,7 @@ begin
   if (glyphIdx in [low(fontPtr^.glyphs)..high(fontPtr^.glyphs)]) then begin
     glyph := fontPtr^.glyphs[glyphIdx];
 
-    SprRegionSolid(
+    SprRegionTint(
       fontPtr^.texHandle,
       glyph.x, glyph.y,
       glyph.width, glyph.height,
@@ -260,7 +261,7 @@ begin
   PrintBMFontCharToDest := 0;
   fontPtr := BorrowBMFontPtr(fontHandle);
 
-  if not IsTextureSet(destHandle) then exit;
+  if not IsTexSet(destHandle) then exit;
 
   charcode := ord(ch);
 

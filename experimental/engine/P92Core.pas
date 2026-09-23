@@ -6,10 +6,41 @@ unit P92Core;
 
 interface
 
-{$ifdef P92_SDL2}
+uses P92AssetHandles;
+
+const
+  Posit92Version = '0.3.4';
+
 type
   TCallback = procedure;
 
+{$IFDEF P92_WASM}
+  TP92AppConfig = record
+    { default: "game" }
+    CanvasID: string;
+
+    { Default: "2d"
+      Possible options: "2d" | "webgl" | "experimental-webgl" }
+    Renderer: string;
+
+    { default: 320 }
+    BufferWidth: smallint;
+
+    { default: 200 }
+    BufferHeight: smallint;
+
+    { default: 60
+      0 makes it the same refresh rate as the monitor }
+    TargetFPS: smallint;
+
+    LoadDefaultBMFont: boolean;
+    DefaultBMFontPath: string;
+
+    EnableScreenshotHotkey: boolean;
+  end;
+{$ENDIF}
+
+{$IFDEF P92_SDL2}
   TP92AppConfig = record
     { Window }
     windowTitle: string;
@@ -17,7 +48,7 @@ type
     height: smallint;
     sdlScale: smallint;
 
-    { Default font }
+    { Default BMFont }
     enableDefaultFont: boolean;
     defaultFontPath: string;
 
@@ -32,22 +63,18 @@ type
     Draw: TCallback;
     OnCleanup: TCallback;
   end;
+{$ENDIF}
 
-var
-  bootConfig: TP92AppConfig;
-{$endif}
+{$IFDEF P92_WASM}
+function GetBootConfig: TP92AppConfig;
 
-{$ifdef P92_WASM}
-function GetBootOptionBoolean(key: string): boolean;
-function JsGetBootOptionBoolean: boolean; external 'env' name 'JsGetBootOptionBoolean';
-
-function GetCgaFontHandle: longint;
-procedure SetCGAFontHandle(value: longint);
+function GetBootFontHandle: TTextureHandle;
+procedure SetBootFontHandle(const value: TTextureHandle);
 
 function IsEngineReady: boolean; public name 'IsEngineReady';
 procedure HostCallOnPreload; external 'env' name 'HostCallOnPreload';
 procedure HostCallOnReady; external 'env' name 'HostCallOnReady';
-{$endif}
+{$ENDIF}
 
 procedure P92Boot; public name 'P92Boot';
 procedure P92Update; public name 'P92Update';
@@ -56,12 +83,14 @@ procedure P92AfterDraw; public name 'P92AfterDraw';
 
 procedure PrintChar(const c: char; const x, y: smallint);
 procedure Print(const txt: string; const x, y: smallint);
+
 procedure PrintWrap(const txt: string; x, y, wrapWidth: smallint);
 
-{$ifdef P92_SDL2}
+procedure PrintCharTint(const c: char; const x, y: smallint; const colour: longword);
+procedure PrintTint(const txt: string; const x, y: smallint; const colour: longword);
+
 function DefaultP92AppConfig: TP92AppConfig;
 procedure P92Start(const appConfig: TP92AppConfig);
-{$endif}
 
 
 implementation
@@ -77,14 +106,16 @@ uses
   P92Panic, P92VGA
 {$endif}
 {$ifdef P92_WASM}
-  P92Fonts, P92AssetRegistry,
-  P92Conversions,
+  P92Fonts, P92AssetRegistry, P92WasmHeap, P92Conversions,
   P92FPS, P92Logger,
-  P92Sounds, P92Timing,
+{$ifdef P92_ENABLE_SOUNDS}
+  P92Sounds,
+{$endif}
+  P92Timing,
   P92Keyboard, P92Mouse,
   P92TexDraw, P92VGA, P92WasmHost, P92WasmMemMgr, P92InteropBuf, P92Loading
 {$endif}
-{$ifdef P92_IMMEDIATE_GUI}
+{$ifdef P92_IMGUI}
   , P92ImmediateGUI
 {$endif}
 {$ifdef P92_WEBGL}
@@ -105,67 +136,80 @@ type
   );
 
 const
-  DebugEngineRunStates = true;
+  DebugEngineRunStates = false;
+
+  BootFontGlyphWidth = 8;
+  BootFontGlyphHeight = 8;
+
 
 var
+  bootConfig: TP92AppConfig;
   engineRunState: TEngineRunStates;
-  enableDefaultBMFont: boolean;
 
   { Default boot font }
-  cgaFontHandle: longint;
+  BootFontHandle: TTextureHandle;
 
-  { Screenshot feature }
+  { Used by screenshot }
   lastF2: boolean;
-  enableScreenshotHotkey: boolean;
 
-function GetCGAFontHandle: longint;
+
+function GetBootConfig: TP92AppConfig;
 begin
-  GetCGAFontHandle := cgaFontHandle
+  GetBootConfig := bootConfig
 end;
 
-procedure SetCGAFontHandle(value: longint);
+function GetBootFontHandle: TTextureHandle;
 begin
-  cgaFontHandle := value
+  GetBootFontHandle := BootFontHandle
 end;
 
-{$ifdef P92_WASM}
-function GetBootOptionBoolean(key: string): boolean;
+procedure SetBootFontHandle(const value: TTextureHandle);
 begin
-  WriteInteropString(key);
-  GetBootOptionBoolean := JsGetBootOptionBoolean
+  BootFontHandle := value
 end;
-{$endif}
 
 function IsEngineReady: boolean;
 begin
   IsEngineReady := engineRunState = ersReady
 end;
 
+{$IFDEF P92_WASM}
+procedure InitWasmRuntime;
+var
+  heapRegionStart: pointer;
+  heapSize: SizeUInt;
+begin
+  JsInitWasmMemory(WasmMemorySize);
+
+  InitVideoMem(Pointer(StackSize), bootConfig.BufferWidth, bootConfig.BufferHeight);
+
+  heapRegionStart := pointer(StackSize + GetVideoMemSize);
+  heapSize := WasmMemorySize - PoolSize - SizeUInt(heapRegionStart);
+  InitHeapRegion(heapRegionStart, heapSize);
+
+  InitHeapMgr;
+  InitInteropBuffer;
+
+  WriteInteropString(bootConfig.CanvasID);
+  JsCreateCanvas(bootConfig.BufferWidth, bootConfig.BufferHeight);
+
+  WriteInteropString(bootConfig.Renderer);
+  JsInitCanvasCtx;
+
+  JsSetTargetFPS(bootConfig.TargetFPS);
+end;
+{$ENDIF}
+
 procedure P92Boot;
 begin
+{$ifdef P92_WASM}
+  InitWasmRuntime;
+{$endif}
+
   engineRunState := ersBoot;
 
   if DebugEngineRunStates then
     writelog('ersBoot');
-
-{$ifdef P92_WASM}
-  InitHeapMgr;
-  InitInteropBuffer;
-
-  InitDeltaTime;
-  InitFPSCounter;
-  InitAssetRegistry;
-  InitSounds;
-
-  { Read boot options }
-
-  enableDefaultBMFont := GetBootOptionBoolean('defaultFont');
-  enableScreenshotHotkey := GetBootOptionBoolean('enableScreenshotHotkey');
-{$endif}
-{$ifdef P92_WEBGL}
-  SetupWebGLViewport;
-  SetupWebGLShaders;
-{$endif}
 
 {$ifdef P92_SDL2}
   InitVideoMem(
@@ -174,13 +218,21 @@ begin
 
   TargetFPS := bootConfig.fps;
   FrameTime := 1000 div TargetFPS;
-  MinimisedFrameTime := 1000 div MinimisedFPS;
+{$endif}
 
   InitDeltaTime;
   InitFPSCounter;
-  InitAssetRegistry;
-  InitSounds;
 
+  InitAssetRegistry;
+
+{$ifdef P92_ENABLE_SOUNDS}
+  InitSounds;
+{$endif}
+{$ifdef P92_WEBGL}
+  SetupWebGLViewport;
+  SetupWebGLShaders;
+{$endif}
+{$ifdef P92_SDL2}
   InitSDL;
   InitLogger;
 {$endif}
@@ -188,10 +240,10 @@ begin
 { Request boot font }
 
 {$ifdef P92_WASM}
-  SetCGAFontHandle(RequestImage('assets/CGA8x8.png'));
+  SetBootFontHandle(RequestImage('assets/CGA8x8.png'));
 {$endif}
 {$ifdef P92_SDL2}
-  SetCGAFontHandle(RequestImage('assets/CGA8x8.png'));
+  SetCGAFontHandle(LoadImage('assets/CGA8x8.png'));
 {$endif}
 end;
 
@@ -207,15 +259,17 @@ begin
     writelog('ersPreload');
 
 {$ifdef P92_SDL2}
-  { imgCursor := RequestImage('assets\images\cursor.png'); }
-  hwCursor := HwRequestImage('assets\images\cursor.png');
-
-  if enableDefaultBMFont then
-    LoadDefaultFont;
+  { imgCursor := LoadImage('assets\images\cursor.png'); }
+  hwCursor := HwLoadImage('assets\images\cursor.png');
+  LoadDefaultFont;
 {$endif}
 
 {$ifdef P92_WASM}
-  LoadDefaultFont;
+  if bootConfig.LoadDefaultBMFont then
+    LoadDefaultBMFont
+  else
+    writelog('InitPreloadState: Skipped loading the default BMFont');
+
   HostCallOnPreload
 {$endif}
 end;
@@ -229,11 +283,17 @@ begin
   engineRunState := ersReady;
 
   if DebugEngineRunStates then
-    writelog('ersReady');
+    WriteLog('ersReady');
 
-{$ifdef P92_IMMEDIATE_GUI}
-  InitImmediateGUI;
-{$endif}
+{$IFDEF P92_IMGUI}
+{$IFDEF P92_WASM}
+  InitImmediateGUI(bootConfig.LoadDefaultBMFont);
+{$ENDIF}
+{$IFDEF P92_SDL2}
+  InitImmediateGUI(bootConfig.LoadDefaultBMFont);
+{$ENDIF}
+{$ENDIF}
+
 {$ifdef P92_WASM}
   HostCallOnReady
 {$endif}
@@ -257,7 +317,7 @@ begin
   else if engineRunState = ersReady then begin
     UpdateDeltaTime;
     IncrementFPS;
-{$ifdef P92_IMMEDIATE_GUI}
+{$ifdef P92_IMGUI}
     ResetWidgetIndices;
 
     UpdateGUILastMouseButton;
@@ -267,7 +327,7 @@ begin
     UpdateMouse;
 {$endif}
 
-    if enableScreenshotHotkey then begin
+    if bootConfig.enableScreenshotHotkey then begin
       if lastF2 <> isKeyDown(SC_F2) then begin
         lastF2 := isKeyDown(SC_F2);
 
@@ -303,13 +363,13 @@ end;
 
 procedure P92AfterDraw;
 begin
-{$ifdef P92_IMMEDIATE_GUI}
+{$ifdef P92_IMGUI}
   ResetActiveWidget;
 {$endif}
 
 {$ifdef P92_WASM}
-  VgaUpload;
-  VgaPresent;
+  VGAUpload;
+  VGAPresent;
 {$endif}
 {$ifdef P92_WEBGL}
   VgaUpload;
@@ -333,9 +393,11 @@ begin
   col := ord(c) mod 16;
 
   SprRegion(
-    cgaFontHandle,
-    col * 8, row * 8,
-    8, 8,
+    BootFontHandle,
+    col * BootFontGlyphWidth,
+    row * BootFontGlyphHeight,
+    BootFontGlyphWidth,
+    BootFontGlyphHeight,
     x, y)
 end;
 
@@ -348,13 +410,14 @@ begin
 
   for c in txt do begin
     PrintChar(c, left, y);
-    inc(left, 8)
+    inc(left, BootFontGlyphWidth)
   end;
 end;
 
 procedure PrintWrap(const txt: string; x, y, wrapWidth: smallint);
 var
   c: char;
+  { relative to x }
   left: smallint;
 begin
   left := 0;
@@ -362,22 +425,86 @@ begin
   for c in txt do begin
     if c = #10 then begin
       left := 0;
-      inc(y, 8);
+      inc(y, BootFontGlyphWidth);
       continue;
     end;
+
     if c = #13 then continue;
 
     PrintChar(c, x + left, y);
-    inc(left, 8);
+    inc(left, BootFontGlyphWidth);
 
     if left >= wrapWidth then begin
       left := 0;
-      inc(y, 8);
+      inc(y, BootFontGlyphHeight);
     end;
   end;
 end;
 
-{$ifdef P92_SDL2}
+procedure PrintCharTint(const c: char; const x, y: smallint; const colour: longword);
+var
+  row, col: smallint;
+begin
+  if not (ord(c) in [1..255]) then exit;
+
+  row := ord(c) div 16;
+  col := ord(c) mod 16;
+
+  SprRegionTint(
+    BootFontHandle,
+    col * BootFontGlyphWidth,
+    row * BootFontGlyphHeight,
+    BootFontGlyphWidth,
+    BootFontGlyphHeight,
+    x, y, colour)
+end;
+
+procedure PrintTint(const txt: string; const x, y: smallint; const colour: longword);
+var
+  c: char;
+  left: smallint;
+begin
+  left := x;
+
+  for c in txt do begin
+    PrintCharTint(c, left, y, colour);
+    inc(left, BootFontGlyphWidth)
+  end;
+end;
+
+{$IFDEF P92_WASM}
+function DefaultP92AppConfig: TP92AppConfig;
+var
+  newConfig: TP92AppConfig;
+begin
+  newConfig := default(TP92AppConfig);
+
+  newConfig.CanvasID := 'game';
+  newConfig.BufferWidth := 320;
+  newConfig.BufferHeight := 200;
+
+  newConfig.Renderer:= '2d';
+  newConfig.TargetFPS := 60;
+
+  newConfig.LoadDefaultBMFont := true;
+
+  { DefaultBMFontPath = 'assets/fonts/nokia_cellphone_fc_8.txt'; }
+  { DefaultBMFontPath = 'assets/fonts/p92_sans_11.txt'; }
+  newConfig.DefaultBMFontPath := 'assets/fonts/p92_sans_8_regular.txt';
+
+  newConfig.EnableScreenshotHotkey := true;
+
+  DefaultP92AppConfig := newConfig;
+end;
+
+procedure P92Start(const appConfig: TP92AppConfig);
+begin
+  bootConfig := appConfig;
+  P92Boot
+end;
+{$ENDIF}
+
+{$IFDEF P92_SDL2}
 procedure P92Cleanup;
 begin
   { TODO: free both the imgCursor and the default font }
@@ -451,17 +578,13 @@ begin
     if elapsed >= FrameTime then begin
       P92Update;
 
-      appConfig.Update; { user callback }
+      { User loop }
+      appConfig.Update;
+      appConfig.Draw;
 
-      if not WindowMinimised then begin
-        appConfig.Draw; { user callback }
-        P92AfterDraw
-      end;
+      P92AfterDraw;
 
-      if WindowMinimised then
-        lastFrameTime := frameTimeNow - (elapsed mod MinimisedFrameTime)  { Carry over extra time }
-      else
-        lastFrameTime := frameTimeNow - (elapsed mod FrameTime);  { Carry over extra time }
+      lastFrameTime := frameTimeNow - (elapsed mod FrameTime) { Carry over extra time }
     end;
 
     SDL_Delay(1)
@@ -473,7 +596,8 @@ begin
   P92Cleanup;
   P92Shutdown
 end;
-{$endif}
+{$ENDIF}
+
 
 end.
 
