@@ -45,8 +45,8 @@ procedure OnCleanup;
 begin
   ShowCursor;
 
-  FreeTexture(imgSpecimenP92[0]);
-  FreeTexture(imgSpecimenP92[1]);
+  FreeTex(imgSpecimenP92[0]);
+  FreeTex(imgSpecimenP92[1]);
 end;
 
 
@@ -73,7 +73,7 @@ begin
   srcX := col * GlyphWidth;
   srcY := row * GlyphHeight;
 
-  texture := BorrowTexturePtr(imgCGAFont2y);
+  texture := BorrowTexPtr(imgCGAFont2y);
 
   { glyph size: 8x16 }
 
@@ -89,8 +89,8 @@ begin
     alpha := texture^.pixelData[offset + 3];
     if alpha < 255 then continue;
 
-    colour := UnsafeSprPget(texture, sx, sy);
-    UnsafePset(x + a, y + b, colour);
+    colour := UnsafeTexPGet(texture, sx, sy);
+    UnsafePSet(x + a, y + b, colour);
   end;
 end;
 
@@ -116,7 +116,7 @@ begin
   srcX := col * GlyphWidth;
   srcY := row * GlyphHeight;
 
-  texture := BorrowTexturePtr(imgCGAFont2y);
+  texture := BorrowTexPtr(imgCGAFont2y);
 
   { glyph size: 8x16 }
 
@@ -203,17 +203,14 @@ var
 begin
   appConfig := DefaultP92AppConfig;
 
-  with appConfig do begin
-    windowTitle := 'Posit-92 with SDL2';
+  appConfig.WindowTitle := 'Posit-92 with SDL2';
+  appConfig.SDLScale := 1;
 
-    width := 8 * 80;
-    height := 16 * 25;
-    sdlScale := 1;
+  appConfig.BufferWidth := 8 * 80;
+  appConfig.BufferHeight := 16 * 25;
 
-    fps := 18;
-
-    enableDefaultFont := false;
-  end;
+  appConfig.TargetFPS := 18;
+  appConfig.EnableDefaultBMFont := false;
 
   appConfig.OnPreload := @OnPreload;
   appConfig.OnReady := @OnReady;

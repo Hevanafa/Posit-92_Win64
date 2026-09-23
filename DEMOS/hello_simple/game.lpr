@@ -67,9 +67,7 @@ var
 begin
   appConfig := DefaultP92AppConfig;
 
-  with appConfig do begin
-    WindowTitle := 'Posit-92 with SDL2';
-  end;
+  appConfig.WindowTitle := 'Posit-92 with SDL2';
 
   appConfig.OnPreload := @OnPreload;
   appConfig.OnReady := @OnReady;
