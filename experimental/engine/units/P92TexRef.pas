@@ -9,7 +9,9 @@ unit P92TexRef;
 
 interface
 
-uses sdl2, sdl2_image;
+uses
+  SDL2, SDL2_image,
+  P92AssetHandles;
 
 type
   PTexRef = ^TTexRef;
@@ -20,14 +22,15 @@ type
   end;
 
 procedure HwSetRenderer(const r: PSDL_Renderer);
-function HwRegisterTexRef(const tex: PSDL_Texture; const w, h: smallint): longint;
-procedure HwFreeTex(const imgHandle: longint);
+function HwRegisterTexRef(const tex: PSDL_Texture; const w, h: smallint): THWTextureHandle;
+procedure HwFreeTex(const texHandle: THWTextureHandle);
 
 { Blitting procedures }
 
-procedure HwSpr(const imgHandle: longint; const x, y: smallint);
+procedure HwSpr(const texHandle: THWTextureHandle; const x, y: smallint);
+
 procedure HwSprRegion(
-  const imgHandle: longint;
+  const texHandle: THWTextureHandle;
   const srcX, srcY, srcW, srcH: smallint;
   const destX, destY: smallint);
 
@@ -67,7 +70,7 @@ begin
   HwFindEmptyImageSlot := -1
 end;
 
-function HwRegisterTexRef(const tex: PSDL_Texture; const w, h: smallint): longint;
+function HwRegisterTexRef(const tex: PSDL_Texture; const w, h: smallint): THWTextureHandle;
 var
   imgHandle: longint;
 begin
@@ -81,38 +84,39 @@ begin
   texRefs[imgHandle].texture := tex
 end;
 
-procedure HwFreeTex(const imgHandle: longint);
+procedure HwFreeTex(const texHandle: THWTextureHandle);
 begin
-  if not HwIsTextureSet(imgHandle) then exit;
+  if not HwIsTextureSet(texHandle) then exit;
 
-  texRefs[imgHandle].width := 0;
-  texRefs[imgHandle].height := 0;
-  SDL_DestroyTexture(texRefs[imgHandle].texture)
+  texRefs[texHandle].width := 0;
+  texRefs[texHandle].height := 0;
+  SDL_DestroyTexture(texRefs[texHandle].texture)
 end;
 
 
-procedure HwSpr(const imgHandle: longint; const x, y: smallint);
+procedure HwSpr(const texHandle: THWTextureHandle; const x, y: smallint);
 var
   dest: TSDL_Rect;
 begin
-  if not HwIsTextureSet(imgHandle) then exit;
+  if not HwIsTextureSet(texHandle) then exit;
 
   dest.x := x;
   dest.y := y;
-  dest.w := texRefs[imgHandle].width;
-  dest.h := texRefs[imgHandle].height;
+  dest.w := texRefs[texHandle].width;
+  dest.h := texRefs[texHandle].height;
 
-  SDL_RenderCopy(renderer, texRefs[imgHandle].texture, nil, @dest)
+  SDL_RenderCopy(renderer, texRefs[texHandle].texture, nil, @dest)
 end;
 
 procedure HwSprRegion(
-  const imgHandle: longint;
+  const texHandle: THWTextureHandle;
   const srcX, srcY, srcW, srcH: smallint;
-  const destX, destY: smallint);
+  const destX, destY: smallint
+);
 var
   src, dest: TSDL_Rect;
 begin
-  if not HwIsTextureSet(imgHandle) then exit;
+  if not HwIsTextureSet(texHandle) then exit;
 
   src.x := srcX;
   src.y := srcY;
@@ -124,7 +128,7 @@ begin
   dest.w := srcW;
   dest.h := srcH;
 
-  SDL_RenderCopy(renderer, texRefs[imgHandle].texture, @src, @dest)
+  SDL_RenderCopy(renderer, texRefs[texHandle].texture, @src, @dest)
 end;
 
 initialization
