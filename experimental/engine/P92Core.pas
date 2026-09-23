@@ -531,12 +531,13 @@ begin
 
   with newConfig do begin
     WindowTitle := 'Posit-92 + SDL2 on Windows';
-    BufferWidth := 320;
-    BufferHeight := 200;
     SDLScale := 2;
 
+    BufferWidth := 320;
+    BufferHeight := 200;
+
     EnableDefaultBMFont := true;
-    DefaultBMFontPath := 'assets/fonts/nokia_cellphone_fc_8.txt';
+    DefaultBMFontPath := 'assets\fonts\p92_sans_8_regular.txt';
 
     TargetFPS := 60;
     EnableScreenshotHotkey := true;
