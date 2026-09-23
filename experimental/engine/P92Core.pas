@@ -253,7 +253,7 @@ begin
 
 {$ifdef P92_SDL2}
   { imgCursor := LoadImage('assets\images\cursor.png'); }
-  hwCursor := HwLoadImage('assets\images\cursor.png');
+  hwCursor := HwRequestImage('assets\images\cursor.png');
   LoadDefaultBMFont;
 {$endif}
 
