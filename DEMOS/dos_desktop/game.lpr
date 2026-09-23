@@ -210,7 +210,7 @@ begin
   appConfig.BufferHeight := 16 * 25;
 
   appConfig.TargetFPS := 18;
-  appConfig.EnableDefaultBMFont := false;
+  appConfig.LoadDefaultBMFont := false;
 
   appConfig.OnPreload := @OnPreload;
   appConfig.OnReady := @OnReady;

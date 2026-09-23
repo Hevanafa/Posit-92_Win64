@@ -58,7 +58,7 @@ type
     BufferWidth: smallint;
     BufferHeight: smallint;
 
-    EnableDefaultBMFont: boolean;
+    LoadDefaultBMFont: boolean;
     DefaultBMFontPath: string;
 
     TargetFPS: smallint;
@@ -268,16 +268,14 @@ begin
     hwCursor := HwRequestImage('assets\images\cursor.png')
   else
     hwCursor := 0;
-
-  LoadDefaultBMFont;
 {$endif}
 
-{$ifdef P92_WASM}
   if bootConfig.LoadDefaultBMFont then
     LoadDefaultBMFont
-  else
-    writelog('InitPreloadState: Skipped loading the default BMFont');
+  { else
+    WriteLog('InitPreloadState: Skipped loading the default BMFont'); }
 
+{$ifdef P92_WASM}
   HostCallOnPreload
 {$endif}
 end;
@@ -542,7 +540,7 @@ begin
     BufferWidth := 320;
     BufferHeight := 200;
 
-    EnableDefaultBMFont := true;
+    LoadDefaultBMFont := true;
     DefaultBMFontPath := 'assets\fonts\p92_sans_8_regular.txt';
 
     TargetFPS := 60;
