@@ -42,21 +42,24 @@ type
 
 {$IFDEF P92_SDL2}
   TP92AppConfig = record
-    { Window }
-    WindowTitle: string;
-    width: smallint;
-    height: smallint;
-    sdlScale: smallint;
+    { SDL2 }
 
-    { Default BMFont }
-    enableDefaultFont: boolean;
-    defaultFontPath: string;
+    WindowTitle: string;
+    SDLScale: smallint;
 
     { Features }
-    fps: smallint;
-    enableScreenshotHotkey: boolean;
+
+    BufferWidth: smallint;
+    BufferHeight: smallint;
+
+    EnableDefaultBMFont: boolean;
+    DefaultBMFontPath: string;
+
+    FPS: smallint;
+    EnableScreenshotHotkey: boolean;
 
     { Callbacks }
+
     OnPreload: TCallback;
     OnReady: TCallback;
     Update: TCallback;
@@ -213,10 +216,10 @@ begin
 
 {$ifdef P92_SDL2}
   InitVideoMem(
-    GetMem(GetBootConfig.width * GetBootConfig.height * 4),
-    bootConfig.width, bootConfig.height);
+    GetMem(GetBootConfig.BufferWidth * GetBootConfig.BufferHeight * 4),
+    bootConfig.BufferWidth, bootConfig.BufferHeight);
 
-  TargetFPS := bootConfig.fps;
+  TargetFPS := bootConfig.FPS;
   FrameTime := 1000 div TargetFPS;
 {$endif}
 
@@ -522,15 +525,15 @@ begin
 
   with newConfig do begin
     WindowTitle := 'Posit-92 + SDL2 on Windows';
-    width := 320;
-    height := 200;
-    sdlScale := 2;
+    BufferWidth := 320;
+    BufferHeight := 200;
+    SDLScale := 2;
 
-    enableDefaultFont := true;
-    defaultFontPath := 'assets/fonts/nokia_cellphone_fc_8.txt';
+    EnableDefaultBMFont := true;
+    DefaultBMFontPath := 'assets/fonts/nokia_cellphone_fc_8.txt';
 
-    fps := 60;
-    enableScreenshotHotkey := true;
+    FPS := 60;
+    EnableScreenshotHotkey := true;
   end;
 
   DefaultP92AppConfig := newConfig

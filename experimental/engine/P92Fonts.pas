@@ -37,7 +37,7 @@ begin
 {$endif}
 
 {$ifdef P92_SDL2}
-  defaultFontHandle := RequestBMFont(GetBootConfig.defaultFontPath)
+  defaultFontHandle := RequestBMFont(GetBootConfig.DefaultBMFontPath)
 {$endif}
 end;
 

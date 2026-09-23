@@ -87,7 +87,7 @@ begin
   window := SDL_CreateWindow(
     PAnsiChar(windowTitle),
     SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-    vgaWidth * GetBootConfig.sdlScale, VGAHeight * GetBootConfig.sdlScale,
+    vgaWidth * GetBootConfig.SDLScale, VGAHeight * GetBootConfig.SDLScale,
     SDL_WINDOW_SHOWN);
 
   renderer := SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
