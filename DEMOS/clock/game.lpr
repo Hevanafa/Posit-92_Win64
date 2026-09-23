@@ -30,7 +30,7 @@ end;
 procedure DrawMouse;
 begin
   { spr(imgCursor, mouseX, mouseY) }
-  pset(mouseX, mouseY, Palette[1])
+  PSet(GetMouseX, GetMouseY, Palette[1])
 end;
 
 { dotw: use DayOfTheWeek from DateUtils unit }
@@ -39,13 +39,13 @@ begin
   result := '';
 
   case dotw of
-  1: result := 'mon';
-  2: result := 'tue';
-  3: result := 'wed';
-  4: result := 'thu';
-  5: result := 'fri';
-  6: result := 'sat';
-  7: result := 'sun';
+  1: result := 'MON';
+  2: result := 'TUE';
+  3: result := 'WED';
+  4: result := 'THU';
+  5: result := 'FRI';
+  6: result := 'SAT';
+  7: result := 'SUN';
   end;
 end;
 
@@ -138,14 +138,13 @@ begin
   appConfig := DefaultP92AppConfig;
 
   with appConfig do begin
-    windowTitle := 'Posit-92 Clock';
-    width := 128;
-    height := 128;
-    sdlScale := 3;
+    WindowTitle := 'Posit-92 Clock';
+    SDLScale := 3;
 
-    fps := 18;
+    BufferWidth := 128;
+    BufferHeight := 128;
 
-    defaultFontPath := 'assets\fonts\pico-8_regular_5.txt';
+    TargetFPS := 18;
   end;
 
   appConfig.OnReady := @OnReady;
