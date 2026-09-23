@@ -236,14 +236,8 @@ begin
   InitLogger;
 {$endif}
 
-{ Request boot font }
-
-{$ifdef P92_WASM}
+  { Request boot font }
   SetBootFontHandle(RequestImage('assets/CGA8x8.png'));
-{$endif}
-{$ifdef P92_SDL2}
-  SetBootFontHandle(LoadImage('assets/CGA8x8.png'));
-{$endif}
 end;
 
 procedure InitPreloadState;
