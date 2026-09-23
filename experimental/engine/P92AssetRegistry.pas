@@ -113,7 +113,7 @@ procedure PascalSoundFailed(sndHandle: longint; errorCode: smallint); public nam
 function RequestImage(const filename: string): TTextureHandle;
 function RequestBMFont(const filename: string): TBMFontHandle;
 function HwRequestImage(const filename: string): longint;
-function LoadSound(const filename: string): TSoundHandle;
+function RequestSound(const filename: string): TSoundHandle;
 {$endif}
 
 
@@ -543,7 +543,7 @@ begin
 end;
 
 
-function LoadSound(const filename: string): TSoundHandle;
+function RequestSound(const filename: string): TSoundHandle;
 var
   sndHandle: TSoundHandle;
   strBuffer: array[0..255] of char;
@@ -560,7 +560,7 @@ begin
   { Assuming that SDL2 mixer is always initialised }
   { if not soundsInitialised then exit; }
 
-  LoadSound := sndHandle;
+  RequestSound := sndHandle;
 
   fillchar(strBuffer, length(strBuffer), #0);
   strpcopy(strBuffer, filename);
