@@ -34,12 +34,12 @@ var
   nextRippleTick: double;
 
 
-procedure drawMouse;
+procedure DrawMouse;
 begin
-  spr(imgCursor, mouseX, mouseY)
+  spr(imgCursor, GetMouseX, GetMouseY)
 end;
 
-procedure spawnRipple(const cx, cy: smallint);
+procedure SpawnRipple(const cx, cy: smallint);
 var
   a: word;
   idx: smallint;
@@ -64,7 +64,7 @@ begin
   end;
 end;
 
-procedure circBlend(const cx, cy, radius: integer; const colour: longword);
+procedure CircBlend(const cx, cy, radius: integer; const colour: longword);
 var
   x, y, p: integer;
 begin
@@ -115,11 +115,11 @@ end;
 
 procedure OnCleanup;
 begin
-  showCursor;
+  ShowCursor;
 
-  FreeTexture(imgCursor);
-  FreeTexture(imgDosuEXE[0]);
-  FreeTexture(imgDosuEXE[1]);
+  FreeTex(imgCursor);
+  FreeTex(imgDosuEXE[0]);
+  FreeTex(imgDosuEXE[1]);
 end;
 
 procedure Update;
@@ -131,7 +131,7 @@ begin
 
   if getTimer >= nextRippleTick then begin
     nextRippleTick := getTimer + random / 8.0;
-    spawnRipple(random(vgaWidth), Random(vgaHeight))
+    SpawnRipple(random(vgaWidth), Random(vgaHeight))
   end;
 
   for a:=0 to high(ripples) do begin
@@ -156,32 +156,32 @@ var
 begin
   { cls($FF6495ED); }
   for a:=0 to vgaHeight - 1 do
-    hline(0, vgaWidth - 1, a, lerpColour($FFFFB08A, $FFD4C5E8, a / (vgaHeight - 1)));
+    HLine(0, vgaWidth - 1, a, LerpColour($FFFFB08A, $FFD4C5E8, a / (vgaHeight - 1)));
 
   for a:=0 to high(ripples) do begin
     if not ripples[a].alive then continue;
 
     grey := round(ripples[a].opacity * $FF);
 
-    circBlend(ripples[a].cx, ripples[a].cy, trunc(ripples[a].radius),
+    CircBlend(ripples[a].cx, ripples[a].cy, trunc(ripples[a].radius),
       (grey shl 24) or $FFFFFF);
       { $FF000000 or (grey shl 16) or (grey shl 8) or grey); }
   end;
 
   if (trunc(gameTime * 4) and 1) > 0 then
-    spr(imgDosuEXE[1], 148, 88)
+    Spr(imgDosuEXE[1], 148, 88)
   else
-    spr(imgDosuEXE[0], 148, 88);
+    Spr(imgDosuEXE[0], 148, 88);
 
   s := 'It is time!';
   w := measureDefault(s);
-  printDefault(s, (vgaWidth - w) div 2, 120);
+  PrintDefault(s, (vgaWidth - w) div 2, 120);
 
   h := trunc(getTimer / 3600);
   m := trunc(getTimer) mod 3600 div 60;
   s := format('%.2d:%.2d', [h, m]);
-  w := measureDefault(s);
-  printDefault(s, (vgaWidth - w) div 2, 130);
+  w := MeasureDefault(s);
+  PrintDefault(s, (vgaWidth - w) div 2, 130);
 end;
 
 
@@ -197,6 +197,8 @@ begin
   conf.Update := @Update;
   conf.Draw := @Draw;
   conf.OnCleanup := @OnCleanup;
+
+  conf.DefaultBMFontPath := 'assets\fonts\p92_sans_8_bold.txt';
 
   P92Start(conf)
 end.
