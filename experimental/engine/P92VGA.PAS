@@ -33,17 +33,17 @@ procedure VGAPresent; external 'env' name 'VGAPresent';
 
 {$ifdef P92_SDL2}
 { Uploads the pixel data to the GPU }
-procedure VgaUpload;
-procedure VgaPresent;
+procedure VGAUpload;
+procedure VGAPresent;
 {$endif}
 
 function VGAWidth: smallint;
 function VGAHeight: smallint;
 function GetVideoMemSize: longint;
 
-{ This is called by InitWasmMemory (JS side)
+{ Called by InitWasmRuntime
   Ref: https://www.freepascal.org/docs-html/ref/refse22.html }
-procedure InitVideoMem(const startAddr: PByteArray; const width, height: smallint); public name 'InitVideoMem';
+procedure InitVideoMem(const startAddr: PByteArray; const width, height: smallint);
 
 function BorrowSurfacePtr: PByteArray; public name 'GetSurfacePtr';
 
@@ -111,7 +111,7 @@ begin
 end;
 
 {$ifdef P92_SDL2}
-procedure VgaUpload;
+procedure VGAUpload;
 begin
   { SDL_SetRenderDrawColor(renderer, $ed, $95, $64, $ff);
   SDL_RenderClear(renderer); }
@@ -121,7 +121,7 @@ begin
   SDL_RenderCopy(renderer, vgaTexture, nil, nil)
 end;
 
-procedure VgaPresent;
+procedure VGAPresent;
 begin
   SDL_RenderPresent(renderer)
 end;

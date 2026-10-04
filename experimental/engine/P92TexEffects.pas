@@ -22,14 +22,14 @@ procedure ReplaceColour(const texHandle: TTextureHandle; oldColour, newColour: l
 
 implementation
 
-uses P92Tex, P92TexDraw, P92VGA;
+uses P92AssetRegistry, P92Tex, P92TexDraw, P92VGA;
 
 procedure SprOutline(const texHandle: TTextureHandle; const x, y: smallint; const colour: longword);
 var
   a, b: smallint;
   texture: PSoftwareTex;
 begin
-  if not IsTexSet(texHandle) then exit;
+  if not IsTexReady(texHandle) then exit;
 
   texture := BorrowTexPtr(texHandle);
 
@@ -77,7 +77,7 @@ var
   texture: PSoftwareTex;
   alpha: byte;
 begin
-  if not IsTexSet(texHandle) then exit;
+  if not IsTexReady(texHandle) then exit;
 
   texture := BorrowTexPtr(texHandle);
 
@@ -108,7 +108,7 @@ var
   a, b: word;
   texture: PSoftwareTex;
 begin
-  if not IsTexSet(texHandle) then exit;
+  if not IsTexReady(texHandle) then exit;
 
   texture := BorrowTexPtr(texHandle);
 

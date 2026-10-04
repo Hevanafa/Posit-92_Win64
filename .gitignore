@@ -23,6 +23,7 @@ DEMOS/*/*.dll
 DEMOS/*/*.ps1
 snippets/*.dll
 
+DEMOS/clock/builds/
 
 # Misc
 thumbs.db

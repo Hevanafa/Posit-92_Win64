@@ -34,21 +34,10 @@ type
     pixelData: PByte;
   end;
 
-const
-  { SprFlips enum }
-  SprFlipNone = 0;
-  SprFlipHorizontal = 1;
-  SprFlipVertical = 2;
-  SprFlipBoth = SprFlipHorizontal or SprFlipVertical;
-
 
 function NewTex(const width, height: smallint): TTextureHandle;
 function CloneTex(const texHandle: TTextureHandle): TTextureHandle;
 procedure FreeTex(const texHandle: TTextureHandle);
-
-function IsTexSet(const texHandle: TTextureHandle): boolean;
-procedure AssertTexSet(const varName: string; const texHandle: longint);
-function BorrowTexPtr(const texHandle: TTextureHandle): PSoftwareTex;
 
 function GetTexWidth(const texHandle: TTextureHandle): smallint;
 procedure SetTexWidth(const texHandle: TTextureHandle; const value: smallint);
@@ -141,39 +130,15 @@ begin
 end;
 
 
-function IsTexSet(const texHandle: TTextureHandle): boolean;
-begin
-  IsTexSet := false;
 
-{$ifdef PanicOnInvalidHandle}
-  if imgHandle <= 0 then
-    panicHalt('Invalid imgHandle: ' + i32str(imgHandle));
-{$else}
-  if texHandle <= 0 then exit;
-{$endif}
-
-  { IsTexSet := (textures[texHandle].width > 0) and (textures[texHandle].height > 0) }
-  { IsTexSet := (textures[texHandle].allocSize > 0) }
-  IsTexSet := textures[texHandle].status = AssetStatusReady
-end;
-
-procedure AssertTexSet(const varName: string; const texHandle: longint);
-begin
-  if not IsTexSet(texHandle) then
-    PanicHalt(varName + ' is unset!');
-end;
-
-function BorrowTexPtr(const texHandle: TTextureHandle): PSoftwareTex;
-begin
-  BorrowTexPtr := @textures[texHandle].texture
-end;
 
 function GetTexWidth(const texHandle: TTextureHandle): smallint;
 var
   texture: PSoftwareTex;
 begin
   GetTexWidth := 0;
-  if not IsTexSet(texHandle) then exit;
+
+  if not IsTexReady(texHandle) then exit;
 
   texture := @textures[texHandle].texture;
   GetTexWidth := texture^.width
@@ -183,7 +148,7 @@ procedure SetTexWidth(const texHandle: TTextureHandle; const value: smallint);
 var
   texture: PSoftwareTex;
 begin
-  if not IsTexSet(texHandle) then exit;
+  if not IsTexReady(texHandle) then exit;
 
   if value <= 0 then
     PanicHalt('SetTextureWidth: Invalid width: ' + I32Str(value));
@@ -202,7 +167,8 @@ var
   texture: PSoftwareTex;
 begin
   GetTexHeight := 0;
-  if not IsTexSet(texHandle) then exit;
+
+  if not IsTexReady(texHandle) then exit;
 
   texture := @textures[texHandle].texture;
   GetTexHeight := texture^.height
@@ -212,7 +178,7 @@ procedure SetTexHeight(const texHandle: TTextureHandle; const value: smallint);
 var
   texture: PSoftwareTex;
 begin
-  if not IsTexSet(texHandle) then exit;
+  if not IsTexReady(texHandle) then exit;
 
   if value <= 0 then
     PanicHalt('SetTextureHeight: Invalid height: ' + I32Str(value));

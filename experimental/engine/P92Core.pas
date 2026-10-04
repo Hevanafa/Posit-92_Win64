@@ -4,13 +4,15 @@ unit P92Core;
 {$H-}  { Use ShortStrings }
 {$J-}  { Don't allow assignments to typed consts }
 
+{DEFINE DebugEngineRunStates}
+
 interface
 
 uses P92AssetHandles;
 
 {$IFDEF P92_WASM}
 const
-  Posit92Version = '0.3.4';
+  Posit92Version = '0.6.2';
 
 type
   TCallback = procedure;
@@ -33,10 +35,23 @@ type
       0 makes it the same refresh rate as the monitor }
     TargetFPS: smallint;
 
+    { default: true }
     LoadDefaultBMFont: boolean;
+    { overridable, used together with `LoadDefaultBMFont` }
     DefaultBMFontPath: string;
 
+    { default: true }
+    LoadDefaultCursor: boolean;
+
+    { default: true }
     EnableScreenshotHotkey: boolean;
+
+    { default: false }
+    EnableDrawFPS: boolean;
+
+    { Callbacks }
+
+    DrawLoading: TCallback;
   end;
 {$ENDIF}
 
@@ -65,6 +80,7 @@ type
     EnableScreenshotHotkey: boolean;
 
     LoadDefaultCursor: boolean;
+    EnableDrawFPS: boolean;
 
     { Callbacks }
 
@@ -77,6 +93,7 @@ type
 {$ENDIF}
 
 {$IFDEF P92_WASM}
+function IsBootFontLoaded: boolean; public name 'IsBootFontLoaded';
 function GetBootFontHandle: TTextureHandle;
 procedure SetBootFontHandle(const value: TTextureHandle);
 
@@ -103,6 +120,9 @@ procedure PrintTint(const txt: string; const x, y: smallint; const colour: longw
 function DefaultP92AppConfig: TP92AppConfig;
 procedure P92Start(const appConfig: TP92AppConfig);
 
+procedure DrawMouse;
+procedure DrawFPS;
+
 
 implementation
 
@@ -116,23 +136,29 @@ uses
   P92Strings, P92Timing, P92FPS, P92Sounds,
   P92Panic, P92VGA
 {$endif}
+
 {$ifdef P92_WASM}
   P92Fonts, P92AssetRegistry, P92WasmHeap, P92Conversions,
-  P92FPS, P92Logger,
+  P92FPS, P92Logger, P92Timing,
 {$ifdef P92_ENABLE_SOUNDS}
   P92Sounds,
 {$endif}
-  P92Timing,
   P92Keyboard, P92Mouse,
-  P92TexDraw, P92VGA, P92WasmHost, P92WasmMemMgr, P92InteropBuf, P92Loading
-{$endif}
-{$ifdef P92_IMGUI}
-  , P92ImmediateGUI
-{$endif}
+  P92Tex, P92TexDraw, P92VGA, P92WasmHost, P92WasmMemMgr,
+  P92InteropBuf, P92Loading
 {$ifdef P92_WEBGL}
   , P92WebGL
 {$endif}
+{$endif}
+{$ifdef P92_IMGUI}
+  , P92IMGUI
+{$endif}
   ;
+
+{$IFDEF P92_WASM}
+var
+  texCursor: TTextureHandle;
+{$ENDIF}
 
 {$ifdef P92_SDL2}
 var
@@ -147,7 +173,8 @@ type
   );
 
 const
-  DebugEngineRunStates = false;
+  DefaultCursorPath = 'assets/images/cursor.png';
+  DefaultBMFontPath = 'assets/fonts/p92_sans_8_regular.txt';
 
   BootFontGlyphWidth = 8;
   BootFontGlyphHeight = 8;
@@ -162,6 +189,8 @@ var
 
   { Used by screenshot }
   lastF2: boolean;
+
+  fpsTop, fpsRight: smallint;
 
 
 function GetBootConfig: TP92AppConfig;
@@ -179,6 +208,18 @@ begin
   BootFontHandle := value
 end;
 
+procedure RequestBootFont;
+begin
+  SetBootFontHandle(
+    RequestImage('assets/fonts/p92_boot.png'))
+end;
+
+function IsBootFontLoaded: boolean;
+begin
+  IsBootFontLoaded := (
+    BorrowTexEntryPtr(BootFontHandle)^.status = AssetStatusReady);
+end;
+
 function IsEngineReady: boolean;
 begin
   IsEngineReady := engineRunState = ersReady
@@ -188,15 +229,13 @@ end;
 procedure InitWasmRuntime;
 var
   heapRegionStart: pointer;
-  heapSize: SizeUInt;
 begin
   JsInitWasmMemory(WasmMemorySize);
 
   InitVideoMem(Pointer(StackSize), bootConfig.BufferWidth, bootConfig.BufferHeight);
 
   heapRegionStart := pointer(StackSize + GetVideoMemSize);
-  heapSize := WasmMemorySize - PoolSize - SizeUInt(heapRegionStart);
-  InitHeapRegion(heapRegionStart, heapSize);
+  InitHeapRegion(heapRegionStart);
 
   InitHeapMgr;
   InitInteropBuffer;
@@ -219,8 +258,9 @@ begin
 
   engineRunState := ersBoot;
 
-  if DebugEngineRunStates then
-    writelog('ersBoot');
+{$IFDEF DebugEngineRunStates}
+  WriteLog('ersBoot');
+{$ENDIF}
 
 {$ifdef P92_SDL2}
   InitVideoMem(
@@ -232,7 +272,11 @@ begin
 {$endif}
 
   InitDeltaTime;
+
   InitFPSCounter;
+  fpsTop := 0;
+  fpsRight := VGAWidth * 3 div 4;
+
   InitAssetRegistry;
 
 {$ifdef P92_ENABLE_SOUNDS}
@@ -247,8 +291,7 @@ begin
   InitLogger;
 {$endif}
 
-  { Request boot font }
-  SetBootFontHandle(RequestImage('assets/CGA8x8.png'));
+  RequestBootFont;
 end;
 
 procedure InitPreloadState;
@@ -259,19 +302,25 @@ begin
 
   engineRunState := ersPreload;
 
-  if DebugEngineRunStates then
-    writelog('ersPreload');
+{$IFDEF DebugEngineRunStates}
+  WriteLog('ersPreload');
+{$ENDIF}
 
-{$ifdef P92_SDL2}
+{$IFDEF P92_WASM}
+  if bootConfig.LoadDefaultCursor then
+    texCursor := RequestImage(DefaultCursorPath);
+{$ENDIF}
+
+{$IFDEF P92_SDL2}
   if bootConfig.LoadDefaultCursor then
     { imgCursor := LoadImage('assets\images\cursor.png'); }
     hwCursor := HwRequestImage('assets\images\cursor.png')
   else
     hwCursor := 0;
-{$endif}
+{$ENDIF}
 
   if bootConfig.LoadDefaultBMFont then
-    LoadDefaultBMFont
+    LoadDefaultBMFont;
   { else
     WriteLog('InitPreloadState: Skipped loading the default BMFont'); }
 
@@ -288,8 +337,9 @@ begin
 
   engineRunState := ersReady;
 
-  if DebugEngineRunStates then
-    WriteLog('ersReady');
+{$IFDEF DebugEngineRunStates}
+  WriteLog('ersReady');
+{$ENDIF}
 
 {$IFDEF P92_IMGUI}
 {$IFDEF P92_WASM}
@@ -328,7 +378,7 @@ begin
 
     UpdateGUILastMouseButton;
     UpdateMouse;
-    UpdateGUIMousePoint;
+    UpdateGUIMouseState;
 {$else}
     UpdateMouse;
 {$endif}
@@ -349,44 +399,61 @@ begin
 {$endif}
 end;
 
-{$ifdef P92_SDL2}
 procedure DrawMouse;
 begin
-  { spr(imgCursor, mouseX, mouseY) }
+{$IFDEF P92_WASM}
+  Spr(texCursor, GetMouseX, GetMouseY)
+{$ENDIF}
+
+{$IFDEF P92_SDL2}
   HwSpr(hwCursor, GetMouseX, GetMouseY)
+{$ENDIF}
 end;
-{$endif}
 
 procedure P92Draw;
 begin
 {$ifdef P92_WASM}
-  cls($FF000000);
-
   if engineRunState = ersPreload then
-    RenderLoadingScreen;
+    bootConfig.DrawLoading;
 {$endif}
 end;
 
 procedure P92AfterDraw;
 begin
-{$ifdef P92_IMGUI}
+{$IFDEF P92_IMGUI}
   ResetActiveWidget;
-{$endif}
+{$ENDIF}
 
-{$ifdef P92_WASM}
+{$IFDEF P92_WASM}
+{$IFDEF P92_WEBGL}
+  DrawMouse;
+
+  if bootConfig.EnableDrawFPS then
+    DrawFPS;
+
+  VGAUpload;
+  WebGLPresent;
+{$ELSE}
+  DrawMouse;
+
+  if bootConfig.EnableDrawFPS then
+    DrawFPS;
+
   VGAUpload;
   VGAPresent;
-{$endif}
-{$ifdef P92_WEBGL}
+{$ENDIF}
+{$ENDIF}
+
+{$IFDEF P92_SDL2}
+  if bootConfig.EnableDrawFPS then
+    DrawFPS;
+
   VgaUpload;
-  WebGLPresent;
-{$endif}
-{$ifdef P92_SDL2}
-  VgaUpload;
+
   { Begin hardware layer }
   DrawMouse;
   VgaPresent
-{$endif}
+{$ENDIF}
 end;
 
 procedure PrintChar(const c: char; const x, y: smallint);
@@ -478,6 +545,20 @@ begin
   end;
 end;
 
+procedure DrawFPS;
+begin
+  if bootConfig.LoadDefaultBMFont then
+    PrintDefault('FPS: ' + I32Str(GetLastFPS), fpsRight, fpsTop)
+  else
+    Print('FPS: ' + I32Str(GetLastFPS), fpsRight, fpsTop);
+
+{$ifdef DEBUG_FPS}
+  print('lastFPS: ' + i32str(lastFPS), VgaWidth - 160, 16);
+  print('actualFPS: ' + i32str(actualFPS), VgaWidth - 160, 24);
+  print('lastFPSTime: ' + f32str(lastFPSTime), VgaWidth - 160, 32);
+{$endif}
+end;
+
 {$IFDEF P92_WASM}
 function DefaultP92AppConfig: TP92AppConfig;
 var
@@ -493,12 +574,15 @@ begin
   newConfig.TargetFPS := 60;
 
   newConfig.LoadDefaultBMFont := true;
+  newConfig.DefaultBMFontPath := DefaultBMFontPath;
 
-  { DefaultBMFontPath = 'assets/fonts/nokia_cellphone_fc_8.txt'; }
-  { DefaultBMFontPath = 'assets/fonts/p92_sans_11.txt'; }
-  newConfig.DefaultBMFontPath := 'assets/fonts/p92_sans_8_regular.txt';
-
+  newConfig.LoadDefaultCursor := true;
   newConfig.EnableScreenshotHotkey := true;
+  newConfig.EnableDrawFPS := false;
+
+  { Callbacks }
+
+  newConfig.DrawLoading := @P92Loading.RenderLoadingScreen;
 
   DefaultP92AppConfig := newConfig;
 end;
@@ -547,6 +631,7 @@ begin
     EnableScreenshotHotkey := true;
 
     LoadDefaultCursor := true;
+    EnableDrawFPS := false;
   end;
 
   DefaultP92AppConfig := newConfig

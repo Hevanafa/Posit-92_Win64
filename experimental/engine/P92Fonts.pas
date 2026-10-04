@@ -10,12 +10,14 @@ uses P92AssetHandles;
 
 procedure LoadDefaultBMFont;
 function GetDefaultFontHandle: TBMFontHandle;
+function GetDefaultFontLineHeight: smallint;
 
-procedure PrintDefault(const text: string; const x, y: integer);
-procedure PrintDefaultCentred(const text: string; const cx, y: integer);
+procedure PrintDefault(const text: string; const x, y: smallint);
+procedure PrintDefaultCentred(const text: string; const cx, y: smallint);
 function MeasureDefault(const text: string): word;
 
-function PrintCharColour(const ch: char; const x, y: integer; const colour: longword): word;
+{ Returns xadvance }
+function PrintCharColour(const ch: char; const x, y: smallint; const colour: longword): smallint;
 
 
 implementation
@@ -25,22 +27,32 @@ uses P92AssetRegistry, P92BMFont, P92Core;
 var
   defaultFontHandle: TBMFontHandle;
 
-function GetDefaultFontHandle: TBMFontHandle;
-begin
-  GetDefaultFontHandle := defaultFontHandle
-end;
-
 procedure LoadDefaultBMFont;
 begin
   defaultFontHandle := RequestBMFont(GetBootConfig.DefaultBMFontPath)
 end;
 
-procedure PrintDefault(const text: string; const x, y: integer);
+function GetDefaultFontHandle: TBMFontHandle;
+begin
+  GetDefaultFontHandle := defaultFontHandle
+end;
+
+function GetDefaultFontLineHeight: smallint;
+begin
+  if defaultFontHandle = 0 then begin
+    GetDefaultFontLineHeight := 0;
+    exit
+  end;
+
+  GetDefaultFontLineHeight := BorrowBMFontPtr(defaultFontHandle)^.lineHeight
+end;
+
+procedure PrintDefault(const text: string; const x, y: smallint);
 begin
   PrintBMFont(defaultFontHandle, text, x, y)
 end;
 
-procedure PrintDefaultCentred(const text: string; const cx, y: integer);
+procedure PrintDefaultCentred(const text: string; const cx, y: smallint);
 var
   w: word;
 begin
@@ -53,12 +65,13 @@ begin
   MeasureDefault := MeasureBMFont(defaultFontHandle, text)
 end;
 
-{ Returns the width of the glyph }
-function PrintCharColour(const ch: char; const x, y: integer; const colour: longword): word;
+function PrintCharColour(const ch: char; const x, y: smallint; const colour: longword): smallint;
 begin
   PrintCharColour := PrintBMFontCharColour(
     defaultFontHandle, ch, x, y, colour)
 end;
 
+begin
+  defaultFontHandle := 0;
 end.
 

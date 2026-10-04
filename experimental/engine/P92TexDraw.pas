@@ -20,6 +20,17 @@ interface
 
 uses P92AssetHandles;
 
+type
+  TSprFlip = (
+    SprFlipHorizontal,
+    SprFlipVertical
+  );
+  TSprFlips = set of TSprFlip;
+
+const
+  SprFlipsNone = [];
+  SprFlipsBoth = [SprFlipHorizontal, SprFlipVertical];
+
 procedure Spr(const texHandle: TTextureHandle; const x, y: smallint);
 
 procedure SprTint(const texHandle: TTextureHandle; const x, y: smallint; const colour: longword);
@@ -32,6 +43,7 @@ procedure SprRegion(
   const srcX, srcY, srcW, srcH: smallint;
   const destX, destY: smallint);
 
+{ Stretch a sprite with nearest neighbour scaling }
 procedure SprStretch(
   const texHandle: TTextureHandle;
   const destX, destY, destWidth, destHeight: smallint);
@@ -50,7 +62,7 @@ procedure SprRegionTint(
 procedure SprFlipped(
   const texHandle: TTextureHandle;
   const x, y: smallint;
-  const flip: smallint);
+  const flip: TSprFlips);
 
 { rotation is in radians }
 procedure SprRotate(
@@ -65,13 +77,13 @@ procedure SprRegionToDest(
   const srcX, srcY, srcW, srcH: smallint;
   const destX, destY: smallint);
 
-procedure SprFlipInPlace(const texHandle: TTextureHandle; const flip: smallint);
+procedure SprFlipInPlace(const texHandle: TTextureHandle; const flip: TSprFlips);
 
 
 implementation
 
 uses
-  P92Logger, P92Conversions,
+  P92Logger, P92Conversions, P92AssetRegistry,
   P92Tex, P92Maths,
   P92Panic, P92VGA;
 
@@ -88,11 +100,12 @@ var
   offset: longword;
   alpha: byte;
 begin
-  if not IsTexSet(texHandle) then exit;
+  if not IsTexReady(texHandle) then exit;
 
   texture := BorrowTexPtr(texHandle);
 
   { Handle clipping }
+
   startX := trunc(max(0, ClipX1 - x));
   endX := trunc(min(texture^.width - 1, ClipX2 - x));
 
@@ -100,6 +113,8 @@ begin
   endY := trunc(min(texture^.height - 1, ClipY2 - y));
 
   if (startX > endX) or (startY > endY) then exit;
+
+  { Render logic }
 
   stride := texture^.width * 4;
   destStride := VGAWidth * 4;
@@ -134,7 +149,7 @@ var
   alpha: byte;
   colour: longword;
 begin
-  if not IsTexSet(texHandle) then exit;
+  if not IsTexReady(texHandle) then exit;
 
   texture := BorrowTexPtr(texHandle);
 
@@ -168,7 +183,7 @@ var
 
   ABGR: longword;
 begin
-  if not IsTexSet(texHandle) then exit;
+  if not IsTexReady(texHandle) then exit;
 
   texture := BorrowTexPtr(texHandle);
 
@@ -212,7 +227,7 @@ var
   px, py: smallint;
   ABGR: longword;
 begin
-  if not IsTexSet(texHandle) then exit;
+  if not IsTexReady(texHandle) then exit;
 
   texture := BorrowTexPtr(texHandle);
   ABGR := ARGBtoABGR(colour);
@@ -239,7 +254,7 @@ var
   alpha: byte;
   colour: longword;
 begin
-  if not IsTexSet(texHandle) then exit;
+  if not IsTexReady(texHandle) then exit;
 
   texture := BorrowTexPtr(texHandle);
 
@@ -276,22 +291,29 @@ var
   srcOffset: longword;
   alpha: byte;
 begin
-  if not IsTexSet(texHandle) then exit;
+  if not IsTexReady(texHandle) then exit;
 
   { Handle clipping }
 
-  startX := 0;
-  endX := srcW - 1;
   startY := 0;
   endY := srcH - 1;
 
-  if destX + startX < ClipX1 then startX := ClipX1 - destX;
-  if destX + endX > ClipX2 then endX := ClipX2 - destX;
+  if destY + startY < ClipY1 then
+    startY := ClipY1 - destY;
+  if destY + endY > ClipY2 then
+    endY := ClipY2 - destY;
 
-  if destY + startY < ClipY1 then startY := ClipY1 - destY;
-  if destY + endY > ClipY2 then endY := ClipY2 - destY;
+  startX := 0;
+  endX := srcW - 1;
+
+  if destX + startX < ClipX1 then
+    startX := ClipX1 - destX;
+  if destX + endX > ClipX2 then
+    endX := ClipX2 - destX;
 
   if (startX > endX) or (startY > endY) then exit;
+
+  { Render logic }
 
   texture := BorrowTexPtr(texHandle);
   texWidth4 := texture^.width * 4;
@@ -315,7 +337,6 @@ begin
   end;
 end;
 
-{ Stretch a sprite with nearest neighbour scaling }
 
 procedure SprStretch(
   const texHandle: TTextureHandle;
@@ -324,32 +345,67 @@ procedure SprStretch(
 var
   sx, sy: smallint;
   dx, dy: smallint;
-  srcPos: longword;
+  startDx, endDx, startDy, endDy: longint;
+
+  srcOffset: longword;
+  srcStride, srcRowOffset, destOffset: longword;
+
   texture: PSoftwareTex;
-  alpha: byte;
-  scaleX, scaleY: double;
-  colour: longword;
+  surface: PByteArray;
+  scaleX: double;
+  ABGR: longword;
 begin
-  if not IsTexSet(texHandle) then exit;
+  if not IsTexReady(texHandle) then exit;
+  if (destWidth <= 0) or (destHeight <= 0) then exit;
+
   texture := BorrowTexPtr(texHandle);
+  if (texture^.width <= 0) or (texture^.height <= 0) then exit;
 
+  { Handle clipping & edge cases }
+
+  if (destX > ClipX2) or (destY > ClipY2)
+    or (longint(destX) + destWidth - 1 < ClipX1)
+    or (longint(destY) + destHeight - 1 < ClipY1) then exit;
+
+  startDy := 0;
+  endDy := destHeight - 1;
+
+  if destY < clipy1 then
+    startDy := clipy1 - destY;
+
+  if longint(destY) + endDy > ClipY2 then
+    endDy := ClipY2 - destY;
+
+  startDx := 0;
+  endDx := destWidth - 1;
+
+  if destX < ClipX1 then
+    startDx := ClipX1 - destX;
+
+  if longint(destX) + endDx > ClipX2 then
+    endDx := ClipX2 - destX;
+
+  { Render logic }
+
+  surface := BorrowSurfacePtr;
   scaleX := texture^.width / destWidth;
-  scaleY := texture^.height / destHeight;
+  srcStride := longword(texture^.width) * 4;
 
-  for dy := 0 to destHeight - 1 do
-  for dx := 0 to destWidth - 1 do begin
-    if (destX + dx > ClipX2) or (destX + dx < ClipX1)
-      or (destY + dy > ClipY2) or (destY + dy < ClipY1) then continue;
+  for dy := startDy to endDy do begin
+    sy := (longint(dy) * texture^.height) div destHeight;
+    srcRowOffset := longword(sy) * srcStride;
 
-    sx := trunc(dx * scaleX);
-    sy := trunc(dy * scaleY);
+    for dx := startDx to endDx do begin
+      sx := trunc(dx * scaleX);
+      srcOffset := srcRowOffset + longword(sx) * 4;
+      ABGR := PLongWord(@texture^.pixelData[srcOffset])^;
 
-    srcPos := (sx + sy * texture^.width) * 4;
-    alpha := texture^.pixelData[srcPos + 3];
-    if alpha < 255 then continue;
+      if ABGR < $FF000000 then continue;
 
-    colour := UnsafeTexPGet(texture, sx, sy);
-    UnsafePSet(dx + destX, dy + destY, colour);
+      destOffset := (longword(dy + destY) * VGAWidth + longword(dx + destX)) * 4;
+
+      PLongWord(@surface^[destOffset])^ := ABGR;
+    end;
   end;
 end;
 
@@ -365,7 +421,8 @@ var
   scaleX, scaleY: double;
   colour: longword;
 begin
-  if not IsTexSet(texHandle) then exit;
+  if not IsTexReady(texHandle) then exit;
+
   texture := BorrowTexPtr(texHandle);
 
   scaleX := srcWidth / destWidth;
@@ -406,7 +463,7 @@ var
   alpha: byte;
   ABGR: longword;
 begin
-  if not IsTexSet(texHandle) then exit;
+  if not IsTexReady(texHandle) then exit;
 
   texture := BorrowTexPtr(texHandle);
   ABGR := ARGBtoABGR(colour);
@@ -427,55 +484,98 @@ begin
   end;
 end;
 
-{ flip: use SprFlips enum }
 procedure SprFlipped(
   const texHandle: TTextureHandle;
   const x, y: smallint;
-  const flip: smallint
-);
+  const flip: TSprFlips);
 var
-  sx, sy: smallint;
-  dx, dy: smallint;
-  srcPos: longword;
+  dx, dy: longint;
+  startX, endX, startY, endY: longint;
+  srcStartX, srcStartY: longint;
+  srcStepX, srcRowStep: longint;
+  srcRowOffset, srcOffset: longint;
+  destRowOffset, destOffset: longint;
+
   texture: PSoftwareTex;
-  alpha: byte;
-  colour: longword;
+  surface: PByteArray;
+  flipH, flipV: boolean;
+  ABGR: longword;
 begin
-  if flip = SprFlipNone then begin
+  if not IsTexReady(texHandle) then exit;
+
+  if flip = [] then begin
     Spr(texHandle, x, y);
     exit
   end;
 
-  if not IsTexSet(texHandle) then exit;
-
   texture := BorrowTexPtr(texHandle);
+  if texture = nil then exit;
+  if (texture^.width <= 0) or (texture^.height <= 0) then exit;
 
-  for sy := 0 to texture^.height - 1 do
-  for sx := 0 to texture^.width - 1 do begin
-    srcPos := (sx + sy * texture^.width) * 4;
-    alpha := texture^.pixelData[srcPos + 3];
+  { Handle edge cases & clipping }
 
-    if alpha < 255 then continue;
+  startY := y;
+  endY := y + texture^.height - 1;
 
-    dx := x + sx;
-    dy := y + sy;
+  if startY < ClipY1 then
+    startY := ClipY1;
 
-    case flip of
-      SprFlipHorizontal:
-        dx := x + texture^.width - sx - 1;
-      SprFlipVertical:
-        dy := y + texture^.height - sy - 1;
-      else begin
-        dx := x + texture^.width - sx - 1;
-        dy := y + texture^.height - sy - 1;
-      end
+  if endY > ClipY2 then
+    endY := ClipY2;
+
+  startX := x;
+  endX := x + texture^.width - 1;
+
+  if startX < ClipX1 then
+    startX := ClipX1;
+
+  if endX > ClipX2 then
+    endX := ClipX2;
+
+  { Fully offscreen }
+  if (startX > endX) or (startY > endY) then exit;
+
+  { Render logic }
+
+  flipH := SprFlipHorizontal in flip;
+  flipV := SprFlipVertical in flip;
+
+  if flipH then begin
+    srcStartX := (x + texture^.width - 1) - startX;
+    srcStepX := -4
+  end else begin
+    srcStartX := startX - x;
+    srcStepX := 4
+  end;
+
+  if flipV then begin
+    srcStartY := (y + texture^.height - 1) - startY;
+    srcRowStep := -texture^.width * 4;
+  end else begin
+    srcStartY := startY - y;
+    srcRowStep := texture^.width * 4;
+  end;
+
+  surface := BorrowSurfacePtr;
+  srcRowOffset := (srcStartY * texture^.width + srcStartX) * 4;
+  destRowOffset := (startY * VGAWidth + startX) * 4;
+
+  for dy := startY to endY do begin
+    srcOffset := srcRowOffset;
+    destOffset := destRowOffset;
+
+    for dx := startX to endX do begin
+      ABGR := PLongWord(@texture^.pixelData[srcOffset])^;
+
+      if ABGR >= $FF000000 then
+        PLongWord(@surface^[destOffset])^ := ABGR;
+
+      inc(srcOffset, srcStepX);
+      inc(destOffset, 4)
     end;
 
-    if (dx > ClipX2) or (dx < ClipX1)
-      or (dy > ClipY2) or (dy < ClipY1) then continue;
-
-    colour := UnsafeTexPGet(texture, sx, sy);
-    UnsafePSet(dx, dy, colour);
+    inc(srcRowOffset, srcRowStep);
+    inc(destRowOffset, VGAWidth * 4)
   end;
 end;
 
@@ -498,7 +598,7 @@ var
   halfW, halfH: smallint;
   maxRadius: smallint;
 begin
-  if not IsTexSet(texHandle) then exit;
+  if not IsTexReady(texHandle) then exit;
   texture := BorrowTexPtr(texHandle);
 
   { Negative for inverse transform }
@@ -543,7 +643,7 @@ var
   alpha: byte;
   colour: longword;
 begin
-  if not IsTexSet(src) or not IsTexSet(dest) then exit;
+  if not IsTexReady(src) or not IsTexReady(dest) then exit;
 
   srcTex := BorrowTexPtr(src);
   destTex := BorrowTexPtr(dest);
@@ -577,8 +677,8 @@ var
   alpha: byte;
   colour: longword;
 begin
-  if not IsTexSet(src) then PanicHalt('SprRegionToDest: src handle is unset!');
-  if not IsTexSet(dest) then PanicHalt('SprRegionToDest: dest handle is unset!');
+  if not IsTexReady(src) then PanicHalt('SprRegionToDest: src handle is unset!');
+  if not IsTexReady(dest) then PanicHalt('SprRegionToDest: dest handle is unset!');
 
   srcTex := BorrowTexPtr(src);
   destTex := BorrowTexPtr(dest);
@@ -601,8 +701,7 @@ begin
   end;
 end;
 
-{ flip: Use SprFlipped enum }
-procedure SprFlipInPlace(const texHandle: TTextureHandle; const flip: smallint);
+procedure SprFlipInPlace(const texHandle: TTextureHandle; const flip: TSprFlips);
 var
   texture: PSoftwareTex;
   px, py: smallint;
@@ -610,13 +709,13 @@ var
   tempColour: longword;
   pos1, pos2: longint;
 begin
-  if flip = SprFlipNone then exit;
-  if not IsTexSet(texHandle) then exit;
+  if flip = [] then exit;
+  if not IsTexReady(texHandle) then exit;
 
   texture := BorrowTexPtr(texHandle);
 
   { Horizontal flip }
-  if (flip and SprFlipHorizontal) <> 0 then begin
+  if SprFlipHorizontal in flip then begin
     halfW := texture^.width div 2;
 
     for py:=0 to texture^.height - 1 do
@@ -631,8 +730,7 @@ begin
     end;
   end;
 
-  { Vertical flip }
-  if (flip and SprFlipVertical) <> 0 then begin
+  if SprFlipVertical in flip then begin
     halfH := texture^.height div 2;
 
     for py:=0 to halfH - 1 do

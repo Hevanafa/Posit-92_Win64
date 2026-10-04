@@ -1,3 +1,8 @@
+{
+  Asset Registry unit
+  Part of Posit-92 game engine
+}
+
 unit P92AssetRegistry;
 
 {$Mode ObjFPC}
@@ -78,10 +83,14 @@ procedure JsRequestImage(texHandle: longint); external 'env' name 'JsRequestImag
 function RequestImage(const path: string): TTextureHandle;
 {$endif}
 
-{ function GetTextureEntryPtr(const texHandle: TTextureHandle): PSoftwareTexEntry; }
+function BorrowTexEntryPtr(const texHandle: TTextureHandle): PSoftwareTexEntry;
+function BorrowTexPtr(const texHandle: TTextureHandle): PSoftwareTex;
+function IsTexReady(const texHandle: TTextureHandle): boolean;
+procedure AssertTexSet(const varName: string; const texHandle: TTextureHandle);
 
 function BorrowBMFontEntryPtr(const bmfontHandle: TBMFontHandle): PBMFontEntry;
 function BorrowBMFontPtr(const bmfontHandle: TBMFontHandle): PBMFont;
+function IsBMFontReady(const bmfontHandle: TBMFontHandle): boolean;
 
 {$ifdef P92_WASM}
 procedure JsRequestBMFont(bmfontHandle: longint); external 'env' name 'JsRequestBMFont';
@@ -262,13 +271,39 @@ begin
 end;
 {$endif}
 
-{ function GetTextureEntryPtr(const texHandle: TTextureHandle): PSoftwareTexEntry;
+function BorrowTexEntryPtr(const texHandle: TTextureHandle): PSoftwareTexEntry;
 begin
   if (texHandle < low(textures)) or (texHandle > high(textures)) then
-    PanicHalt('GetTextureEntryPtr: Invalid texHandle: ' + I32Str(texHandle));
+    PanicHalt('BorrowTexEntryPtr: Invalid texHandle: ' + I32Str(texHandle));
 
-  GetTextureEntryPtr := @textures[texHandle]
-end; }
+  BorrowTexEntryPtr := @textures[texHandle]
+end;
+
+function BorrowTexPtr(const texHandle: TTextureHandle): PSoftwareTex;
+begin
+  BorrowTexPtr := @textures[texHandle].texture
+end;
+
+function IsTexReady(const texHandle: TTextureHandle): boolean;
+begin
+  IsTexReady := false;
+
+{$ifdef PanicOnInvalidHandle}
+  if imgHandle <= 0 then
+    panicHalt('Invalid imgHandle: ' + i32str(imgHandle));
+{$else}
+  if texHandle <= 0 then exit;
+{$endif}
+
+  IsTexReady := textures[texHandle].status = AssetStatusReady
+end;
+
+procedure AssertTexSet(const varName: string; const texHandle: TTextureHandle);
+begin
+  if not IsTexReady(texHandle) then
+    PanicHalt(varName + ' is unset!');
+end;
+
 
 function BorrowBMFontEntryPtr(const bmfontHandle: TBMFontHandle): PBMFontEntry;
 begin
@@ -283,11 +318,14 @@ end;
 
 function BorrowBMFontPtr(const bmfontHandle: TBMFontHandle): PBMFont;
 begin
-  { if bmfonts[bmfontHandle].status <> AssetStatusReady then
-    raise Exception.Create('Attempting to use bmfont ' + i32str(bmfontHandle)); }
-
   BorrowBMFontPtr := @bmfonts[bmfontHandle]
 end;
+
+function IsBMFontReady(const bmfontHandle: TBMFontHandle): boolean;
+begin
+  IsBMFontReady := bmfonts[bmfontHandle].status = AssetStatusReady;
+end;
+
 
 {$ifdef P92_WASM}
 function RequestBMFont(const path: string): longint;
