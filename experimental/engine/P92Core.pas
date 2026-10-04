@@ -313,8 +313,8 @@ begin
 
 {$IFDEF P92_SDL2}
   if bootConfig.LoadDefaultCursor then
-    { imgCursor := LoadImage('assets\images\cursor.png'); }
-    hwCursor := HwRequestImage('assets\images\cursor.png')
+    { imgCursor := LoadImage(DefaultCursorPath); }
+    hwCursor := HwRequestImage(DefaultCursorPath)
   else
     hwCursor := 0;
 {$ENDIF}
