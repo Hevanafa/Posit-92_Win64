@@ -6,7 +6,7 @@ program Game;
 
 uses
   SysUtils, DateUtils,
-  SDL2Wrapper,
+  SDL2,
   P92Core, P92CoreSDL2, P92AssetRegistry, P92Fonts, P92Maths,
   P92Graphics, P92BMFont,
   P92Keyboard, P92Mouse, P92Logger,
