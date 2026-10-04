@@ -6,8 +6,10 @@ unit Assets;
 
 interface
 
+uses P92AssetHandles;
+
 var
-  texSpecimenP92: array[0..1] of longint;
+  texSpecimenP92: array[0..1] of TTextureHandle;
 
 
 implementation
