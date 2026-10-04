@@ -404,14 +404,15 @@ begin
   surface := IMG_Load(strBuffer);
 
   if surface = nil then begin
-    writeLog('RequestImage: Failed to load ' + filename);
+    PanicHalt('RequestImage: Failed to load ' + filename);
     RequestImage := -1;
     exit
   end;
 
   if surface^.format^.BitsPerPixel <> 32 then begin
     WriteWarn('loadImage: Warning: ' + filename + ' is not 32 BPP!');
-    writeLog('loadImage: Convert it to 32 BPP then reload');
+    WriteLog('loadImage: Convert it to 32 BPP then reload');
+
     SDL_FreeSurface(surface);
     RequestImage := -1;
     exit
