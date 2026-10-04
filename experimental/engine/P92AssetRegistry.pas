@@ -590,12 +590,6 @@ var
 begin
   sndHandle := FindUnusedSoundHandle;
 
-{
-  writeLog('loadSound:');
-  writeLogI32(key);
-  writeLog(filename);
-}
-
   { Assuming that SDL2 mixer is always initialised }
   { if not soundsInitialised then exit; }
 
@@ -606,12 +600,12 @@ begin
   chunk := Mix_LoadWAV(strBuffer);
 
   if chunk = nil then begin
-    writeLog('loadSound: Failed to load ' + filename);
+    PanicHalt('RequestSound: Failed to load ' + filename);
     exit
   end;
 
   if sounds[sndHandle].chunk <> nil then begin
-    writeLog('loadSound: Warning: Possibly duplicate sound key ' + i32str(sndHandle));
+    writeLog('RequestSound: Warning: Possibly duplicate sound key ' + i32str(sndHandle));
     Mix_FreeChunk(sounds[sndHandle].chunk);
     exit
   end;
