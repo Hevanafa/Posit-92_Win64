@@ -410,8 +410,8 @@ begin
   end;
 
   if surface^.format^.BitsPerPixel <> 32 then begin
-    WriteWarn('loadImage: Warning: ' + filename + ' is not 32 BPP!');
-    WriteLog('loadImage: Convert it to 32 BPP then reload');
+    WriteWarn('RequestImage: Warning: ' + filename + ' is not 32 BPP!');
+    WriteLog('RequestImage: Convert it to 32 BPP then reload');
 
     SDL_FreeSurface(surface);
     RequestImage := -1;
@@ -457,7 +457,7 @@ begin
   {$I-} reset(f); {$I+}
 
   if IOResult <> 0 then begin
-    writeLog('Failed to open BMFont file: ' + filename);
+    PanicHalt('RequestBMFont: Failed to open BMFont file ' + filename);
     exit
   end;
 
