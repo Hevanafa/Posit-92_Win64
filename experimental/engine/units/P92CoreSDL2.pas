@@ -36,7 +36,10 @@ procedure HideCursor;
 procedure ShowCursor;
 
 procedure InitSDL;
+
+{ Handle SDL2 keyboard & mouse events }
 procedure HandleSDLEvents;
+
 procedure CleanupSDL;
 
 procedure MinimiseWindow;
