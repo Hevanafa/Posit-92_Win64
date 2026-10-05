@@ -102,7 +102,7 @@ begin
     vgaWidth div 2, vgaHeight * 3 div 4 - 10);
 
 
-  positNow := getTimer;
+  positNow := GetTimer;
 
   circfill(vgaWidth div 2, vgaHeight div 2, 2, Palette[1]);
 
