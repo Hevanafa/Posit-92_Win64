@@ -357,6 +357,18 @@ begin
 {$endif}
 end;
 
+
+{$IFDEF P92_SDL2}
+procedure P92UpdateSDL2;
+begin
+  UpdateDeltaTime;
+  IncrementFPS;
+
+  HandleSDLEvents;
+end;
+{$ENDIF}
+
+
 procedure P92Update;
 begin
 {$ifdef P92_WASM}
@@ -395,9 +407,7 @@ begin
   end;
 {$endif}
 {$ifdef P92_SDL2}
-  HandleSDLEvents;
-  UpdateDeltaTime;
-  IncrementFPS;
+  P92UpdateSDL2;
 {$endif}
 end;
 
