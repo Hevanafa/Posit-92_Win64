@@ -364,6 +364,32 @@ begin
 {$endif}
 end;
 
+{$IFDEF P92_SDL2}
+function SHGetKnownFolderPath(
+  rfid: PGUID;
+  dwFlags: DWORD;
+  hToken: THandle;
+  out ppszPath: PWideChar
+): HRESULT; stdcall; external 'shell32.dll';
+
+procedure CoTaskMemFree(pv: Pointer); stdcall; external 'ole32.dll';
+
+function GetDownloadsDir: AnsiString;
+const
+  GUIDDownloads: TGuid = '{374DE290-123F-4565-9164-39C4925E467B}';
+var
+  p: PWideChar;
+begin
+  GetDownloadsDir := '';
+
+  if SHGetKnownFolderPath(@GUIDDownloads, 0, 0, p) = S_OK then begin
+    GetDownloadsDir := UTF8Encode(UnicodeString(p));
+
+    { The shell allocates the string & it must be freed manually }
+    CoTaskMemFree(p);
+  end;
+end;
+
 procedure SDL2TakeScreenshot;
 var
   w, h: longint;
@@ -401,6 +427,7 @@ begin
 
   SDL_FreeSurface(screenshot)
 end;
+{$ENDIF}
 
 procedure TakeScreenshot;
 begin
