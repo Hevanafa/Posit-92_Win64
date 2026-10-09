@@ -546,6 +546,12 @@ begin
 {$ENDIF}
 
 {$IFDEF P92_WASM}
+  if screenshotHint <> '' then
+    PrintWrap(
+      screenshotHint,
+      0, VGAHeight - BootFontGlyphHeight,
+      VGAWidth);
+
 {$IFDEF P92_WEBGL}
   DrawMouse;
 
@@ -565,13 +571,13 @@ begin
 {$ENDIF}
 {$ENDIF}
 
+{$IFDEF P92_SDL2}
   if screenshotHint <> '' then
     PrintWrap(
       screenshotHint,
       0, VGAHeight - BootFontGlyphHeight * 2,
       VGAWidth);
 
-{$IFDEF P92_SDL2}
   if bootConfig.EnableDrawFPS then
     DrawFPS;
 
