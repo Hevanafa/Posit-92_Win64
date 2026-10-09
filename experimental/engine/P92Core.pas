@@ -394,7 +394,7 @@ procedure SDL2TakeScreenshot;
 var
   w, h: longint;
   screenshot: PSDL_Surface;
-  filename: AnsiString;
+  filename, fullpath: AnsiString;
   msg: AnsiString;
 begin
   { filename := 'test.png'; }
@@ -402,6 +402,8 @@ begin
     FormatDateTime('yyyy-mm-dd_hh-nn-ss', now),
     bootConfig.SDLScale
   ]);
+
+  fullpath := ConcatPaths([GetDownloadsDir, filename]);
 
   SDL_GetRendererOutputSize(renderer, @w, @h);
 
@@ -417,8 +419,8 @@ begin
     renderer, nil, SDL_PIXELFORMAT_RGBA32,
     screenshot^.pixels, screenshot^.pitch) = 0 then
   begin
-    if IMG_SavePNG(screenshot, PAnsiChar(filename)) = 0 then begin
-      msg := 'Saved as ' + filename;
+    if IMG_SavePNG(screenshot, PAnsiChar(fullpath)) = 0 then begin
+      msg := 'Saved as ' + fullpath;
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION,
         'Screenshot', PAnsiChar(msg), window);
     end;
