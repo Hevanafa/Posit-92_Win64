@@ -391,22 +391,25 @@ begin
 {$else}
     UpdateMouse;
 {$endif}
-
-    if bootConfig.enableScreenshotHotkey then begin
-      if lastF2 <> isKeyDown(SC_F2) then begin
-        lastF2 := isKeyDown(SC_F2);
-
-        if lastF2 then JsTakeScreenshot;
-      end;
-    end;
   end;
 {$endif}
 
 {$ifdef P92_SDL2}
-  HandleSDLEvents;
   UpdateDeltaTime;
   IncrementFPS;
+  HandleSDLEvents;
 {$endif}
+
+  if engineRunState = ersReady then begin
+    if bootConfig.EnableScreenshotHotkey then begin
+      if lastF2 <> isKeyDown(SC_F2) then begin
+        lastF2 := isKeyDown(SC_F2);
+
+        if lastF2 then
+          JsTakeScreenshot;
+      end;
+    end;
+  end;
 end;
 
 procedure DrawMouse;
