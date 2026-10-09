@@ -57,7 +57,7 @@ type
 
 {$IFDEF P92_SDL2}
 const
-  Posit92Version = '0.3.1';
+  Posit92Version = '0.3.2';
 
 type
   TCallback = procedure;
