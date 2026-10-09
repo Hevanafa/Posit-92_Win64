@@ -372,7 +372,10 @@ var
   msg: AnsiString;
 begin
   { filename := 'test.png'; }
-  filename := format('%s.png', [FormatDateTime('yyyy-mm-dd_hh-nn-ss', now)]);
+  filename := format('%s_%dx.png', [
+    FormatDateTime('yyyy-mm-dd_hh-nn-ss', now),
+    bootConfig.SDLScale
+  ]);
 
   SDL_GetRendererOutputSize(renderer, @w, @h);
 
