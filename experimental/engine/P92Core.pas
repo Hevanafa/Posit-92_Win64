@@ -371,7 +371,8 @@ var
   filename: AnsiString;
   msg: AnsiString;
 begin
-  filename := 'test.png';
+  { filename := 'test.png'; }
+  filename := format('%s.png', [FormatDateTime('yyyy-mm-dd_hh-nn-ss', now)]);
 
   SDL_GetRendererOutputSize(renderer, @w, @h);
 
