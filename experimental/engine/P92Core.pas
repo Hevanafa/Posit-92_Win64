@@ -392,6 +392,7 @@ begin
     end;
   end;
 {$endif}
+
 {$ifdef P92_SDL2}
   HandleSDLEvents;
   UpdateDeltaTime;
