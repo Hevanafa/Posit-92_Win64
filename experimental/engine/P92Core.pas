@@ -102,12 +102,21 @@ procedure HostCallOnPreload; external 'env' name 'HostCallOnPreload';
 procedure HostCallOnReady; external 'env' name 'HostCallOnReady';
 {$ENDIF}
 
-function GetBootConfig: TP92AppConfig;
-
+{$IFDEF P92_WASM}
 procedure P92Boot; public name 'P92Boot';
 procedure P92Update; public name 'P92Update';
 procedure P92Draw; public name 'P92Draw';
 procedure P92AfterDraw; public name 'P92AfterDraw';
+{$ENDIF}
+
+{$IFDEF P92_SDL2}
+procedure P92Boot;
+procedure P92Update;
+procedure P92Draw;
+procedure P92AfterDraw;
+{$ENDIF}
+
+function GetBootConfig: TP92AppConfig;
 
 procedure PrintChar(const c: char; const x, y: smallint);
 procedure Print(const txt: string; const x, y: smallint);

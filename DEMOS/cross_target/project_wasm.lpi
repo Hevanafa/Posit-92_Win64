@@ -28,7 +28,6 @@
       <Unit>
         <Filename Value="game.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="Game"/>
       </Unit>
     </Units>
   </ProjectOptions>
@@ -54,6 +53,9 @@
       <Debugging>
         <GenerateDebugInfo Value="False"/>
       </Debugging>
+      <Options>
+        <ExecutableType Value="Library"/>
+      </Options>
     </Linking>
     <Other>
       <WriteFPCLogo Value="False"/>
