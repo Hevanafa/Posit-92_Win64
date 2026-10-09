@@ -12,7 +12,7 @@ uses P92AssetHandles;
 
 {$IFDEF P92_WASM}
 const
-  Posit92Version = '0.6.2';
+  Posit92Version = '0.6.4';
 
 type
   TCallback = procedure;
@@ -104,12 +104,10 @@ procedure HostCallOnReady; external 'env' name 'HostCallOnReady';
 
 function GetBootConfig: TP92AppConfig;
 
-{$IFDEF P92_SDL2}
-procedure P92Boot;
-procedure P92Update;
-procedure P92Draw;
-procedure P92AfterDraw;
-{$ENDIF}
+procedure P92Boot; public name 'P92Boot';
+procedure P92Update; public name 'P92Update';
+procedure P92Draw; public name 'P92Draw';
+procedure P92AfterDraw; public name 'P92AfterDraw';
 
 procedure PrintChar(const c: char; const x, y: smallint);
 procedure Print(const txt: string; const x, y: smallint);
@@ -357,18 +355,6 @@ begin
 {$endif}
 end;
 
-
-{$IFDEF P92_SDL2}
-procedure P92UpdateSDL2;
-begin
-  UpdateDeltaTime;
-  IncrementFPS;
-
-  HandleSDLEvents;
-end;
-{$ENDIF}
-
-
 procedure P92Update;
 begin
 {$ifdef P92_WASM}
@@ -407,7 +393,9 @@ begin
   end;
 {$endif}
 {$ifdef P92_SDL2}
-  P92UpdateSDL2;
+  HandleSDLEvents;
+  UpdateDeltaTime;
+  IncrementFPS;
 {$endif}
 end;
 

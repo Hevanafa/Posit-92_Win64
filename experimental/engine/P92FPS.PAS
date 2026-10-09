@@ -39,8 +39,8 @@ end;
 procedure IncrementFPS;
 begin
   actualFPS := actualFPS + 1;
-  if GetTimer - lastFPSTime >= 1.0 then begin
-    lastFPSTime := GetTimer;
+  if getTimer - lastFPSTime >= 1.0 then begin
+    lastFPSTime := getTimer;
     lastFPS := actualFPS;
     actualFPS := 1
   end;
