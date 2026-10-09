@@ -364,14 +364,22 @@ begin
 {$endif}
 end;
 
-procedure TakeScreenshot;
+procedure SDL2TakeScreenshot;
 var
   w, h: integer;
   screenshot: PSDL_Surface;
 begin
-{$IFDEF P92_WASM} JsTakeScreenshot; {$ENDIF}
+{ TODO: Implement the screenshot logic }
+
+end;
+
+procedure TakeScreenshot;
+begin
+{$IFDEF P92_WASM}
+  JsTakeScreenshot
+{$ENDIF}
 {$IFDEF P92_SDL2}
-  { TODO: Implement the screenshot logic }
+  SDL2TakeScreenshot
 {$ENDIF}
 end;
 
