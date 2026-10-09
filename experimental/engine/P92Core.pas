@@ -368,6 +368,7 @@ procedure SDL2TakeScreenshot;
 var
   w, h: longint;
   screenshot: PSDL_Surface;
+  err: string;
 begin
   SDL_GetRendererOutputSize(renderer, @w, @h);
 
@@ -379,7 +380,14 @@ begin
     exit
   end;
 
-  { TODO: Implement save PNG logic }
+  if SDL_RenderReadPixels(
+    renderer, nil, SDL_PIXELFORMAT_RGBA32,
+    screenshot^.pixels, screenshot^.pitch) = 0 then
+      IMG_SavePNG(screenshot, PAnsiChar('test.png'))
+  else begin
+    err := SDL_GetError;
+    WriteWarn('SDL2TakeScreenshot: ReadPixels failed: ' + err);
+  end;
 
   SDL_FreeSurface(screenshot)
 end;
