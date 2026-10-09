@@ -8,6 +8,9 @@ uses
 {$IFDEF P92_SDL2}
   SysUtils, SDL2, P92CoreSDL2,
 {$ENDIF}
+{$IFDEF P92_WASM}
+  P92WasmHost,
+{$ENDIF}
   P92Core, P92Fonts, P92AssetRegistry,
   P92Keyboard, P92Mouse,
   P92Tex, P92TexDraw, P92Sounds,
