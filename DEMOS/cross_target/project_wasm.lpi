@@ -40,7 +40,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="..\..\experimental\units"/>
+      <OtherUnitFiles Value="..\..\experimental\engine"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <CodeGeneration>
@@ -54,9 +54,6 @@
       <Debugging>
         <GenerateDebugInfo Value="False"/>
       </Debugging>
-      <Options>
-        <ExecutableType Value="Library"/>
-      </Options>
     </Linking>
     <Other>
       <WriteFPCLogo Value="False"/>

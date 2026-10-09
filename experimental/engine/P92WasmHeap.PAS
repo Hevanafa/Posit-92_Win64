@@ -1,0 +1,581 @@
+{ 
+  Low-level memory allocator unit
+  Part of Posit-92 game engine
+
+  Memory layout (2 MB default)
+  - Pascal stack	(320KB)
+  - Video memory	(320x200x4 bytes, depending on bufferWidth and bufferHeight)
+  - Bucket pool region	(128KB, two-tier tier 1)
+  - Free list / two-directional linked list region	(two-tier tier 2)
+}
+
+unit P92WasmHeap;
+
+{$Mode ObjFPC}
+{$H-}{$J-}
+{$WARN 4056 off : Conversion between ordinals and pointers is not portable}
+
+{ Enable this to debug GetMem }
+{DEFINE P92_DEBUG_HEAP}
+
+interface
+
+{$IFDEF P92_WASM}
+
+const
+  WasmMemorySize = 2 * 1048576;  { 2 MB }
+  StackSize = 384 * 1024;
+  PoolSize = 128 * 1024;
+
+procedure InitHeapRegion(const startAddr: pointer);
+
+function BorrowHeapRegionStart: pointer;
+
+{ Accessible externally, in use by RequestImage }
+function WasmGetMem(const bytes: longword): pointer; public name 'WasmGetMem';
+procedure WasmFreeMem(const ptr: pointer);
+function WasmReAllocMem(const ptr: pointer; const newBytes: longword): pointer;
+function WasmAllocMem(const bytes: longword): pointer;
+function WasmMemSize(const ptr: pointer): PtrUInt;
+
+procedure JsReportGetMem(bytes: longint); external 'env' name 'JsReportGetMem';
+procedure JsReportFreeMem(bytes: longint); external 'env' name 'JsReportFreeMem';
+
+function BorrowBucketAllocRegionStart: pointer;
+function BorrowBucketAllocRegionEnd: pointer;
+
+function BorrowFreeListRegionStart: pointer;
+function BorrowFreeListRegionEnd: pointer;
+
+{$ENDIF}
+
+
+implementation
+
+{$IFDEF P92_WASM}
+
+uses P92Logger, P92Conversions, P92Panic;
+
+type
+  { Small heap: bucket allocator }
+  PPoolSlot = ^TPoolSlot;
+  TPoolSlot = record
+    next: PPoolSlot;
+  end;
+
+  TBucket = record
+    slotSize: longword;
+    freeHead: PPoolSlot;
+    regionStart: pbyte;
+    regionEnd: pbyte;
+  end;
+
+  { Large heap: Free list }
+  PBlockHeader = ^TBlockHeader;
+  TBlockHeader = record
+    size: longword;
+    isFree: boolean;
+    prev: PBlockHeader;
+    next: PBlockHeader;
+  end;
+
+  PBlockFooter = ^TBlockFooter;
+  TBlockFooter = record
+    size: longword;
+    isFree: boolean;
+  end;
+
+
+{ Small heap }
+
+const
+{ Fixed slot sizes for tier 1 pool buckets, in bytes
+
+  Covers typical small FPC allocations:
+  * 16: object headers, VMT pointers
+  * 32: typical AnsiString headers & small list nodes
+  * 64: small class instances or short string buffers
+  * 128: medium objects
+  * 256: larger objects
+}
+  BucketSizes: array[0..4] of longword = (16, 32, 64, 128, 256);
+  BucketCount = 5;
+
+
+{ Allocations at or below this size go to tier 1 pool
+
+  Anything above this goes to tier 2 free-list heap
+
+  This must match the largest value in BucketSizes }
+  PoolSizeClassMax = 256;
+
+
+{ Weight distribution across buckets
+
+  Weighted toward smaller buckets since the engine profile is
+  many of small objects rather than few large ones
+
+  The sum must match to TotalWeights }
+  BucketWeights: array[0..4] of longword = (30, 25, 20, 15, 10);
+  TotalWeights = 100;
+
+var
+  heapRegionStart: pointer;
+
+  { Bucket allocator }
+
+  { Inclusive: first byte of the pool }
+  bucketAllocStart,
+  { Exclusive }
+  bucketAllocEnd: PByte;
+
+  buckets: array[0..BucketCount-1] of TBucket;
+
+  { Free list allocator }
+
+  freeListStart, freeListEnd: PByte;
+  freeListHead: PBlockHeader;
+
+{ Slab allocation }
+
+procedure InitPoolAlloc;
+var
+  b: smallint; { bucket index }
+  rollingPtr: PByte;
+  regionStart: PByte;  { bucket region start }
+  slotCount: longword;
+  regionSize: longword;
+  i: smallint;
+begin
+  rollingPtr := bucketAllocStart;
+
+  for b:=0 to BucketCount-1 do begin
+    regionSize := (PoolSize * BucketWeights[b]) div TotalWeights;
+    regionStart := rollingPtr;
+    slotCount := regionSize div BucketSizes[b];
+
+    buckets[b].slotSize := BucketSizes[b];
+    buckets[b].freeHead := PPoolSlot(regionStart);
+
+    buckets[b].regionStart := regionStart;
+    buckets[b].regionEnd := pbyte(longword(regionStart) + regionSize);
+
+    for i:=0 to slotCount - 2 do begin
+      PPoolSlot(rollingPtr)^.next := PPoolSlot(rollingPtr + BucketSizes[b]);
+      inc(rollingPtr, BucketSizes[b])
+    end;
+
+    { Last slot points to nil }
+    PPoolSlot(rollingPtr)^.next := nil;
+    inc(rollingPtr, BucketSizes[b])
+  end;
+end;
+
+
+function FindBucket(const bytes: longword): smallint;
+var
+  a: word;
+begin
+  FindBucket := -1;
+
+  for a:=0 to BucketCount-1 do
+    if BucketSizes[a] >= bytes then begin
+      FindBucket := a;
+      exit
+    end;
+end;
+
+function FindBucketByPtr(const ptr: pointer): smallint;
+var
+  b: smallint;
+begin
+  FindBucketByPtr := -1;
+
+  for b:=0 to BucketCount-1 do
+    if (LongWord(ptr) >= longword(buckets[b].regionStart))
+      and (longword(ptr) < longword(buckets[b].regionEnd)) then begin
+        FindBucketByPtr := b;
+        exit
+      end;
+end;
+
+
+function PoolAlloc(const bytes: LongWord): pointer;
+var
+  b: smallint;
+  slot: PPoolSlot;
+begin
+  b := FindBucket(bytes);
+
+  if b = -1 then
+    PanicHalt('PoolAlloc: Unable to allocate a bucket! Requested size: ' + I32Str(bytes));
+
+  if buckets[b].freeHead = nil then
+    PanicHalt('PoolAlloc: No free buckets!');
+
+  slot := buckets[b].freeHead;
+  buckets[b].freeHead := slot^.next;
+  PoolAlloc := pointer(slot)
+end;
+
+procedure PoolFree(const ptr: pointer);
+var
+  b: smallint;
+  slot: PPoolSlot;
+begin
+  b := FindBucketByPtr(ptr);
+
+  if b = -1 then PanicHalt('poolFree: ' + I32Str(longword(ptr)) + 'doesn''t belong to the pool region!');
+
+  slot := PPoolSlot(ptr);
+  slot^.next := buckets[b].freeHead;
+  buckets[b].freeHead := slot
+end;
+
+
+{ Large allocator }
+
+function NextBlockInMemory(header: PBlockHeader): PBlockHeader;
+begin
+  NextBlockInMemory := PBlockHeader(
+    PByte(header) + sizeof(TBlockHeader) + header^.size + sizeof(TBlockFooter)
+  );
+end;
+
+function PrevBlockInMemory(header: PBlockHeader): PBlockHeader;
+var
+  prevFooter: PBlockFooter;
+begin
+  prevFooter := PBlockFooter(pbyte(header) - sizeof(TBlockFooter));
+
+  PrevBlockInMemory := PBlockHeader(
+    PByte(header) - sizeof(TBlockFooter) - prevFooter^.size - sizeof(TBlockHeader)
+  )
+end;
+
+procedure SetBlockState(header: PBlockHeader; size: longword; isFree: boolean);
+var
+  footer: PBlockFooter;
+begin
+  header^.size := size;
+  header^.isFree := isFree;
+
+  footer := PBlockFooter(pbyte(header) + sizeof(TBlockHeader) + size);
+  footer^.size := size;
+  footer^.isFree := isFree;
+end;
+
+function IsValidBlock(header: PBlockHeader): boolean;
+begin
+  IsValidBlock := (pbyte(header) >= freeListStart) and (pbyte(header) < freeListEnd)
+end;
+
+procedure InitLargeHeap(const baseAddr: pointer; const size: SizeUInt);
+var
+  firstBlock: PBlockHeader;
+  payloadSize: longword;
+begin
+  freeListStart := pbyte(baseAddr);
+  freeListEnd := pbyte(baseAddr + size);
+
+  { Make the entire region a free block }
+  firstBlock := PBlockHeader(freeListStart);
+  payloadSize := size - sizeof(TBlockHeader) - sizeof(TBlockFooter);
+
+  SetBlockState(firstBlock, payloadSize, true);
+
+  firstBlock^.prev := nil;
+  firstBlock^.next := nil;
+
+  freeListHead := firstBlock;
+end;
+
+procedure RemoveFromFreeList(block: PBlockHeader);
+begin
+  if block^.prev <> nil then
+    block^.prev^.next := block^.next
+  else
+    freeListHead := block^.next;  { was the head }
+
+  if block^.next <> nil then
+    block^.next^.prev := block^.prev;
+
+  block^.prev := nil;
+  block^.next := nil;
+end;
+
+const
+  MinBlockSize = 32;
+
+{ Helper for large alloc }
+procedure SplitBlock(block: PBlockHeader; needed: longword);
+var
+  remainder: PBlockHeader;
+  leftover: longword;
+  totalOverhead: longword;
+begin
+  totalOverhead := sizeof(TBlockHeader) + sizeof(TBlockFooter);
+
+  if block^.size < needed + totalOverhead + MinBlockSize then
+    exit;
+
+  leftover := block^.size - needed - totalOverhead;
+
+  SetBlockState(block, needed, block^.isFree);
+
+  remainder := NextBlockInMemory(block);
+  SetBlockState(remainder, leftover, true);
+
+  remainder^.prev := nil;
+  remainder^.next := freeListHead;
+
+  if freeListHead <> nil then
+    freeListHead^.prev := remainder;
+
+  freeListHead := remainder;
+end;
+
+procedure InsertToFreeList(block: PBlockHeader);
+begin
+  block^.prev := nil;
+  block^.next := freeListHead;
+
+  if freeListHead <> nil then
+    freeListHead^.prev := block;
+
+  freeListHead := block
+end;
+
+
+function LargeAlloc(const bytes: longword): pointer;
+var
+  current: PBlockHeader;
+begin
+  LargeAlloc := nil;
+  current := freeListHead;
+
+  while current <> nil do begin
+    if current^.size >= bytes then begin
+      SplitBlock(current, bytes);  { Shrink if possible }
+      RemoveFromFreeList(current);
+      SetBlockState(current, current^.size, false);
+
+      LargeAlloc := pointer(PByte(current) + SizeOf(TBlockHeader));
+      exit
+    end;
+
+    current := current^.next
+  end;
+
+  { nil = out of memory }
+end;
+
+procedure LargeFree(p: pointer);
+var
+  header: PBlockHeader;
+  neighbour: PBlockHeader;
+  newSize: longword;
+begin
+  if p = nil then exit;
+
+  header := PBlockHeader(pbyte(p) - sizeof(TBlockHeader));
+
+{$ifdef P92_DEBUG_HEAP}
+  assert(IsValidBlock(header), 'LargeFree: pointer outside heap');
+{$endif}
+
+  SetBlockState(header, header^.size, true);
+
+  { absorb the next block }
+  neighbour := NextBlockInMemory(header);
+
+  if IsValidBlock(neighbour) and neighbour^.isFree then begin
+    RemoveFromFreeList(neighbour);
+
+    newSize :=
+      header^.size + sizeof(TBlockHeader) + sizeof(TBlockFooter)
+      + neighbour^.size;
+
+    SetBlockState(header, newSize, true);
+  end;
+
+  { absorb the previous block }
+  neighbour := PrevBlockInMemory(header);
+
+  if IsValidBlock(neighbour) and neighbour^.isFree then begin
+    RemoveFromFreeList(neighbour);
+
+    newSize :=
+      neighbour^.size + sizeof(TBlockHeader) + sizeof(TBlockFooter)
+      + header^.size;
+
+    SetBlockState(neighbour, newSize, true);
+    header := neighbour
+  end;
+
+  InsertToFreeList(header)
+end;
+
+function LargeMemSize(const ptr: pointer): PtrUInt;
+var
+  header: PBlockHeader;
+begin
+  header := PBlockHeader(pbyte(ptr) - sizeof(TBlockHeader));
+  LargeMemSize := header^.size
+end;
+
+{ Begin generic allocator functions }
+
+function BorrowHeapRegionStart: pointer;
+begin
+  BorrowHeapRegionStart := heapRegionStart
+end;
+
+
+function WasmGetMem(const bytes: longword): pointer;
+begin
+{$ifdef P92_DEBUG_HEAP}
+  JsReportGetMem(bytes);
+{$endif}
+
+  if bytes <= PoolSizeClassMax then begin
+    WasmGetMem := PoolAlloc(bytes);
+    exit
+  end;
+
+  WasmGetMem := LargeAlloc(bytes);
+end;
+
+
+procedure WasmFreeMem(const ptr: pointer);
+begin
+  if ptr = nil then exit;
+
+  if (PByte(ptr) >= bucketAllocStart) and (PByte(ptr) < bucketAllocEnd) then begin
+    PoolFree(ptr);
+    exit
+  end;
+
+  LargeFree(ptr);
+end;
+
+
+function WasmReAllocMem(const ptr: pointer; const newBytes: longword): pointer;
+var
+  b: smallint;
+  oldSize: longword;
+begin
+  if (longword(ptr) >= longword(bucketAllocStart))
+    and (longword(ptr) < longword(bucketAllocEnd)) then begin
+      b := FindBucketByPtr(ptr);
+      oldSize := buckets[b].slotSize;
+
+      WasmReAllocMem := WasmGetMem(newBytes);
+
+      if WasmReAllocMem <> nil then begin
+        if newBytes < oldSize then
+          move(ptr^, WasmReAllocMem^, newBytes)
+        else
+          move(ptr^, WasmReAllocMem^, oldSize);
+
+        PoolFree(ptr)
+      end;
+
+      exit
+    end;
+
+  if ptr = nil then begin
+    WasmReAllocMem := WasmGetMem(newBytes);
+    exit
+  end;
+
+  if newBytes = 0 then begin
+    WasmFreeMem(ptr);
+    WasmReAllocMem := nil;
+    exit
+  end;
+
+  { Large realloc }
+  oldSize := LargeMemSize(ptr);
+
+  if newBytes = oldSize then begin
+    WasmReAllocMem := ptr;
+    exit
+  end;
+
+  WasmReAllocMem := WasmGetMem(newBytes);
+  if WasmReAllocMem <> nil then begin
+    move(ptr^, WasmReAllocMem^, oldSize);
+    LargeFree(ptr)
+  end;
+end;
+
+
+function WasmAllocMem(const bytes: longword): pointer;
+begin
+  WasmAllocMem := WasmGetMem(bytes);
+
+  if WasmAllocMem <> nil then
+    fillchar(WasmAllocMem^, bytes, 0)
+end;
+
+function WasmMemSize(const ptr: pointer): PtrUInt;
+var
+  idx: smallint;
+begin
+  if ptr = nil then begin
+    WasmMemSize := 0;
+    exit
+  end;
+
+  { Pool: Find which bucket owns this address }
+  idx := FindBucketByPtr(ptr);
+  if idx >=0 then begin
+    WasmMemSize := buckets[idx].slotSize;
+    exit
+  end;
+
+  WasmMemSize := LargeMemSize(ptr)
+end;
+
+procedure InitHeapRegion(const startAddr: pointer);
+var
+  largeHeapSize: SizeUInt;
+begin
+  heapRegionStart := startAddr;
+
+  bucketAllocStart := PByte(startAddr);
+  bucketAllocEnd := PByte(startAddr + PoolSize);
+
+  InitPoolAlloc;
+
+  largeHeapSize := WasmMemorySize - (longword(startAddr) + PoolSize);
+  InitLargeHeap(pointer(startAddr + PoolSize), largeHeapSize)
+end;
+
+
+function BorrowBucketAllocRegionStart: pointer;
+begin
+  BorrowBucketAllocRegionStart := bucketAllocStart
+end;
+
+function BorrowBucketAllocRegionEnd: pointer;
+begin
+  BorrowBucketAllocRegionEnd := bucketAllocEnd
+end;
+
+
+function BorrowFreeListRegionStart: pointer;
+begin
+  BorrowFreeListRegionStart := freeListStart
+end;
+
+function BorrowFreeListRegionEnd: pointer;
+begin
+  BorrowFreeListRegionEnd := freeListEnd
+end;
+
+{$ENDIF}
+
+end.
+

@@ -5,8 +5,10 @@ program Game;
 {$J-}  { Don't allow assignments to typed consts }
 
 uses
-  SysUtils, SDL2,
-  P92Core, P92CoreSDL2, P92Fonts, P92AssetRegistry,
+{$IFDEF P92_SDL2}
+  SysUtils, SDL2, P92CoreSDL2,
+{$ENDIF}
+  P92Core, P92Fonts, P92AssetRegistry,
   P92Keyboard, P92Mouse,
   P92Tex, P92TexDraw, P92Sounds,
   P92Logger, P92Timing, P92VGA,

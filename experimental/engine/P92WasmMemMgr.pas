@@ -1,0 +1,79 @@
+{
+  Wasm Memory Manager
+  Part of Posit-92 game engine
+  By Hevanafa
+  
+  High-level wrapper for WasmHeap
+}
+
+unit P92WasmMemMgr;
+
+{$Mode ObjFPC}
+{$Notes OFF}
+
+interface
+
+{$IFDEF P92_WASM}
+
+procedure InitHeapMgr;
+
+{$ENDIF}
+
+
+implementation
+
+{$IFDEF P92_WASM}
+
+uses P92WasmHeap;
+
+var
+  customMemMgr: TMemoryManager;
+
+function whGetMem(size: ptruint): pointer;
+begin
+  whGetMem := WasmGetMem(size)
+end;
+
+function whFreeMem(p: pointer): ptruint;
+begin
+  WasmFreeMem(p);
+  whFreeMem := 0
+end;
+
+function whFreeMemSize(p: pointer; size: ptruint): ptruint;
+begin
+  { Read size before freeing }
+  whFreeMemSize := WasmMemSize(p);
+  WasmFreeMem(p)
+end;
+
+function whReAllocMem(var p: pointer; size: ptruint): pointer;
+begin
+  whReAllocMem := WasmReAllocMem(p, size)
+end;
+
+function whAllocMem(size: ptruint): pointer;
+begin
+  whAllocMem := WasmAllocMem(size)
+end;
+
+function whMemSize(p: pointer): ptruint;
+begin
+  whMemSize := WasmMemSize(p)
+end;
+
+procedure InitHeapMgr;
+begin
+  customMemMgr.GetMem := @whGetMem;
+  customMemMgr.FreeMem := @whFreeMem;
+  customMemMgr.FreeMemSize := @whFreeMemSize;
+  customMemMgr.ReAllocMem := @whReAllocMem;
+  customMemMgr.AllocMem := @whAllocMem;
+  customMemMgr.MemSize := @whMemSize;
+
+  SetMemoryManager(customMemMgr)
+end;
+
+{$ENDIF}
+
+end.
