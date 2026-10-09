@@ -10,7 +10,7 @@ uses
   P92Core, P92CoreSDL2, P92AssetRegistry, P92Fonts, P92Maths,
   P92Graphics, P92BMFont,
   P92Keyboard, P92Mouse, P92Logger,
-  P92Tex, P92TexDraw, p92texEffects,
+  P92Tex, P92TexDraw, P92TexEffects, P92TexOps,
   P92Timing, P92FPS, P92VGA,
   Assets;
 
@@ -53,7 +53,9 @@ procedure OnReady;
 begin
   HideCursor;
 
-  ReplaceColour(BorrowBMFontPtr(GetDefaultFontHandle)^.texHandle, white, Palette[1]);
+  ReplaceTexColour(
+    BorrowBMFontPtr(GetDefaultFontHandle)^.texHandle,
+    white, Palette[1]);
 
   { Init your game state here }
   gameTime := 0.0

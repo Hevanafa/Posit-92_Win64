@@ -9,8 +9,8 @@ uses
   P92Core, P92CoreSDL2, P92Fonts, P92AssetRegistry,
   P92Keyboard, P92Mouse,
   P92Logger,
-  P92Tex, P92TexDraw,
-  P92Colour, P92Graphics, P92Timing, P92VGA,
+  P92Colour, P92Tex, P92TexDraw,
+  P92Graphics, P92Timing, P92VGA,
   Assets;
 
 type
@@ -156,7 +156,7 @@ var
 begin
   { cls($FF6495ED); }
   for a:=0 to vgaHeight - 1 do
-    HLine(0, vgaWidth - 1, a, LerpColour($FFFFB08A, $FFD4C5E8, a / (vgaHeight - 1)));
+    HLine(0, vgaWidth - 1, a, MixColours($FFFFB08A, $FFD4C5E8, a / (vgaHeight - 1)));
 
   for a:=0 to high(ripples) do begin
     if not ripples[a].alive then continue;
