@@ -368,8 +368,11 @@ procedure SDL2TakeScreenshot;
 var
   w, h: longint;
   screenshot: PSDL_Surface;
-  err: string;
+  filename: AnsiString;
+  msg: AnsiString;
 begin
+  filename := 'test.png';
+
   SDL_GetRendererOutputSize(renderer, @w, @h);
 
   { The pixel format must match vgaTexture }
@@ -383,11 +386,14 @@ begin
   if SDL_RenderReadPixels(
     renderer, nil, SDL_PIXELFORMAT_RGBA32,
     screenshot^.pixels, screenshot^.pitch) = 0 then
-      IMG_SavePNG(screenshot, PAnsiChar('test.png'))
-  else begin
-    err := SDL_GetError;
-    WriteWarn('SDL2TakeScreenshot: ReadPixels failed: ' + err);
-  end;
+  begin
+    if IMG_SavePNG(screenshot, PAnsiChar(filename)) = 0 then begin
+      msg := 'Saved as ' + filename;
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION,
+        'Screenshot', PAnsiChar(msg), window);
+    end;
+  end else
+    WriteWarn('SDL2TakeScreenshot: SavePNG failed: ' + SDL_GetError);
 
   SDL_FreeSurface(screenshot)
 end;
