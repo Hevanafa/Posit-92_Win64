@@ -366,11 +366,22 @@ end;
 
 procedure SDL2TakeScreenshot;
 var
-  w, h: integer;
+  w, h: longint;
   screenshot: PSDL_Surface;
 begin
-{ TODO: Implement the screenshot logic }
+  SDL_GetRendererOutputSize(renderer, @w, @h);
 
+  { The pixel format must match vgaTexture }
+  screenshot := SDL_CreateRGBSurfaceWithFormat(0, w, h, 32, SDL_PIXELFORMAT_RGBA32);
+
+  if screenshot = nil then begin
+    WriteWarn('SDL2TakeScreenshot: Unable to create a screenshot');
+    exit
+  end;
+
+  { TODO: Implement save PNG logic }
+
+  SDL_FreeSurface(screenshot)
 end;
 
 procedure TakeScreenshot;
