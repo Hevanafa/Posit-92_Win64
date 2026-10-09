@@ -434,7 +434,7 @@ begin
         'Screenshot', PAnsiChar(msg), window);
       }
       screenshotHint := msg;
-      screenshotEndTick := GetTimer + 2.0;
+      screenshotEndTick := GetTimer + 3.0;
     end;
   end else
     WriteWarn('SDL2TakeScreenshot: SavePNG failed: ' + SDL_GetError);
@@ -488,6 +488,8 @@ begin
   IncrementFPS;
   HandleSDLEvents;
 {$endif}
+  if (screenshotHint <> '') and (getTimer >= screenshotEndTick) then
+    screenshotHint := '';
 
   if engineRunState = ersReady then begin
     if bootConfig.EnableScreenshotHotkey then begin
@@ -546,15 +548,21 @@ begin
 {$ENDIF}
 {$ENDIF}
 
+  if screenshotHint <> '' then
+    PrintWrap(
+      screenshotHint,
+      0, VGAHeight - BootFontGlyphHeight * 2,
+      VGAWidth);
+
 {$IFDEF P92_SDL2}
   if bootConfig.EnableDrawFPS then
     DrawFPS;
 
-  VgaUpload;
+  VGAUpload;
 
   { Begin hardware layer }
   DrawMouse;
-  VgaPresent
+  VGAPresent;
 {$ENDIF}
 end;
 
