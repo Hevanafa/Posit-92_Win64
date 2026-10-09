@@ -201,6 +201,8 @@ var
 
   { Used by screenshot }
   lastF2: boolean;
+  screenshotHint: string;
+  screenshotEndTick: double;
 
   fpsTop, fpsRight: smallint;
 
@@ -427,8 +429,12 @@ begin
   begin
     if IMG_SavePNG(screenshot, PAnsiChar(fullpath)) = 0 then begin
       msg := 'Saved as ' + fullpath;
+      {
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION,
         'Screenshot', PAnsiChar(msg), window);
+      }
+      screenshotHint := msg;
+      screenshotEndTick := GetTimer + 2.0;
     end;
   end else
     WriteWarn('SDL2TakeScreenshot: SavePNG failed: ' + SDL_GetError);
