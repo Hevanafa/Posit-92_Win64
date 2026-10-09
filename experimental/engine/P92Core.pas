@@ -77,7 +77,10 @@ type
     DefaultBMFontPath: string;
 
     TargetFPS: smallint;
+
     EnableScreenshotHotkey: boolean;
+    { default: empty string, Downloads folder }
+    ScreenshotsDir: string;
 
     LoadDefaultCursor: boolean;
     EnableDrawFPS: boolean;
@@ -403,7 +406,10 @@ begin
     bootConfig.SDLScale
   ]);
 
-  fullpath := ConcatPaths([GetDownloadsDir, filename]);
+  if bootConfig.ScreenshotsDir <> '' then
+    fullpath := ConcatPaths([bootConfig.ScreenshotsDir, filename])
+  else
+    fullpath := ConcatPaths([GetDownloadsDir, filename]);
 
   SDL_GetRendererOutputSize(renderer, @w, @h);
 
@@ -718,7 +724,9 @@ begin
     DefaultBMFontPath := 'assets\fonts\p92_sans_8_regular.txt';
 
     TargetFPS := 60;
+
     EnableScreenshotHotkey := true;
+    ScreenshotsDir := '';
 
     LoadDefaultCursor := true;
     EnableDrawFPS := false;
