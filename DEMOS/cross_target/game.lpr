@@ -1,4 +1,9 @@
+{$IFDEF P92_SDL2}
 program Game;
+{$ENDIF}
+{$IFDEF P92_WASM}
+library Game;
+{$ENDIF}
 
 {$Mode ObjFPC}
 {$H+}  { Use AnsiStrings }
@@ -93,6 +98,13 @@ end.
 {$ENDIF}
 
 {$IFDEF P92_WASM}
+exports
+  Init,
+  OnPreload,
+  OnReady,
+  Update,
+  Draw;
+
 begin
   { Entry point is intentionally left empty }
 end.
