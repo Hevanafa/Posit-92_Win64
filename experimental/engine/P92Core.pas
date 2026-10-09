@@ -488,7 +488,7 @@ begin
   IncrementFPS;
   HandleSDLEvents;
 {$endif}
-  if (screenshotHint <> '') and (getTimer >= screenshotEndTick) then
+  if (screenshotHint <> '') and (GetTimer >= screenshotEndTick) then
     screenshotHint := '';
 
   if engineRunState = ersReady then begin
