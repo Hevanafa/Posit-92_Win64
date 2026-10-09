@@ -1,0 +1,650 @@
+"use strict";
+var debugEngineCalls = true;
+var debugRequests = true;
+class Posit92 {
+    static Version = "0.6.4";
+    #wasmSource = "game.wasm";
+    #TargetFPS;
+    #FrameTime;
+    #bufferWidth;
+    #bufferHeight;
+    #canvas;
+    canvasCtx = null;
+    glCtx = null;
+    #wasm = null;
+    get WasmInstance() {
+        return this.#wasm;
+    }
+    #midnightOffset = 0;
+    #done = false;
+    #lastFrameTime = 0.0;
+    #importObject = {
+        env: {
+            _haltproc: this.#HandleHaltProc.bind(this),
+            JsInitWasmMemory: this.#InitWasmMemory.bind(this),
+            JsSetTitle: this.#SetTitle.bind(this),
+            JsCreateCanvas: this.#CreateCanvas.bind(this),
+            JsInitCanvasCtx: this.#InitCanvasCtx.bind(this),
+            JsSetTargetFPS: this.#SetTargetFPS.bind(this),
+            JsRequestImage: this.RequestImage.bind(this),
+            HostCallOnPreload: this.#OnPreload.bind(this),
+            HostCallOnReady: this.#OnReady.bind(this),
+            SignalDone: this.#SignalDone.bind(this),
+            ShowCursor: this.#ShowCursor.bind(this),
+            HideCursor: this.#HideCursor.bind(this),
+            FitCanvas: this.#FitCanvas.bind(this),
+            HideLoadingOverlay: this.#HideLoadingOverlay.bind(this),
+            ToggleFullscreen: this.#ToggleFullscreen.bind(this),
+            GetFullscreenState: this.#GetFullscreenState.bind(this),
+            EndFullscreen: this.#EndFullscreen.bind(this),
+            JsTakeScreenshot: this.#TakeScreenshot.bind(this),
+            IsKeyDown: this.#IsKeyDown.bind(this),
+            WriteLogF32: value => console.log("Pascal (f32):", value),
+            WriteLogI32: value => console.log("Pascal (i32):", value),
+            FlushLog: this.#PascalFlushLog.bind(this),
+            JsGetMouseX: this.#GetMouseX.bind(this),
+            JsGetMouseY: this.#GetMouseY.bind(this),
+            JsGetMouseButton: this.#GetMouseButton.bind(this),
+            JsPanicHalt: this.#PanicHalt.bind(this),
+            GetTimer: this.#GetTimer.bind(this),
+            GetFullTimer: this.#GetFullTimer.bind(this),
+            JsReportGetMem: this.#ReportGetMem.bind(this),
+            JsReportFreeMem: this.#ReportFreeMem.bind(this),
+            VGAUpload: this.#VGAUpload.bind(this),
+            VGAPresent: this.#VGAPresent.bind(this),
+        }
+    };
+    get WasmImportObject() {
+        return this.#importObject;
+    }
+    #HandleHaltProc(exitcode) {
+        console.log("Programme halted with code:", exitcode);
+        this.Cleanup();
+        this.#done = true;
+    }
+    #SignalDone() {
+        this.Cleanup();
+        this.#done = true;
+        window.parent.postMessage({
+            from: "posit-92",
+            type: "done"
+        }, window.location.origin);
+    }
+    constructor() {
+    }
+    #SetTitle() {
+        const newTitle = this.ReadInteropBuffer();
+        document.title = newTitle;
+    }
+    #CreateCanvas(width, height) {
+        const canvasID = this.ReadInteropBuffer();
+        this.#canvas = document.createElement("canvas");
+        this.#canvas.id = canvasID;
+        this.#canvas.className = "scale-fit";
+        this.#canvas.setAttribute("width", "" + width);
+        this.#canvas.setAttribute("height", "" + height);
+        document.body.prepend(this.#canvas);
+        this.#bufferWidth = width;
+        this.#bufferHeight = height;
+    }
+    #InitCanvasCtx() {
+        const renderer = this.ReadInteropBuffer();
+        if (renderer == "2d")
+            this.canvasCtx = this.#canvas.getContext("2d");
+        else if (renderer == "webgl")
+            this.glCtx = this.#canvas.getContext(renderer);
+        else
+            throw new Error("Unknown renderer: " + renderer);
+    }
+    #SetTargetFPS(fps) {
+        this.#TargetFPS = fps;
+        this.#FrameTime = 1000 / this.#TargetFPS;
+    }
+    #LoadMidnightOffset() {
+        const now = new Date();
+        const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        this.#midnightOffset = midnight.getTime();
+    }
+    SetupImportObject() { }
+    async #InitWebAssembly() {
+        this.SetupImportObject();
+        Object.freeze(this.#importObject);
+        const response = await fetch(this.#wasmSource);
+        if (response.body == null)
+            throw new Error("Missing response.body");
+        let loaded = 0;
+        const reader = response.body.getReader();
+        const chunks = [];
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done)
+                break;
+            chunks.push(value);
+            loaded += value.length;
+            this.OnWasmProgress(loaded);
+        }
+        const bytes = new Uint8Array(loaded);
+        let pos = 0;
+        for (const chunk of chunks) {
+            bytes.set(chunk, pos);
+            pos += chunk.length;
+        }
+        const result = await WebAssembly.instantiate(bytes.buffer, this.#importObject);
+        this.#wasm = result.instance;
+    }
+    OnWasmProgress(loaded) {
+        const loadedKB = Math.ceil(loaded / 1024);
+        if (loadedKB > 0)
+            this.#SetLoadingText(`Downloading engine... ${loadedKB} KB received`);
+        else
+            this.#SetLoadingText(`Downloading engine...`);
+    }
+    #InitWasmMemory(requiredSize) {
+        const pages = this.#wasm.exports.memory.buffer.byteLength / 65536;
+        const requiredPages = Math.ceil(requiredSize / 65536);
+        if (pages < requiredPages)
+            this.#wasm.exports.memory.grow(requiredPages - pages);
+    }
+    async InitRuntime() {
+        this.#LoadMidnightOffset();
+        await this.#InitWebAssembly();
+        this.#wasm.exports.Init();
+        this.#InitKeyboard();
+        this.#InitMouse();
+    }
+    #AddOutOfFocusFix() {
+        this.#canvas.addEventListener("click", () => {
+            this.#canvas.tabIndex = 0;
+            this.#canvas.focus();
+        });
+    }
+    Cleanup() {
+        this.#ShowCursor();
+    }
+    async RequestImage(texHandle) {
+        const url = this.ReadInteropBuffer();
+        if (debugRequests)
+            console.log("RequestImage", texHandle, url);
+        try {
+            const img = await this.LoadImageFromURL(url);
+            const tempCanvas = document.createElement("canvas");
+            tempCanvas.width = img.width;
+            tempCanvas.height = img.height;
+            const tempCtx = tempCanvas.getContext("2d");
+            if (tempCtx == null)
+                throw new Error("Error getting 2D canvas context");
+            tempCtx.drawImage(img, 0, 0);
+            const imageData = tempCtx.getImageData(0, 0, img.width, img.height);
+            const wasmMemory = new Uint8Array(this.#wasm.exports.memory.buffer);
+            const byteSize = img.width * img.height * 4;
+            const wasmPtr = this.#wasm.exports.WasmGetMem(byteSize);
+            wasmMemory.set(imageData.data, wasmPtr);
+            this.#wasm.exports.PascalImageLoaded(texHandle, img.width, img.height, wasmPtr);
+        }
+        catch (error) {
+            console.error(error);
+            const lines = [
+                "Failed to load image",
+                "",
+                "Path: " + url
+            ];
+            if (error instanceof Error)
+                lines.push("Reason: " + error.message);
+            else
+                lines.push("Reason: " + error);
+            this.PanicHaltDisplay(lines.join("\n"));
+            this.#wasm.exports.PascalImageFailed(texHandle, 0);
+        }
+    }
+    #ShowCursor() {
+        this.#canvas.style.removeProperty("cursor");
+    }
+    #HideCursor() {
+        this.#canvas.style.cursor = "none";
+    }
+    #AddResizeListener() {
+        window.addEventListener("resize", this.#HandleResize.bind(this));
+    }
+    #HandleResize() {
+        this.#FitCanvas();
+    }
+    #FitCanvas() {
+        const aspectRatio = this.#bufferWidth / this.#bufferHeight;
+        const [windowWidth, windowHeight] = [window.innerWidth, window.innerHeight];
+        const windowRatio = windowWidth / windowHeight;
+        let w = 0, h = 0;
+        if (windowRatio > aspectRatio) {
+            h = windowHeight;
+            w = h * aspectRatio;
+        }
+        else {
+            w = windowWidth;
+            h = w / aspectRatio;
+        }
+        if (this.#canvas != null) {
+            this.#canvas.style.width = w + "px";
+            this.#canvas.style.height = h + "px";
+        }
+    }
+    #SetLoadingText(text) {
+        const div = document.querySelector("#loading-overlay > div");
+        if (div == null)
+            return;
+        div.innerHTML = text;
+    }
+    #HideLoadingOverlay() {
+        const div = document.getElementById("loading-overlay");
+        if (div == null)
+            return;
+        div.classList.add("hidden");
+        this.#SetLoadingText("");
+    }
+    #ToggleFullscreen() {
+        if (!this.#GetFullscreenState())
+            this.#canvas.requestFullscreen();
+        else
+            document.exitFullscreen();
+    }
+    #GetFullscreenState() {
+        return document.fullscreenElement != null;
+    }
+    #EndFullscreen() {
+        if (this.#GetFullscreenState())
+            document.exitFullscreen();
+    }
+    #SaveCanvasBase(filename) {
+        const anchor = document.createElement("a");
+        anchor.href = this.#canvas.toDataURL();
+        anchor.download = filename;
+        anchor.click();
+    }
+    #SaveCanvas2x(filename) {
+        const w = this.#bufferWidth;
+        const h = this.#bufferHeight;
+        const offscreen = document.createElement("canvas");
+        offscreen.width = w * 2;
+        offscreen.height = h * 2;
+        const offCtx = offscreen.getContext("2d");
+        offCtx.imageSmoothingEnabled = false;
+        offCtx.drawImage(this.#canvas, 0, 0, w * 2, h * 2);
+        const anchor = document.createElement("a");
+        anchor.href = offscreen.toDataURL();
+        anchor.download = filename;
+        anchor.click();
+    }
+    #TakeScreenshot() {
+        const now = new Date();
+        const twoDigits = (n) => n.toString().padStart(2, "0");
+        const timestampStr = [now.getFullYear(), twoDigits(now.getMonth() + 1), twoDigits(now.getDate())].join("-")
+            + "_"
+            + [twoDigits(now.getHours()), twoDigits(now.getMinutes()), twoDigits(now.getSeconds())].join(".");
+        console.log("TakeScreenshot: timestampStr", timestampStr);
+        this.#SaveCanvas2x(timestampStr + "_2x.png");
+    }
+    AssertNumber(value) {
+        if (typeof value != "number")
+            throw new Error(`Expected a number, but received ${typeof value}`);
+        if (isNaN(value))
+            throw new Error("Expected a number, but received NaN");
+    }
+    AssertString(value) {
+        if (typeof value != "string")
+            throw new Error(`Expected a string, but received ${typeof value}`);
+    }
+    async LoadImageFromURL(url) {
+        const res = await fetch(url);
+        if (!res.ok)
+            throw new Error(`HTTP status ${res.status}`);
+        const blob = await res.blob();
+        const img = new Image();
+        img.src = URL.createObjectURL(blob);
+        await img.decode();
+        URL.revokeObjectURL(img.src);
+        return img;
+    }
+    async Sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    Clamp(value, min, max) {
+        this.AssertNumber(value);
+        this.AssertNumber(min);
+        this.AssertNumber(max);
+        return Math.max(min, Math.min(max, value));
+    }
+    ScancodeMap = {
+        "Escape": 0x01,
+        "Digit1": 0x02,
+        "Digit2": 0x03,
+        "Digit3": 0x04,
+        "Digit4": 0x05,
+        "Digit5": 0x06,
+        "Digit6": 0x07,
+        "Digit7": 0x08,
+        "Digit8": 0x09,
+        "Digit9": 0x0A,
+        "Digit0": 0x0B,
+        "Minus": 0x0C,
+        "Equal": 0x0D,
+        "Backspace": 0x0E,
+        "Tab": 0x0F,
+        "KeyQ": 0x10,
+        "KeyW": 0x11,
+        "KeyE": 0x12,
+        "KeyR": 0x13,
+        "KeyT": 0x14,
+        "KeyY": 0x15,
+        "KeyU": 0x16,
+        "KeyI": 0x17,
+        "KeyO": 0x18,
+        "KeyP": 0x19,
+        "BracketLeft": 0x1A,
+        "BracketRight": 0x1B,
+        "Enter": 0x1C,
+        "ControlLeft": 0x1D,
+        "KeyA": 0x1E,
+        "KeyS": 0x1F,
+        "KeyD": 0x20,
+        "KeyF": 0x21,
+        "KeyG": 0x22,
+        "KeyH": 0x23,
+        "KeyJ": 0x24,
+        "KeyK": 0x25,
+        "KeyL": 0x26,
+        "Semicolon": 0x27,
+        "Quote": 0x28,
+        "Backquote": 0x29,
+        "ShiftLeft": 0x2A,
+        "Backslash": 0x2B,
+        "KeyZ": 0x2C,
+        "KeyX": 0x2D,
+        "KeyC": 0x2E,
+        "KeyV": 0x2F,
+        "KeyB": 0x30,
+        "KeyN": 0x31,
+        "KeyM": 0x32,
+        "Comma": 0x33,
+        "Period": 0x34,
+        "Slash": 0x35,
+        "ShiftRight": 0x36,
+        "AltLeft": 0x38,
+        "Space": 0x39,
+        "CapsLock": 0x3A,
+        "F1": 0x3B,
+        "F2": 0x3C,
+        "F3": 0x3D,
+        "F4": 0x3E,
+        "F6": 0x40,
+        "F7": 0x41,
+        "F8": 0x42,
+        "F9": 0x43,
+        "F10": 0x44,
+        "F11": 0x57,
+        "F12": 0x58,
+        "NumLock": 0x45,
+        "ScrollLock": 0x46,
+        "Home": 0x47,
+        "ArrowUp": 0x48,
+        "PageUp": 0x49,
+        "ArrowLeft": 0x4B,
+        "ArrowRight": 0x4D,
+        "End": 0x4F,
+        "ArrowDown": 0x50,
+        "PageDown": 0x51,
+        "Insert": 0x52,
+        "Delete": 0x53,
+        "Numpad7": 0x47,
+        "Numpad8": 0x48,
+        "Numpad9": 0x49,
+        "NumpadSubtract": 0x4A,
+        "Numpad4": 0x4B,
+        "Numpad5": 0x4C,
+        "Numpad6": 0x4D,
+        "NumpadAdd": 0x4E,
+        "Numpad1": 0x4F,
+        "Numpad2": 0x50,
+        "Numpad3": 0x51,
+        "Numpad0": 0x52,
+        "NumpadDecimal": 0x53,
+    };
+    #heldScancodes = new Set();
+    #InitKeyboard() {
+        if (this.ScancodeMap == null) {
+            console.warn("Missing ScancodeMap in " + this.constructor.name);
+            return;
+        }
+        window.addEventListener("keydown", e => {
+            if (e.repeat)
+                return;
+            const scancode = this.ScancodeMap[e.code];
+            if (scancode) {
+                this.#heldScancodes.add(scancode);
+                e.preventDefault();
+            }
+        });
+        window.addEventListener("keyup", e => {
+            const scancode = this.ScancodeMap[e.code];
+            if (scancode)
+                this.#heldScancodes.delete(scancode);
+        });
+    }
+    #IsKeyDown(scancode) {
+        return this.#heldScancodes.has(scancode);
+    }
+    #mouseX = 0;
+    #mouseY = 0;
+    #mouseButton = 0;
+    #leftButtonDown = false;
+    #rightButtonDown = false;
+    #InitMouse() {
+        this.#canvas.addEventListener("mousemove", e => {
+            const rect = this.#canvas.getBoundingClientRect();
+            const scaleX = this.#canvas.width / rect.width;
+            const scaleY = this.#canvas.height / rect.height;
+            this.#mouseX = Math.floor((e.clientX - rect.left) * scaleX);
+            this.#mouseY = Math.floor((e.clientY - rect.top) * scaleY);
+        });
+        this.#canvas.addEventListener("mousedown", e => {
+            if (e.button == 0)
+                this.#leftButtonDown = true;
+            if (e.button == 2)
+                this.#rightButtonDown = true;
+            this.#UpdateMouseButton();
+            e.preventDefault();
+        });
+        this.#canvas.addEventListener("mouseup", e => {
+            if (e.button == 0)
+                this.#leftButtonDown = false;
+            if (e.button == 2)
+                this.#rightButtonDown = false;
+            this.#UpdateMouseButton();
+        });
+        this.#canvas.addEventListener("contextmenu", e => {
+            e.preventDefault();
+        });
+        this.#canvas.addEventListener("touchmove", e => {
+            const touch = e.touches[0];
+            const rect = this.#canvas.getBoundingClientRect();
+            const scaleX = this.#canvas.width / rect.width;
+            const scaleY = this.#canvas.height / rect.height;
+            this.#mouseX = Math.floor((touch.clientX - rect.left) * scaleX);
+            this.#mouseY = Math.floor((touch.clientY - rect.top) * scaleY);
+            e.preventDefault({ passive: false });
+        });
+        this.#canvas.addEventListener("touchstart", e => {
+            const touch = e.touches[0];
+            const rect = this.#canvas.getBoundingClientRect();
+            const scaleX = this.#canvas.width / rect.width;
+            const scaleY = this.#canvas.height / rect.height;
+            this.#mouseX = Math.floor((touch.clientX - rect.left) * scaleX);
+            this.#mouseY = Math.floor((touch.clientY - rect.top) * scaleY);
+            this.#leftButtonDown = true;
+            this.#UpdateMouseButton();
+            e.preventDefault({ passive: false });
+        });
+        this.#canvas.addEventListener("touchend", e => {
+            this.#leftButtonDown = false;
+            this.#UpdateMouseButton();
+            e.preventDefault({ passive: false });
+        });
+    }
+    #GetMouseX() {
+        return this.#mouseX;
+    }
+    #GetMouseY() {
+        return this.#mouseY;
+    }
+    #GetMouseButton() {
+        return this.#mouseButton;
+    }
+    #UpdateMouseButton() {
+        if (this.#leftButtonDown && this.#rightButtonDown)
+            this.#mouseButton = 3;
+        else if (this.#rightButtonDown)
+            this.#mouseButton = 2;
+        else if (this.#leftButtonDown)
+            this.#mouseButton = 1;
+        else
+            this.#mouseButton = 0;
+    }
+    WriteInteropBuffer(s) {
+        const encoder = new TextEncoder();
+        const bytes = encoder.encode(s);
+        const ptr = this.#wasm.exports.GetInteropBufPtr();
+        const len = bytes.length;
+        const capacity = this.#wasm.exports.GetInteropBufCapacity();
+        if (len > capacity)
+            throw new RangeError(`Interop buffer overflow: ${len} > ${capacity}`);
+        const memview = new Uint8Array(this.#wasm.exports.memory.buffer);
+        memview.set(bytes, ptr);
+        this.#wasm.exports.SetInteropBufLen(len);
+    }
+    ReadInteropBuffer() {
+        if (this.#wasm.exports.GetInteropBufLen() == 0)
+            return "";
+        const wasmBuffer = this.#wasm.exports.memory.buffer;
+        const ptr = this.#wasm.exports.GetInteropBufPtr();
+        const len = this.#wasm.exports.GetInteropBufLen();
+        const byteArray = new Uint8Array(wasmBuffer, ptr, len);
+        return new TextDecoder("utf-8").decode(byteArray);
+    }
+    #PascalFlushLog() {
+        const msg = this.ReadInteropBuffer();
+        console.log("WriteLog:", msg);
+    }
+    #PanicHalt(textPtr, textLen) {
+        const buffer = new Uint8Array(this.#wasm.exports.memory.buffer, textPtr, textLen);
+        const msg = new TextDecoder().decode(buffer);
+        this.#done = true;
+        this.Cleanup();
+        throw new Error(`PANIC: ${msg}`);
+    }
+    PanicHaltDisplay(msg) {
+        if (this.#wasm.exports.IsBootFontLoaded()) {
+            this.WriteInteropBuffer(msg);
+            this.WasmInstance.exports.PascalPanicHaltDisplay();
+        }
+        else {
+            const div = document.createElement("div");
+            div.style.color = "white";
+            div.innerHTML = "<pre>Posit-92 Fatal Error: (Missing boot font)\n\n"
+                + msg
+                + "\n\nCheck Console for details</pre>";
+            document.body.appendChild(div);
+        }
+    }
+    #GetTimer() {
+        return (Date.now() - this.#midnightOffset) / 1000;
+    }
+    #GetFullTimer() {
+        return Date.now() / 1000;
+    }
+    #ReportGetMem(bytes) {
+        console.debug("GetMem: " + bytes);
+    }
+    #ReportFreeMem(bytes) {
+        console.debug("FreeMem: " + bytes);
+    }
+    #surface = null;
+    #VGAUpload() {
+        const surfacePtr = this.#wasm.exports.GetSurfacePtr();
+        const imageData = new Uint8ClampedArray(this.#wasm.exports.memory.buffer, surfacePtr, this.#bufferWidth * this.#bufferHeight * 4);
+        if (this.#surface != null)
+            this.#surface = null;
+        this.#surface = new ImageData(imageData, this.#bufferWidth, this.#bufferHeight);
+    }
+    #VGAPresent() {
+        if (this.#surface != null)
+            this.canvasCtx.putImageData(this.#surface, 0, 0);
+    }
+    async Start() {
+        await this.InitRuntime();
+        this.#HideLoadingOverlay();
+        this.#AddOutOfFocusFix();
+        this.#AddResizeListener();
+        this.#StartLoop();
+    }
+    #OnPreload() {
+        if (debugEngineCalls)
+            if (!Object.hasOwn(this.#wasm.exports, "OnPreload"))
+                console.warn("OnPreload is not available");
+        this.#wasm.exports.OnPreload?.();
+    }
+    #OnReady() {
+        if (debugEngineCalls)
+            if (!Object.hasOwn(this.#wasm.exports, "OnReady"))
+                console.warn("OnReady is not available");
+        this.#wasm.exports.OnReady?.();
+    }
+    #PerformLoop() {
+        if (this.#wasm.exports.DrawOnce != null) {
+            if (!this.#wasm.exports.IsEngineReady()) {
+                this.#wasm.exports.P92Update();
+            }
+            else {
+                this.#wasm.exports.DrawOnce();
+                this.#wasm.exports.P92AfterDraw();
+                this.#SignalDone();
+            }
+            return;
+        }
+        if (!this.#wasm.exports.IsEngineReady()) {
+            this.#wasm.exports.P92Update();
+            this.#wasm.exports.P92Draw();
+            return;
+        }
+        this.#wasm.exports.P92Update();
+        try {
+            this.#wasm.exports.Update();
+        }
+        catch (error) {
+            console.error("Unhandled exception on Update:", error);
+        }
+        try {
+            this.#wasm.exports.Draw();
+        }
+        catch (error) {
+            console.error("Unhandled exception on Draw:", error);
+        }
+        this.#wasm.exports.P92AfterDraw();
+    }
+    #Loop = (currentTime) => {
+        if (this.#done) {
+            this.Cleanup();
+            return;
+        }
+        if (this.#TargetFPS == 0) {
+            this.#PerformLoop();
+            requestAnimationFrame(this.#Loop);
+            return;
+        }
+        const elapsed = currentTime - this.#lastFrameTime;
+        if (elapsed >= this.#FrameTime) {
+            this.#lastFrameTime = currentTime - (elapsed % this.#FrameTime);
+            this.#PerformLoop();
+        }
+        requestAnimationFrame(this.#Loop);
+    };
+    #StartLoop() {
+        requestAnimationFrame(this.#Loop);
+    }
+}
