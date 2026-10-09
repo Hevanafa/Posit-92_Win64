@@ -65,21 +65,35 @@ begin
 end;
 
 
+procedure Init;
+var
+  config: TP92AppConfig;
+begin
+  config := DefaultP92AppConfig;
+
+{$IFDEF P92_SDL2}
+  config.WindowTitle := 'Posit-92 with SDL2';
+
+  config.OnPreload := @OnPreload;
+  config.OnReady := @OnReady;
+  config.Update := @Update;
+  config.Draw := @Draw;
+  config.OnCleanup := @OnCleanup;
+{$ENDIF}
+
+  P92Start(config)
+end;
+
+{$IFDEF P92_SDL2}
 {$R *.res}
 
-var
-  appConfig: TP92AppConfig;
 begin
-  appConfig := DefaultP92AppConfig;
-
-  appConfig.WindowTitle := 'Posit-92 with SDL2';
-
-  appConfig.OnPreload := @OnPreload;
-  appConfig.OnReady := @OnReady;
-  appConfig.Update := @Update;
-  appConfig.Draw := @Draw;
-  appConfig.OnCleanup := @OnCleanup;
-
-  P92Start(appConfig)
+  Init
 end.
+{$ENDIF}
 
+{$IFDEF P92_WASM}
+begin
+  { Entry point is intentionally left empty }
+end.
+{$ENDIF}
