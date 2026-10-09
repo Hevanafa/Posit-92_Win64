@@ -364,6 +364,17 @@ begin
 {$endif}
 end;
 
+procedure TakeScreenshot;
+var
+  w, h: integer;
+  screenshot: PSDL_Surface;
+begin
+{$IFDEF P92_WASM} JsTakeScreenshot; {$ENDIF}
+{$IFDEF P92_SDL2}
+  { TODO: Implement the screenshot logic }
+{$ENDIF}
+end;
+
 procedure P92Update;
 begin
 {$ifdef P92_WASM}
@@ -406,7 +417,7 @@ begin
         lastF2 := isKeyDown(SC_F2);
 
         if lastF2 then
-          JsTakeScreenshot;
+          TakeScreenshot;
       end;
     end;
   end;
