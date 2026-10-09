@@ -279,7 +279,9 @@ class Posit92 {
             + "_"
             + [twoDigits(now.getHours()), twoDigits(now.getMinutes()), twoDigits(now.getSeconds())].join(".");
         console.log("TakeScreenshot: timestampStr", timestampStr);
-        this.#SaveCanvas2x(timestampStr + "_2x.png");
+        const filename = timestampStr + "_2x.png";
+        this.WriteInteropBuffer(filename);
+        this.#SaveCanvas2x(filename);
     }
     AssertNumber(value) {
         if (typeof value != "number")

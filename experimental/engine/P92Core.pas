@@ -444,10 +444,26 @@ end;
 {$ENDIF}
 
 procedure TakeScreenshot;
-begin
 {$IFDEF P92_WASM}
-  JsTakeScreenshot
+var
+  filename: string;
+  msg: string;
 {$ENDIF}
+
+begin
+
+{$IFDEF P92_WASM}
+  JsTakeScreenshot;
+
+  filename := ReadInteropString;
+  msg := 'Saved as ' + filename;
+
+  screenshotHint := msg;
+  screenshotEndTick := GetTimer + 3.0;
+
+  writelog('TakeScreenshot: ' + msg);
+{$ENDIF}
+
 {$IFDEF P92_SDL2}
   SDL2TakeScreenshot
 {$ENDIF}
@@ -488,6 +504,7 @@ begin
   IncrementFPS;
   HandleSDLEvents;
 {$endif}
+
   if (screenshotHint <> '') and (GetTimer >= screenshotEndTick) then
     screenshotHint := '';
 
